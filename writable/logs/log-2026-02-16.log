@@ -1,0 +1,26 @@
+ERROR - 2026-02-16 23:55:40 --> Error connecting to the database: mysqli_sql_exception: Access denied for user ''@'localhost' (using password: NO) in D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:201
+Stack trace:
+#0 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(201): mysqli->real_connect('localhost', '', Object(SensitiveParameterValue), '', 3306, '', 0)
+#1 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\Database.php(74): CodeIgniter\Database\BaseConnection->initialize()
+#3 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\Config.php(111): CodeIgniter\Database\Database->loadForge(Object(CodeIgniter\Database\MySQLi\Connection))
+#4 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Commands\Database\CreateDatabase.php(136): CodeIgniter\Database\Config::forge()
+#5 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\CreateDatabase->run(Array)
+#6 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('db:create', Array)
+#7 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Boot.php(442): CodeIgniter\CLI\Console->run()
+#8 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#9 D:\Development\laragon\www\perpus_ci4\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#10 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Access denied for user ''@'localhost' (using password: NO) in D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:231
+Stack trace:
+#0 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(419): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\Database.php(74): CodeIgniter\Database\BaseConnection->initialize()
+#2 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Database\Config.php(111): CodeIgniter\Database\Database->loadForge(Object(CodeIgniter\Database\MySQLi\Connection))
+#3 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Commands\Database\CreateDatabase.php(136): CodeIgniter\Database\Config::forge()
+#4 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\CLI\Commands.php(74): CodeIgniter\Commands\Database\CreateDatabase->run(Array)
+#5 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('db:create', Array)
+#6 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Boot.php(442): CodeIgniter\CLI\Console->run()
+#7 D:\Development\laragon\www\perpus_ci4\vendor\codeigniter4\framework\system\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#8 D:\Development\laragon\www\perpus_ci4\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#9 {main}
