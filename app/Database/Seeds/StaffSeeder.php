@@ -29,9 +29,10 @@ class StaffSeeder extends Seeder
             'password'   => hashPassword('Zona##123'),
             'role'      => 'staff',
             'jenis_pengguna' => 'pegawai',
-            'is_active' => 1,
-            'created_at'=> date('Y-m-d H:i:s'),
-            'updated_at'=> date('Y-m-d H:i:s')
+            'member_code' => 'STF-001',
+            'is_validated' => 1,
+            'is_archived' => 0,
+            'must_change_password' => 0
         ]);
 
         echo "User Staff berhasil dibuat.\n";

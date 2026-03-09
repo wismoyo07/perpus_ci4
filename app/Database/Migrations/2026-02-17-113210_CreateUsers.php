@@ -17,6 +17,21 @@ class CreateUsers extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => 100
             ],
+            'member_code' => [
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => true
+            ],
+            'member_code_nation' => [
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => true
+            ],
+            'class' => [
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => true
+            ],
             'username' => [
                 'type' => 'VARCHAR',
                 'constraint' => 50
@@ -34,11 +49,6 @@ class CreateUsers extends Migration
                 'type' => 'ENUM',
                 'constraint' => ['siswa','guru','pegawai'],
                 'default' => 'siswa'
-            ],
-            'nomor_induk' => [
-                'type' => 'VARCHAR',
-                'constraint' => 50,
-                'null' => true
             ],
             'is_validated' => [
                 'type' => 'TINYINT',
@@ -65,7 +75,8 @@ class CreateUsers extends Migration
 
         $this->forge->addKey('id', true);
         $this->forge->addUniqueKey('username');
-        $this->forge->addUniqueKey('nomor_induk');
+        $this->forge->addUniqueKey('member_code');
+        $this->forge->addUniqueKey('member_code_nation');
 
         $this->forge->addKey('role');
         $this->forge->addKey('is_validated');

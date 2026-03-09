@@ -37,15 +37,17 @@ class Auth extends Controller
             $userModel = new \App\Models\UserModel();
 
             $data = [
-                'name'            => trim($this->request->getPost('name')),
-                'username'        => trim($this->request->getPost('username')),
-                'password'        => hashPassword($this->request->getPost('password')),
-                'role'            => 'member',
-                'jenis_pengguna'  => $this->request->getPost('jenis_pengguna'),
-                'nomor_induk'     => trim($this->request->getPost('nomor_induk')),
-                'is_validated'    => 0,
-                'is_archived'     => 0,
-                'must_change_password' => 0
+                'name'                  => trim($this->request->getPost('name')),
+                'member_code'           => trim($this->request->getPost('member_code')),
+                'member_code_nation'    => trim($this->request->getPost('member_code_nation')),
+                'class'                 => trim($this->request->getPost('class')),
+                'username'              => trim($this->request->getPost('username')),
+                'password'              => hashPassword($this->request->getPost('password')),
+                'role'                  => 'member',
+                'jenis_pengguna'        => trim($this->request->getPost('jenis_pengguna')),
+                'is_validated'          => 0,
+                'is_archived'           => 0,
+                'must_change_password'  => 0
             ];
 
             $userModel->insert($data);

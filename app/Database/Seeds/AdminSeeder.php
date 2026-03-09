@@ -29,7 +29,7 @@ class AdminSeeder extends Seeder
             'password'   => hashPassword('Zona##123'),
             'role'      => 'admin',
             'jenis_pengguna' => 'guru',
-            'nomor_induk' => 'ADM-001',
+            'member_code' => 'ADM-001',
             'is_validated' => 1,
             'is_archived' => 0,
             'must_change_password' => 0
