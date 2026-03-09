@@ -19,63 +19,63 @@ class CreateUsers extends Migration
             ],
             'username' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
-                'unique' => true
+                'constraint' => 50
             ],
             'password' => [
                 'type' => 'VARCHAR',
                 'constraint' => 255
             ],
             'role' => [
-                'type' => "ENUM('admin','staff','member')",
+                'type' => 'ENUM',
+                'constraint' => ['admin','staff','member'],
                 'default' => 'member'
             ],
             'jenis_pengguna' => [
-                'type' => "ENUM('siswa','guru','pegawai')",
+                'type' => 'ENUM',
+                'constraint' => ['siswa','guru','pegawai'],
                 'default' => 'siswa'
             ],
             'nomor_induk' => [
                 'type' => 'VARCHAR',
                 'constraint' => 50,
-                'unique' => true
+                'null' => true
             ],
             'is_validated' => [
                 'type' => 'TINYINT',
+                'constraint' => 1,
                 'default' => 0
             ],
             'is_archived' => [
                 'type' => 'TINYINT',
+                'constraint' => 1,
                 'default' => 0
             ],
             'must_change_password' => [
                 'type' => 'TINYINT',
+                'constraint' => 1,
                 'default' => 0
             ],
-            'created_at DATETIME DEFAULT CURRENT_TIMESTAMP',
-            'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+            'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            'last_login' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ]
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey('username');
+        $this->forge->addUniqueKey('nomor_induk');
+
         $this->forge->addKey('role');
-        $this->forge->addKey('jenis_pengguna');
         $this->forge->addKey('is_validated');
+        $this->forge->addKey('jenis_pengguna');
 
-        $this->forge->createTable('users', true);
-
-        // CHECK constraint (MySQL 8)
-        $this->db->query("
-            ALTER TABLE users
-            ADD CONSTRAINT chk_staff_role
-            CHECK (
-                (role != 'staff')
-                OR
-                (jenis_pengguna IN ('guru','pegawai'))
-            )
-        ");
+        $this->forge->createTable('users');
     }
 
     public function down()
     {
-        $this->forge->dropTable('users', true);
+        $this->forge->dropTable('users');
     }
 }

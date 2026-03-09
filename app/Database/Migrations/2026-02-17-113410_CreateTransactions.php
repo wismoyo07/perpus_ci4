@@ -9,63 +9,64 @@ class CreateTransactions extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => [
-                'type' => 'INT',
-                'auto_increment' => true,
+            'id'=>[
+                'type'=>'INT',
+                'auto_increment'=>true
             ],
-            'kode_transaksi' => [
-                'type' => 'VARCHAR',
-                'constraint' => 30,
-                'unique' => true,
+            'kode_transaksi'=>[
+                'type'=>'VARCHAR',
+                'constraint'=>30
             ],
-            'user_id' => [
-                'type' => 'INT',
+            'user_id'=>[
+                'type'=>'INT'
             ],
-            'borrowed_by' => [
-                'type' => 'INT',
-                'null' => false,
+            'borrowed_by'=>[
+                'type'=>'INT'
             ],
-            'returned_by' => [
-                'type' => 'INT',
-                'null' => true,
+            'returned_by'=>[
+                'type'=>'INT',
+                'null'=>true
             ],
-            'tanggal_pinjam' => [
-                'type' => 'DATE',
+            'tanggal_pinjam'=>[
+                'type'=>'DATE'
             ],
-            'jatuh_tempo' => [
-                'type' => 'DATE',
+            'jatuh_tempo'=>[
+                'type'=>'DATE'
             ],
-            'tanggal_kembali' => [
-                'type' => 'DATE',
-                'null' => true,
+            'tanggal_kembali'=>[
+                'type'=>'DATE',
+                'null'=>true
             ],
-            'status' => [
-                'type' => "ENUM('dipinjam','terlambat','selesai')",
-                'default' => 'dipinjam',
+            'status'=>[
+                'type'=>'ENUM',
+                'constraint'=>['dipinjam','terlambat','selesai'],
+                'default'=>'dipinjam'
             ],
-            'total_denda' => [
-                'type' => 'DECIMAL',
-                'constraint' => '12,2',
-                'default' => 0,
+            'total_denda'=>[
+                'type'=>'DECIMAL',
+                'constraint'=>'12,2',
+                'default'=>0
             ],
             'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-            'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
         ]);
 
-        $this->forge->addKey('id', true);
+        $this->forge->addKey('id',true);
+        $this->forge->addUniqueKey('kode_transaksi');
+
         $this->forge->addKey('user_id');
-        $this->forge->addForeignKey('borrowed_by', 'users', 'id', 'RESTRICT', 'CASCADE');
-        $this->forge->addForeignKey('returned_by', 'users', 'id', 'SET NULL', 'CASCADE');
         $this->forge->addKey('status');
         $this->forge->addKey('jatuh_tempo');
 
-        $this->forge->addForeignKey('user_id', 'users', 'id', 'RESTRICT', 'CASCADE');
+        $this->forge->addForeignKey('user_id','users','id','CASCADE','RESTRICT');
+        $this->forge->addForeignKey('borrowed_by','users','id','RESTRICT','CASCADE');
+        $this->forge->addForeignKey('returned_by','users','id','SET NULL','CASCADE');
 
-        $this->forge->createTable('transactions', true);
+        $this->forge->createTable('transactions');
     }
 
     public function down()
     {
-        $this->forge->dropTable('transactions', true);
+        $this->forge->dropTable('transactions');
     }
 }

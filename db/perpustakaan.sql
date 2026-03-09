@@ -14,6 +14,12 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+
+-- Dumping database structure for perpus_ci4
+DROP DATABASE IF EXISTS `perpus_ci4`;
+CREATE DATABASE IF NOT EXISTS `perpus_ci4` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `perpus_ci4`;
+
 -- Dumping structure for table perpus_ci4.activity_logs
 CREATE TABLE IF NOT EXISTS `activity_logs` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -28,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
   CONSTRAINT `activity_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table perpus_ci4.activity_logs: ~6 rows (approximately)
+-- Dumping data for table perpus_ci4_bck.activity_logs: ~6 rows (approximately)
 DELETE FROM `activity_logs`;
 INSERT INTO `activity_logs` (`id`, `user_id`, `aktivitas`, `created_at`, `target_user_id`, `ip_address`, `user_agent`) VALUES
 	(1, NULL, 'Login gagal - password salah', '2026-03-07 15:21:14', 1, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36'),
@@ -38,7 +44,7 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `aktivitas`, `created_at`, `target
 	(5, 1, 'Mengupdate buku: Pemrograman Laravel Dasar', '2026-03-07 22:25:17', NULL, NULL, NULL),
 	(6, 1, 'Mengupdate buku: Pemrograman Laravel Dasar', '2026-03-07 22:25:25', NULL, NULL, NULL);
 
--- Dumping structure for table perpus_ci4.books
+-- Dumping structure for table perpus_ci4_bck.books
 CREATE TABLE IF NOT EXISTS `books` (
   `id` int NOT NULL AUTO_INCREMENT,
   `kode_buku` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -57,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `books` (
   CONSTRAINT `chk_stok` CHECK (((`stok_total` >= 0) and (`stok_tersedia` >= 0) and (`stok_tersedia` <= `stok_total`)))
 ) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table perpus_ci4.books: ~50 rows (approximately)
+-- Dumping data for table perpus_ci4_bck.books: ~50 rows (approximately)
 DELETE FROM `books`;
 INSERT INTO `books` (`id`, `kode_buku`, `judul`, `pengarang`, `penerbit`, `about`, `stok_total`, `stok_tersedia`, `is_active`, `created_at`, `updated_at`) VALUES
 	(1, 'BK001', 'Pemrograman Laravel Dasar', 'Andi Wijaya', 'Informatika Press', 'Panduan dasar membangun aplikasi dengan Laravel.', 22, 22, 1, '2026-02-22 02:27:58', '2026-03-07 22:25:25'),
@@ -111,7 +117,7 @@ INSERT INTO `books` (`id`, `kode_buku`, `judul`, `pengarang`, `penerbit`, `about
 	(49, 'BK049', 'Big Data Processing', 'Wahyu Nugraha', 'Data Press', 'Pemrosesan data skala besar.', 14, 14, 1, '2026-02-22 02:27:58', '2026-02-22 02:27:58'),
 	(50, 'BK050', 'Enterprise Architecture', 'Rizal Hidayat', 'Enterprise Media', 'Perancangan arsitektur enterprise.', 18, 18, 1, '2026-02-22 02:27:58', '2026-02-26 23:58:42');
 
--- Dumping structure for table perpus_ci4.migrations
+-- Dumping structure for table perpus_ci4_bck.migrations
 CREATE TABLE IF NOT EXISTS `migrations` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
@@ -123,10 +129,10 @@ CREATE TABLE IF NOT EXISTS `migrations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table perpus_ci4.migrations: ~0 rows (approximately)
+-- Dumping data for table perpus_ci4_bck.migrations: ~0 rows (approximately)
 DELETE FROM `migrations`;
 
--- Dumping structure for table perpus_ci4.transaction_details
+-- Dumping structure for table perpus_ci4_bck.transaction_details
 CREATE TABLE IF NOT EXISTS `transaction_details` (
   `id` int NOT NULL AUTO_INCREMENT,
   `transaction_id` int NOT NULL,
@@ -146,10 +152,10 @@ CREATE TABLE IF NOT EXISTS `transaction_details` (
   CONSTRAINT `transaction_details_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table perpus_ci4.transaction_details: ~0 rows (approximately)
+-- Dumping data for table perpus_ci4_bck.transaction_details: ~0 rows (approximately)
 DELETE FROM `transaction_details`;
 
--- Dumping structure for table perpus_ci4.transactions
+-- Dumping structure for table perpus_ci4_bck.transactions
 CREATE TABLE IF NOT EXISTS `transactions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `kode_transaksi` varchar(30) COLLATE utf8mb4_general_ci NOT NULL,
@@ -178,10 +184,10 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   CONSTRAINT `transactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table perpus_ci4.transactions: ~0 rows (approximately)
+-- Dumping data for table perpus_ci4_bck.transactions: ~0 rows (approximately)
 DELETE FROM `transactions`;
 
--- Dumping structure for table perpus_ci4.users
+-- Dumping structure for table perpus_ci4_bck.users
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
@@ -206,7 +212,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `idx_users_jenis` (`jenis_pengguna`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table perpus_ci4.users: ~0 rows (approximately)
+-- Dumping data for table perpus_ci4_bck.users: ~0 rows (approximately)
 DELETE FROM `users`;
 INSERT INTO `users` (`id`, `name`, `username`, `password`, `role`, `jenis_pengguna`, `nomor_induk`, `is_validated`, `is_archived`, `must_change_password`, `created_at`, `updated_at`, `last_login`) VALUES
 	(1, 'Super Administrator', 'admin', '$2y$12$wX6z2w/CrqZaGWiDYtVgZ.6Cm39nrhF/p0CD5kLNiHzoGP849yoKm', 'admin', 'guru', 'ADM-001', 1, 0, 0, '2026-03-03 01:30:09', '2026-03-03 01:30:09', NULL);
