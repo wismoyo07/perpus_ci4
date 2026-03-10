@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\ClassModel;
 use App\Models\ActivityLogModel;
 use CodeIgniter\Controller;
 
@@ -56,7 +57,14 @@ class Auth extends Controller
                 ->with('success','Registrasi berhasil. Tunggu validasi admin.');
         }
 
-        return view('auth/register');
+        $classModel = new ClassModel();
+        
+        // Mengambil data untuk dropdown
+        $data['list_kelas'] = $classModel->getClass();
+        
+        return view('auth/register', $data);
+
+        // return view('auth/register');
     }
 
     public function processRegister()
@@ -103,12 +111,12 @@ class Auth extends Controller
                 ]
             ],
             
-            'nomor_induk' => [
+            'member_code' => [
                 'rules'  => 'required',
                 'errors' => [
-                    'required' => 'Nomor Induk wajib diisi.'
+                    'required' => 'NIS / NIP wajib diisi.'
                 ]
-            ],
+            ]
         ];
 
         if (!$this->validate($rules)) {
@@ -124,7 +132,9 @@ class Auth extends Controller
             'password'  => hashPassword($this->request->getPost('password')),
             'role'      => 'member',
             'jenis_pengguna' => $this->request->getPost('jenis_pengguna'),
-            'nomor_induk' => $this->request->getPost('nomor_induk')
+            'member_code' => $this->request->getPost('member_code'),
+            'member_code_nation' => $this->request->getPost('member_code_nation'),
+            'class' => $this->request->getPost('class')
         ];
 
         $newUserId = $this->userModel->insert($data);
@@ -367,5 +377,18 @@ class Auth extends Controller
 
         session()->destroy();
         return redirect()->to('/auth/login');
+    }
+
+    // =====================================================
+    // Ambil Dropdown Kelas
+    // =====================================================
+    public function ClassDropdown()
+    {
+        $classModel = new ClassModel();
+        
+        // Mengambil data untuk dropdown
+        $data['list_kelas'] = $classModel->getClass();
+        
+        return view('auth/register', $data);
     }
 }

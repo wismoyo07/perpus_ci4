@@ -31,7 +31,7 @@
 
 <div class="mb-3">
     <label>NIS / NIP</label>
-    <input type="text" name="nomor_induk"
+    <input type="text" name="member_code"
            class="form-control" required>
 </div>
 

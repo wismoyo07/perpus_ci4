@@ -55,7 +55,7 @@ class Users extends BaseController
             $builder = $builder->groupStart()
                 ->like('name', $search)
                 ->orLike('username', $search)
-                ->orLike('nomor_induk', $search)
+                ->orLike('member_code', $search)
                 ->groupEnd();
         }
 
@@ -89,7 +89,7 @@ class Users extends BaseController
         $rules = [
             'name' => 'required',
             'username' => 'required|is_unique[users.username]',
-            'nomor_induk' => 'required|is_unique[users.nomor_induk]',
+            'member_code' => 'required|is_unique[users.member_code]',
             'jenis_pengguna' => 'required|in_list[siswa,guru,pegawai]'
         ];
 
@@ -103,7 +103,7 @@ class Users extends BaseController
             'password' => hashPassword('123456', PASSWORD_DEFAULT),
             'role' => 'member',
             'jenis_pengguna' => $this->request->getPost('jenis_pengguna'),
-            'nomor_induk' => $this->request->getPost('nomor_induk'),
+            'member_code' => $this->request->getPost('member_code'),
             'is_active' => 1
         ]);
 
@@ -332,7 +332,7 @@ class Users extends BaseController
 
         $data = [
             'name' => $this->request->getPost('name'),
-            'nomor_induk' => $this->request->getPost('nomor_induk'),
+            'member_code' => $this->request->getPost('member_code'),
             'jenis_pengguna' => $this->request->getPost('jenis_pengguna')
         ];
 

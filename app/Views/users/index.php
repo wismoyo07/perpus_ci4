@@ -126,7 +126,7 @@
                                 value="<?= $u['id'] ?>">
                         </td>
                         <td><?= esc($u['name']) ?></td>
-                        <td><?= esc($u['nomor_induk']) ?></td>
+                        <td><?= esc($u['member_code']) ?></td>
                         <td><?= esc($u['jenis_pengguna']) ?></td>
                         <td>
                             <span class="badge bg-info">

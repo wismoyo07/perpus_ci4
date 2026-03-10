@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `role` enum('admin','staff','member') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'member',
   `jenis_pengguna` enum('siswa','guru','pegawai') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'siswa',
-  `nomor_induk` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `member_code` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `is_validated` tinyint(1) DEFAULT '0',
   `is_archived` tinyint(1) DEFAULT '0',
   `must_change_password` tinyint(1) DEFAULT '0',
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `last_login` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `uniq_nomor_induk` (`nomor_induk`),
+  UNIQUE KEY `uniq_member_code` (`member_code`),
   KEY `role` (`role`),
   KEY `is_active` (`is_validated`),
   KEY `idx_users_role` (`role`),
@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- Dumping data for table perpus_ci4_bck.users: ~0 rows (approximately)
 DELETE FROM `users`;
-INSERT INTO `users` (`id`, `name`, `username`, `password`, `role`, `jenis_pengguna`, `nomor_induk`, `is_validated`, `is_archived`, `must_change_password`, `created_at`, `updated_at`, `last_login`) VALUES
+INSERT INTO `users` (`id`, `name`, `username`, `password`, `role`, `jenis_pengguna`, `member_code`, `is_validated`, `is_archived`, `must_change_password`, `created_at`, `updated_at`, `last_login`) VALUES
 	(1, 'Super Administrator', 'admin', '$2y$12$wX6z2w/CrqZaGWiDYtVgZ.6Cm39nrhF/p0CD5kLNiHzoGP849yoKm', 'admin', 'guru', 'ADM-001', 1, 0, 0, '2026-03-03 01:30:09', '2026-03-03 01:30:09', NULL);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;

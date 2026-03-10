@@ -45,7 +45,7 @@ in SYSTEMPATH\Database\BaseConnection.php on line 465.
 FROM `users`
 WHERE   (
 `username` = :username:
-OR `nomor_induk` = :nomor_induk:
+OR `member_code` = :member_code:
  )
  LIMIT 1', [...], false)
  3 SYSTEMPATH\Model.php(296): CodeIgniter\Database\BaseBuilder->get()

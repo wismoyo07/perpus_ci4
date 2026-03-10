@@ -12,11 +12,13 @@ class UserModel extends Model
 
     protected $allowedFields = [
         'name',
+        'member_code',
+        'member_code_nation',
+        'class',
         'username',
         'password',
         'role',
         'jenis_pengguna',
-        'nomor_induk',
         'is_validated',
         'is_archived',
         'must_change_password',
@@ -30,7 +32,7 @@ class UserModel extends Model
 
         return $this->groupStart()
                         ->where('username', $identity)
-                        ->orWhere('nomor_induk', $identity)
+                        ->orWhere('member_code', $identity)
                     ->groupEnd()
                     ->first();
     }

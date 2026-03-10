@@ -15,8 +15,8 @@
 
 <div class="mb-3">
     <label>Nomor Induk</label>
-    <input type="text" name="nomor_induk"
-           value="<?= esc($user['nomor_induk']) ?>"
+    <input type="text" name="member_code"
+           value="<?= esc($user['member_code']) ?>"
            class="form-control" required>
 </div>
 

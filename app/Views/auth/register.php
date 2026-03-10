@@ -17,30 +17,6 @@
         <form method="post" action="/auth/register" class="needs-validation" novalidate>
             <?= csrf_field() ?>
 
-            <!-- Nomor Induk -->
-            <div class="mb-3">
-                <label id="label_nomor_induk">Nomor Induk</label>
-                <input type="text"
-                    name="nomor_induk"
-                    id="nomor_induk"
-                    class="form-control"
-                    value="<?= old('nomor_induk') ?>"
-                    required>
-                <small class="text-muted">
-                    Siswa → NIS | Guru/Pegawai → NIP/NUPTK
-                </small>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Nama Lengkap</label>
-                <input type="text" name="name" class="form-control" required value="<?= old('name') ?>">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required value="<?= old('username') ?>">
-            </div>
-
             <!-- Jenis Pengguna -->
             <div class="mb-3">
                 <label>Jenis Pengguna</label>
@@ -59,6 +35,60 @@
                         Pegawai
                     </option>
                 </select>
+            </div>
+
+             <div class="mb-3">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" name="name" class="form-control" required value="<?= old('name') ?>">
+            </div>
+
+            <!-- Nomor Induk -->
+            <div class="mb-3">
+                <label id="label_member_code">Nomor Induk</label>
+                <input type="text"
+                    name="member_code"
+                    id="member_code"
+                    class="form-control"
+                    value="<?= old('member_code') ?>"
+                    required>
+                <small class="text-muted">
+                    Siswa → NIS | Guru/Pegawai → NIP/NUPTK
+                </small>
+            </div>
+
+            <!-- NISN -->
+            <div class="mb-3">
+                <label id="label_member_code_nasional">Nomor Induk Nasional</label>
+                <input type="text"
+                    name="member_code_nation"
+                    id="member_code_nation"
+                    class="form-control"
+                    value="<?= old('member_code_nation') ?>"
+                    required>
+                <small class="text-muted">
+                    Siswa → NISN | Guru/Pegawai → NUPTK | Kosongkan Jika belum ada
+                </small>
+            </div>
+
+            <!-- Dropdown Kelas -->
+            <div class="mb-3">
+                <label>Kelas</label>
+                <select name="class"
+                        id="class"
+                        class="form-select"
+                        required>
+                    <option value="">-- Pilih --</option>
+                    <?php foreach ($list_kelas as $kelas): ?>
+                        <option value="<?= $kelas['id']; ?>">
+                            <?= $kelas['class_name']; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" required value="<?= old('username') ?>">
             </div>
 
             <div class="mb-3">
@@ -128,7 +158,7 @@
 document.getElementById('jenis_pengguna')
     .addEventListener('change', function(){
 
-    const label = document.getElementById('label_nomor_induk');
+    const label = document.getElementById('label_member_code');
 
     if(this.value === 'siswa'){
         label.innerText = 'NIS';
