@@ -1,170 +1,76 @@
-<?= $this->extend('layout/auth') ?>
+<?= $this->extend('layout/auth2') ?>
 <?= $this->section('content') ?>
 
-<div class="card shadow auth-card">
-    <div class="card-body p-4">
+    <!-- Register -->
+            <div class="nk-auth-card toggled" id="l-register">
+                <div class="nk-auth-card-header">
+                    <h2>Registrasi Akun Baru</h2>
+                    <p>Isi semua form dengan data Anda</p>
+                </div>
 
-        <h4 class="text-center mb-4">Register Member</h4>
-
-        <?php if(session()->getFlashdata('errors')): ?>
-            <div class="alert alert-danger">
-                <?php foreach(session()->getFlashdata('errors') as $error): ?>
-                    <div><?= $error ?></div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <form method="post" action="/auth/register" class="needs-validation" novalidate>
-            <?= csrf_field() ?>
-
-            <!-- Jenis Pengguna -->
-            <div class="mb-3">
-                <label>Jenis Pengguna</label>
-                <select name="jenis_pengguna"
-                        id="jenis_pengguna"
-                        class="form-select"
-                        required>
-                    <option value="">-- Pilih --</option>
-                    <option value="siswa" <?= old('jenis_pengguna')=='siswa'?'selected':'' ?>>
-                        Siswa
-                    </option>
-                    <option value="guru" <?= old('jenis_pengguna')=='guru'?'selected':'' ?>>
-                        Guru
-                    </option>
-                    <option value="pegawai" <?= old('jenis_pengguna')=='pegawai'?'selected':'' ?>>
-                        Pegawai
-                    </option>
-                </select>
-            </div>
-
-             <div class="mb-3">
-                <label class="form-label">Nama Lengkap</label>
-                <input type="text" name="name" class="form-control" required value="<?= old('name') ?>">
-            </div>
-
-            <!-- Nomor Induk -->
-            <div class="mb-3">
-                <label id="label_member_code">Nomor Induk</label>
-                <input type="text"
-                    name="member_code"
-                    id="member_code"
-                    class="form-control"
-                    value="<?= old('member_code') ?>"
-                    required>
-                <small class="text-muted">
-                    Siswa → NIS | Guru/Pegawai → NIP/NUPTK
-                </small>
-            </div>
-
-            <!-- NISN -->
-            <div class="mb-3">
-                <label id="label_member_code_nasional">Nomor Induk Nasional</label>
-                <input type="text"
-                    name="member_code_nation"
-                    id="member_code_nation"
-                    class="form-control"
-                    value="<?= old('member_code_nation') ?>"
-                    required>
-                <small class="text-muted">
-                    Siswa → NISN | Guru/Pegawai → NUPTK | Kosongkan Jika belum ada
-                </small>
-            </div>
-
-            <!-- Dropdown Kelas -->
-            <div class="mb-3">
-                <label>Kelas</label>
-                <select name="class"
-                        id="class"
-                        class="form-select"
-                        required>
-                    <option value="">-- Pilih --</option>
-                    <?php foreach ($list_kelas as $kelas): ?>
-                        <option value="<?= $kelas['id']; ?>">
-                            <?= $kelas['class_name']; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required value="<?= old('username') ?>">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <div class="input-group">
-                    <input type="password"
-                        name="password"
-                        id="registerPassword"
-                        class="form-control"
-                        required
-                        minlength="6"
-                        pattern="^(?=.*[A-Z])(?=.*[0-9]).{6,}$"
-                        onkeyup="checkStrength(this.value); checkMatch();">
-                    <button type="button" class="btn btn-outline-secondary"
-                            onclick="togglePassword('registerPassword')">
-                        Show
-                    </button>
-                    <div class="invalid-feedback">
-                        Password minimal 6 karakter, harus mengandung huruf besar dan angka.
+                <form method="post" action="/auth/register" class="nk-auth-form" id="registerForm" novalidate>
+                    <div class="mb-3">
+                        <label for="regUsername" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" class="form-control" id="regUsername" name="username" placeholder="Choose a username" required autocomplete="username">
+                        </div>
+                        <div class="invalid-feedback">Please choose a username.</div>
                     </div>
-                </div>
 
-                <div class="progress mt-2" style="height: 8px;">
-                    <div id="strengthBar" class="progress-bar" style="width: 0%;"></div>
-                </div>
-                <small id="strengthText" class="text-muted"></small>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Konfirmasi Password</label>
-                <div class="input-group">
-                    <input type="password"
-                        name="confirm_password"
-                        id="confirmPassword"
-                        class="form-control"
-                        required
-                        minlength="8"
-                        onkeyup="checkMatch()">
-                    <button type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="togglePassword('confirmPassword')">
-                        Show
-                    </button>
-                    <div class="invalid-feedback">
-                        Konfirmasi password wajib diisi.
+                    <div class="mb-3">
+                        <label for="regEmail" class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="regEmail" name="email" placeholder="Enter your email" required autocomplete="email">
+                        </div>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="regPassword" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" class="form-control" id="regPassword" name="password" placeholder="Create a password" required minlength="8" autocomplete="new-password">
+                            <button type="button" class="input-group-text nk-toggle-password" aria-label="Toggle password visibility" data-target="regPassword">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Password must be at least 8 characters.</div>
+                    </div>
+
+                    <!-- <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" name="terms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            Saya telah membaca dan menyetujui <a href="#" class="nk-auth-link">Ketentuan Layanan</a> dan <a href="#" class="nk-auth-link">Kebijakan Privasi</a>
+                        </label>
+                        <div class="invalid-feedback">You must agree to the terms.</div>
+                    </div> -->
+
+                    <button type="submit" class="btn btn-primary w-100 nk-auth-btn">
+                        <i class="fa-solid fa-user-plus me-2"></i>Create Account
+                    </button>
+                </form>
+
+                <!-- <div class="nk-auth-divider">
+                    <span>or continue with</span>
                 </div>
 
-                <small id="matchText" class="fw-semibold"></small>
+                <div class="nk-auth-social">
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fa-brands fa-google"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fa-brands fa-github"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fa-brands fa-microsoft"></i>
+                    </button>
+                </div> -->
+
+                <div class="nk-auth-footer">
+                    <p>Already have an account? <a href="/auth/login" data-auth-switch="#l-login">Sign in</a></p>
+                </div>
             </div>
-
-            <button type="submit" class="btn btn-success w-100">Register</button>
-
-        </form>
-
-        <hr>
-
-        <div class="text-center mt-3">
-            Sudah punya akun?
-            <a href="/auth/login">Login</a>
-        </div>
-
-    </div>
-</div>
-
-<script>
-document.getElementById('jenis_pengguna')
-    .addEventListener('change', function(){
-
-    const label = document.getElementById('label_member_code');
-
-    if(this.value === 'siswa'){
-        label.innerText = 'NIS';
-    } else {
-        label.innerText = 'NIP / Nomor Induk';
-    }
-});
 
 <?= $this->endSection() ?>

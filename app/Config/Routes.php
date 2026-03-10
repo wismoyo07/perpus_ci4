@@ -7,10 +7,12 @@ use CodeIgniter\Router\RouteCollection;
  */
 // $routes->get('/', 'Home::index');
 
+
+// Template Notika
+// LOGIN
 // Default
 $routes->get('/', 'Auth::login');
 
-// LOGIN
 $routes->get('auth/login', 'Auth::login');
 $routes->post('auth/login', 'Auth::processLogin');
 

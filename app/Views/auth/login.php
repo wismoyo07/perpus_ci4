@@ -1,59 +1,67 @@
-<?= $this->extend('layout/auth') ?>
+<?= $this->extend('layout/auth2') ?>
 <?= $this->section('content') ?>
 
-<div class="card shadow auth-card">
-    <div class="card-body p-4">
+    <!-- Login -->
+    <div class="nk-auth-card toggled">
+        <div class="nk-auth-card-header">
+            <h2>Sign In</h2>
+                <p>Enter your credentials to access your account</p>
+        </div>
 
-        <h4 class="text-center mb-4">Login</h4>
+            <?php if(session()->getFlashdata('error')): ?>
+                <div class="alert alert-danger">
+                    <?= session()->getFlashdata('error') ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if(session()->getFlashdata('error')): ?>
-            <div class="alert alert-danger">
-                <?= session()->getFlashdata('error') ?>
-            </div>
-        <?php endif; ?>
 
-        <?php if(session()->getFlashdata('success')): ?>
-            <div class="alert alert-success">
-                <?= session()->getFlashdata('success') ?>
-            </div>
-        <?php endif; ?>
+            <?php if(session()->getFlashdata('success')): ?>
+                <div class="alert alert-success">
+                    <?= session()->getFlashdata('success') ?>
+                </div>
+            <?php endif; ?>
 
-        <form method="post" action="/auth/login" class="needs-validation" novalidate>
+
+        <form method="post" action="/auth/login" class="nk-auth-form" novalidate>
             <?= csrf_field() ?>
 
             <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" name="identity" class="form-control" required>
-                <div class="invalid-feedback">
-                    Username wajib diisi.
+                <label for="loginUsername" class="form-label">Username or NIS / NIP</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                    <input type="text" class="form-control" name="identity" placeholder="Enter your username" required>
                 </div>
+                <div class="invalid-feedback">Ketikan Username atau NIS/NIP.</div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Password</label>
                 <div class="input-group">
-                    <input type="password" name="password" id="loginPassword" class="form-control" required minlength="6">
-                    <div class="invalid-feedback">
-                        Password minimal 6 karakter.
-                    </div>
-                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('loginPassword')">
-                        Show
+                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter your password" required autocomplete="current-password" minlength="6">
+                    <button type="button" class="input-group-text nk-toggle-password" aria-label="Toggle password visibility" data-target="loginPassword">
+                        <i class="fa-solid fa-eye"></i>
                     </button>
                 </div>
+                <div class="invalid-feedback">Ketikan Password Anda, Minimal 6 karakter.</div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
+                    <label class="form-check-label" for="rememberMe">Ingat Saya</label>
+                </div>
+                <a href="#" class="nk-auth-link" data-auth-switch="#l-forget-password">Lupa password?</a>
+            </div>
 
+            <button type="submit" class="btn btn-primary w-100 nk-auth-btn">
+                <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Sign In
+            </button>
         </form>
 
-        <hr>
-
-        <div class="text-center">
-            <small>Belum punya akun?</small><br>
-            <a href="/auth/register">Register sebagai Member</a>
+        <div class="nk-auth-footer">
+            <p>Belum Punya Akun? <a href="/auth/register">Registrasi disini</a></p>
         </div>
-
     </div>
-</div>
 
 <?= $this->endSection() ?>
