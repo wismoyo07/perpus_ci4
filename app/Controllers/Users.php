@@ -100,11 +100,12 @@ class Users extends BaseController
         $this->userModel->insert([
             'name' => $this->request->getPost('name'),
             'username' => $this->request->getPost('username'),
-            'password' => hashPassword('123456', PASSWORD_DEFAULT),
+            'password' => hashPassword('123456'),
             'role' => 'member',
             'jenis_pengguna' => $this->request->getPost('jenis_pengguna'),
             'member_code' => $this->request->getPost('member_code'),
-            'is_active' => 1
+            'is_validated' => 1,
+            'must_change_password' => 1
         ]);
 
         return redirect()->to('/users')->with('success','User dibuat.');
@@ -148,7 +149,7 @@ class Users extends BaseController
     public function activate($id)
     {
         $this->userModel->update($id,[
-            'is_active' => 1
+            'is_validated' => 1
         ]);
 
         $this->logActivity(
@@ -186,7 +187,7 @@ class Users extends BaseController
         $newPassword = '123456';
 
         $this->userModel->update($id,[
-            'password' => hashPassword($newPassword, PASSWORD_DEFAULT),
+            'password' => hashPassword($newPassword),
             'must_change_password' => 1
         ]);
 

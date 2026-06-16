@@ -13,6 +13,11 @@ class CreateBooks extends Migration
                 'type' => 'INT',
                 'auto_increment' => true
             ],
+            'kode_buku' => [
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => true
+            ],
             'judul' => [
                 'type' => 'VARCHAR',
                 'constraint' => 150
@@ -31,6 +36,14 @@ class CreateBooks extends Migration
                 'type' => 'TEXT',
                 'null' => true
             ],
+            'stok_total' => [
+                'type' => 'INT',
+                'default' => 0
+            ],
+            'stok_tersedia' => [
+                'type' => 'INT',
+                'default' => 0
+            ],
             'is_active' => [
                 'type' => 'TINYINT',
                 'constraint' => 1,
@@ -41,6 +54,7 @@ class CreateBooks extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey('kode_buku');
         $this->forge->addKey('is_active');
 
         $this->forge->createTable('books');

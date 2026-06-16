@@ -19,7 +19,7 @@
                 <form method="post" action="<?= site_url('auth/register') ?>" class="nk-auth-form" id="registerForm" novalidate>
 
                     <div class="mb-3 mb-3">
-                        <label for="regJenis" class="form-label">Jenis Pengguna</label>
+                        <label for="jenis_pengguna" class="form-label">Jenis Pengguna</label>
                         <select name="jenis_pengguna"
                                 id="jenis_pengguna"
                                 class="form-select"
@@ -34,6 +34,21 @@
                             <option value="pegawai" <?= old('jenis_pengguna')=='pegawai'?'selected':'' ?>>
                                 Pegawai
                             </option>
+                        </select>
+                    </div>
+
+                    <!-- Pilihan Kelas (Hanya untuk Siswa) -->
+                    <div class="mb-3" id="class-container" style="display: none;">
+                        <label for="class" class="form-label">Kelas</label>
+                        <select name="class" id="class" class="form-select">
+                            <option value="">-- Pilih Kelas --</option>
+                            <?php if (!empty($list_kelas)): ?>
+                                <?php foreach ($list_kelas as $k): ?>
+                                    <option value="<?= esc($k['class_name']) ?>" <?= old('class')==$k['class_name']?'selected':'' ?>>
+                                        <?= esc($k['class_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
 
@@ -99,6 +114,17 @@
                         <div class="invalid-feedback">Password must be at least 8 characters.</div>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Konfirmasi Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" placeholder="Confirm your password" required autocomplete="new-password">
+                            <button type="button" class="input-group-text nk-toggle-password" aria-label="Toggle password visibility" data-target="confirmPassword">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- <div class="form-check mb-4">
                         <input class="form-check-input" type="checkbox" id="agreeTerms" name="terms" required>
                         <label class="form-check-label" for="agreeTerms">
@@ -127,10 +153,31 @@
                         <i class="fa-brands fa-microsoft"></i>
                     </button>
                 </div> -->
-
                 <div class="nk-auth-footer">
                     <p>Already have an account? <a href="<?= site_url('auth/login') ?>" data-auth-switch="#l-login">Sign in</a></p>
                 </div>
             </div>
+
+<script>
+    // Toggle tampilan Kelas untuk Siswa secara dinamis
+    document.getElementById('jenis_pengguna').addEventListener('change', function() {
+        const classContainer = document.getElementById('class-container');
+        if (this.value === 'siswa') {
+            classContainer.style.display = 'block';
+        } else {
+            classContainer.style.display = 'none';
+            document.getElementById('class').value = '';
+        }
+    });
+
+    // Inisialisasi saat load halaman (untuk validation fallback)
+    window.addEventListener('DOMContentLoaded', () => {
+        const jenisVal = document.getElementById('jenis_pengguna').value;
+        const classContainer = document.getElementById('class-container');
+        if (jenisVal === 'siswa') {
+            classContainer.style.display = 'block';
+        }
+    });
+</script>
 
 <?= $this->endSection() ?>

@@ -199,10 +199,15 @@
                                             Edit
                                         </a>
 
-                                        <a href="/users/reset-password/<?= $u['id'] ?>"
-                                        class="btn btn-sm btn-warning">
-                                            Reset
-                                        </a>
+                                        <form method="post"
+                                            action="/users/reset-password/<?= $u['id'] ?>"
+                                            style="display:inline;"
+                                            onsubmit="return confirm('Reset password user ini ke default?')">
+                                            <?= csrf_field() ?>
+                                            <button class="btn btn-sm btn-warning">
+                                                Reset
+                                            </button>
+                                        </form>
 
                                         <form method="post"
                                             action="/users/archive/<?= $u['id'] ?>"
