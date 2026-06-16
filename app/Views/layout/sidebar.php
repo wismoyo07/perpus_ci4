@@ -93,6 +93,14 @@ $currentSegment = $uri->getSegment(1);
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link <?= $currentSegment === 'reports' ? 'active fw-bold' : '' ?>"
+                    href="/reports">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                        Laporan Perpustakaan
+                    </a>
+                </li>
+
             <?php endif; ?>
 
 
@@ -182,6 +190,22 @@ $currentSegment = $uri->getSegment(1);
                     href="/activity-logs">
                         <i class="bi bi-clipboard-data"></i>
                         Activity Log
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <?= $currentSegment === 'reports' ? 'active fw-bold' : '' ?>"
+                    href="/reports">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                        Laporan Perpustakaan
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <?= $currentSegment === 'settings' ? 'active fw-bold' : '' ?>"
+                    href="/admin/settings">
+                        <i class="bi bi-gear"></i>
+                        Pengaturan Sekolah
                     </a>
                 </li>
 

@@ -183,3 +183,15 @@ $routes->post('users/reset-password/(:num)', 'Users::resetPassword', [
 $routes->get('activity-logs', 'ActivityLogs::index', [
     'filter' => ['auth','role:admin']
 ]);
+
+// Pengaturan Identitas Sekolah (Admin Only)
+$routes->group('admin/settings', ['filter' => ['auth', 'role:admin']], function($routes) {
+    $routes->get('/', 'AppSetting::index');
+    $routes->post('update', 'AppSetting::update');
+});
+
+// Laporan Perpustakaan (Admin & Staff)
+$routes->group('reports', ['filter' => ['auth', 'role:admin,staff']], function($routes) {
+    $routes->get('/', 'Reports::index');
+    $routes->get('print', 'Reports::print');
+});

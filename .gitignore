@@ -139,3 +139,9 @@ _modules/*
 
 # Local development rules and reference notes
 /rules_development.md
+
+#-------------------------
+# Local settings logo uploads
+#-------------------------
+/public/uploads/settings/*
+!/public/uploads/settings/index.html
