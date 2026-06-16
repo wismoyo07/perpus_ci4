@@ -124,3 +124,10 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+#-------------------------
+# Local database scripts containing sensitive credentials
+#-------------------------
+/db/check_books_table.php
+/db/import_db.php
+/db/run_alter.php
