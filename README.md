@@ -1,69 +1,86 @@
-# CodeIgniter 4 Application Starter
+# Sistem Informasi Perpustakaan Digital (Perpustakaan CI4)
 
-## What is CodeIgniter?
+Sistem Informasi Manajemen Perpustakaan berbasis web yang dikembangkan menggunakan framework **CodeIgniter 4** (PHP 8.2+), database **MySQL**, dan antarmuka **Bootstrap 5**.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+Aplikasi ini dirancang untuk memudahkan inventarisasi buku sekolah, sirkulasi peminjaman/pengembalian, serta pencetakan laporan resmi dengan identitas sekolah dinamis.
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+---
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## 1. Akses Halaman & Fitur Utama
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+Aplikasi dapat dijalankan secara lokal melalui:
+*   **Halaman Utama (Katalog Publik):** [http://localhost:8080/](http://localhost:8080/)
+    *   *Deskripsi:* Dapat diakses oleh tamu umum untuk mencari ketersediaan buku di perpustakaan berdasarkan judul, pengarang, atau penerbit tanpa harus login.
+*   **Halaman Masuk (Login):** [http://localhost:8080/auth/login](http://localhost:8080/auth/login)
+    *   *Deskripsi:* Halaman pintu masuk bagi Admin, Petugas (Staff), dan Anggota (Member).
 
-## Installation & updates
+---
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+## 2. Akun Pengujian (Demo Accounts)
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang telah didaftarkan dalam sistem:
 
-## Setup
+| Peran (Role) | Jenis Pengguna | Username | Password | Kode Anggota |
+| :--- | :--- | :--- | :--- | :--- |
+| **Admin** (Super Admin) | Guru | `admin` | `Zona##123` | `ADM-001` |
+| **Staff** (Petugas Perpus) | Pegawai | `lina_petugas` | `Lina##123` | `STF-002` |
+| **Member** (Pegawai) | Pegawai | `bambang_pegawai` | `Bambang##123` | `PEG-001` |
+| **Member** (Guru) | Guru | `endang_guru` | `Endang##123` | `GRU-001` |
+| **Member** (Siswa 1) | Siswa | `siti_siswa` | `Siti##123` | `SSW-001` |
+| **Member** (Siswa 2) | Siswa | `rian_siswa` | `Rian##123` | `SSW-002` |
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+---
 
-## Important Change with index.php
+## 3. Matriks Hak Akses & Aturan Bisnis
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+### A. Hak Akses Fitur (Role Based Access Control)
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+| Fitur / Halaman | Admin | Staff (Petugas) | Member (Siswa/Guru/Pegawai) |
+| :--- | :---: | :---: | :---: |
+| Halaman Dashboard | ✔ | ✔ | ✔ |
+| Cari & Lihat Katalog Buku | ✔ | ✔ | ✔ |
+| Manajemen Buku (Tambah, Edit, Arsip) | ✔ | ✔ | ✘ |
+| Hapus Buku (*Delete*) | ✔ | ✔ | ✘ |
+| Manajemen User (Tambah, Edit, Validasi) | ✔ | ✔ (Hanya Member) | ✘ |
+| Hapus User (*Delete*) | ✔ | ✘ | ✘ |
+| Sirkulasi Transaksi (Peminjaman & Kembali) | ✔ (View) | ✔ (Penuh) | ✘ |
+| Settle Buku Hilang (*Lost Books*) | ✔ | ✔ | ✘ |
+| Laporan & Cetak Dokumen Resmi | ✔ | ✔ | ✘ |
+| Pengaturan Identitas Sekolah (Logo/Kop) | ✔ | ✘ | ✘ |
+| Riwayat Log Aktivitas Sistem | ✔ | ✘ | ✘ |
 
-**Please** read the user guide for a better explanation of how CI4 works!
+### B. Aturan Bisnis Peminjaman Buku (Member Specific Rules)
+Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan secara otomatis berdasarkan kategori pengguna:
 
-## Repository Management
+*   **Guru / Pegawai:**
+    *   Maksimal peminjaman aktif: **5 Buku** per transaksi.
+    *   Denda keterlambatan: **Rp 5.000,-** per hari.
+*   **Siswa:**
+    *   Maksimal peminjaman aktif: **3 Buku** per transaksi.
+    *   Denda keterlambatan: **Rp 1.000,-** per hari.
+*   **Ketentuan Umum:**
+    *   Durasi peminjaman default: **10 hari** (Peminjaman Jangka Pendek).
+    *   Anggota yang memiliki transaksi berstatus `terlambat` tidak diperbolehkan melakukan peminjaman baru sampai denda/transaksi diselesaikan.
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+---
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+## 4. Cara Menjalankan Aplikasi di Lokal
 
-## Server Requirements
-
-PHP version 8.2 or higher is required, with the following extensions installed:
-
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+1.  **Aktifkan Laragon / MySQL Server.**
+2.  **Clone / Download Repositori** ke folder `www/` Laragon Anda.
+3.  **Salin file `.env`** dan sesuaikan konfigurasi database Anda.
+4.  **Jalankan Migrasi & Seeder** (Opsional jika database kosong):
+    ```bash
+    php spark migrate
+    php spark db:seed DdcSeeder
+    php spark db:seed ClassSeeder
+    php spark db:seed SourceFundSeeder
+    php spark db:seed AdminSeeder
+    php spark db:seed StaffSeeder
+    php spark db:seed UserDemoSeeder
+    ```
+5.  **Jalankan Server Lokal:**
+    ```bash
+    php spark serve
+    ```
+    Buka [http://localhost:8080/](http://localhost:8080/) pada browser Anda.

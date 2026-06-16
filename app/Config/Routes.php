@@ -13,7 +13,7 @@ use CodeIgniter\Router\RouteCollection;
 // Default
 $routes->get('auth/wizard', 'Auth::wizard');
 
-$routes->get('/', 'Auth::login');
+$routes->get('/', 'Home::index');
 
 $routes->get('auth/login', 'Auth::login');
 $routes->post('auth/login', 'Auth::processLogin');
