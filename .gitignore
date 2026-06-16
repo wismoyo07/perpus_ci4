@@ -131,3 +131,8 @@ _modules/*
 /db/check_books_table.php
 /db/import_db.php
 /db/run_alter.php
+
+#-------------------------
+# Local analysis reports
+#-------------------------
+/analysis_*.md
