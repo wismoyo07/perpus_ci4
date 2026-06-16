@@ -47,7 +47,7 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `aktivitas`, `created_at`, `target
 -- Dumping structure for table perpus_ci4_bck.books
 CREATE TABLE IF NOT EXISTS `books` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `kode_buku` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `kode_buku` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `judul` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
   `pengarang` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `penerbit` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,

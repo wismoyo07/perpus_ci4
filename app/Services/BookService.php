@@ -28,7 +28,33 @@ class BookService
     {
         // AUTO GENERATE JIKA KOSONG
         if (empty($data['kode_buku'])) {
-            $data['kode_buku'] = 'BK-' . date('YmdHis');
+            $tahun = date('Y');
+            $sumberDana = 'BOS';
+            $kodeAkun = '03.11.01.01.001';
+
+            // Cari nomor urut terakhir untuk tahun ini dan sumber dana ini
+            $lastBook = $this->db->table('books')
+                ->like('kode_buku', "{$kodeAkun} / {$sumberDana} / {$tahun} /", 'after')
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            $nextNumber = 1;
+            if ($lastBook) {
+                // Ekstrak nomor urut dari kode terakhir
+                $parts = explode('/', $lastBook['kode_buku']);
+                $lastSeq = intval(trim(end($parts)));
+                $nextNumber = $lastSeq + 1;
+            }
+
+            $urutPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            $data['kode_buku'] = "{$kodeAkun} / {$sumberDana} / {$tahun} / {$urutPadded}";
+        } else {
+            // Validasi format jika diinput manual
+            $pattern = '/^\d{2}\.\d{2}\.\d{2}\.\d{2}\.\d{3}\s*\/\s*[A-Z0-9-]+\s*\/\s*\d{4}\s*\/\s*\d{3,}$/i';
+            if (!preg_match($pattern, $data['kode_buku'])) {
+                throw new \Exception('Format Kode Buku tidak valid. Contoh format: 03.11.01.01.001 / BOS / 2024 / 005');
+            }
         }
 
         $this->validateStock($data['stok_total'], $data['stok_tersedia']);
@@ -53,6 +79,14 @@ class BookService
         $book = $this->bookModel->find($id);
         if (!$book) {
             throw new \Exception('Buku tidak ditemukan');
+        }
+
+        // Validasi format kode buku baru jika diubah
+        if (!empty($data['kode_buku']) && $data['kode_buku'] !== $book['kode_buku']) {
+            $pattern = '/^\d{2}\.\d{2}\.\d{2}\.\d{2}\.\d{3}\s*\/\s*[A-Z0-9-]+\s*\/\s*\d{4}\s*\/\s*\d{3,}$/i';
+            if (!preg_match($pattern, $data['kode_buku'])) {
+                throw new \Exception('Format Kode Buku tidak valid. Contoh format: 03.11.01.01.001 / BOS / 2024 / 005');
+            }
         }
 
         $stokDipinjam = $book['stok_total'] - $book['stok_tersedia'];

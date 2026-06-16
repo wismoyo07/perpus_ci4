@@ -20,7 +20,7 @@
         <div class="card-body">
 
             <form method="post"
-                  action="<?= isset($book) ? '/books/update/'.$book['id'] : '/books/store' ?>">
+                  action="<?= isset($book) ? site_url('books/update/'.$book['id']) : site_url('books/store') ?>">
 
                 <?= csrf_field() ?>
 
@@ -32,9 +32,11 @@
                         <input type="text"
                                name="kode_buku"
                                class="form-control"
+                               placeholder="03.11.01.01.001 / BOS / 2024 / 005"
+                               pattern="^\d{2}\.\d{2}\.\d{2}\.\d{2}\.\d{3}\s*\/\s*[A-Za-z0-9-]+\s*\/\s*\d{4}\s*\/\s*\d{3,}$"
                                value="<?= old('kode_buku', $book['kode_buku'] ?? '') ?>">
                         <small class="text-muted">
-                            Kosongkan jika ingin auto-generate (opsional)
+                            Contoh: <b>03.11.01.01.001 / BOS / 2024 / 005</b>. Kosongkan untuk auto-generate.
                         </small>
                     </div>
 

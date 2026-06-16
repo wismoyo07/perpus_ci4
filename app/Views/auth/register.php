@@ -1,4 +1,4 @@
-<?= $this->extend('layout/auth2') ?>
+<?= $this->extend('layout/auth') ?>
 <?= $this->section('content') ?>
 
     <!-- Register -->
@@ -8,7 +8,67 @@
                     <p>Isi semua form dengan data Anda</p>
                 </div>
 
-                <form method="post" action="/auth/register" class="nk-auth-form" id="registerForm" novalidate>
+            <?php if(session()->getFlashdata('errors')): ?>
+                <div class="alert alert-danger">
+                    <?php foreach(session()->getFlashdata('errors') as $error): ?>
+                        <div><?= $error ?></div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+                <form method="post" action="<?= site_url('auth/register') ?>" class="nk-auth-form" id="registerForm" novalidate>
+
+                    <div class="mb-3 mb-3">
+                        <label for="regJenis" class="form-label">Jenis Pengguna</label>
+                        <select name="jenis_pengguna"
+                                id="jenis_pengguna"
+                                class="form-select"
+                                required>
+                            <option value="">-- Pilih Jenis Pengguna --</option>
+                            <option value="siswa" <?= old('jenis_pengguna')=='siswa'?'selected':'' ?>>
+                                Siswa
+                            </option>
+                            <option value="guru" <?= old('jenis_pengguna')=='guru'?'selected':'' ?>>
+                                Guru
+                            </option>
+                            <option value="pegawai" <?= old('jenis_pengguna')=='pegawai'?'selected':'' ?>>
+                                Pegawai
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Lengkap</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" name="name" class="form-control" placeholder="Isikan Nama Lengkap" required value="<?= old('name') ?>">
+                        </div>
+                    </div>
+
+                    <!-- Nomor Induk -->
+                    <div class="mb-3">
+                        <label id="label_member_code" class="form-label">Nomor Induk</label>
+                        <input type="text"
+                            name="member_code"
+                            id="member_code"
+                            class="form-control"
+                            value="<?= old('member_code') ?>"
+                            placeholder="Siswa → NIS | Guru/Pegawai → NIP/Kode Pegawai"
+                            required>
+                    </div>
+
+                    <!-- NISN -->
+                    <div class="mb-3">
+                        <label id="label_member_code_nasional" class="form-label">Nomor Induk Nasional</label>
+                        <input type="text"
+                            name="member_code_nation"
+                            id="member_code_nation"
+                            class="form-control"
+                            value="<?= old('member_code_nation') ?>"
+                            placeholder="Siswa → NISN | Guru/Pegawai → NUPTK | Kosongkan Jika belum ada"
+                            required>
+                    </div>
+
                     <div class="mb-3">
                         <label for="regUsername" class="form-label">Username</label>
                         <div class="input-group">
@@ -69,7 +129,7 @@
                 </div> -->
 
                 <div class="nk-auth-footer">
-                    <p>Already have an account? <a href="/auth/login" data-auth-switch="#l-login">Sign in</a></p>
+                    <p>Already have an account? <a href="<?= site_url('auth/login') ?>" data-auth-switch="#l-login">Sign in</a></p>
                 </div>
             </div>
 

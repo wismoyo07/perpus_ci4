@@ -11,6 +11,8 @@ use CodeIgniter\Router\RouteCollection;
 // Template Notika
 // LOGIN
 // Default
+$routes->get('auth/wizard', 'Auth::wizard');
+
 $routes->get('/', 'Auth::login');
 
 $routes->get('auth/login', 'Auth::login');

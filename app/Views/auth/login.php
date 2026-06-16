@@ -1,4 +1,4 @@
-<?= $this->extend('layout/auth2') ?>
+<?= $this->extend('layout/auth') ?>
 <?= $this->section('content') ?>
 
     <!-- Login -->
@@ -22,7 +22,7 @@
             <?php endif; ?>
 
 
-        <form method="post" action="/auth/login" class="nk-auth-form" novalidate>
+        <form method="post" action="<?= site_url('auth/login') ?>" class="nk-auth-form" novalidate>
             <?= csrf_field() ?>
 
             <div class="mb-3">
@@ -60,7 +60,7 @@
         </form>
 
         <div class="nk-auth-footer">
-            <p>Belum Punya Akun? <a href="/auth/register">Registrasi disini</a></p>
+            <p>Belum Punya Akun? <a href="<?= site_url('auth/register') ?>">Registrasi disini</a></p>
         </div>
     </div>
 

@@ -8,7 +8,7 @@ use App\Models\ActivityLogModel;
 use CodeIgniter\Controller;
 
 use App\Services\LoggingService;
-
+use PhpParser\Builder\Function_;
 
 class Auth extends Controller
 {
@@ -24,6 +24,14 @@ class Auth extends Controller
         $this->session   = session();
 
         helper(['form', 'url', 'password']);
+    }
+
+    // =====================================================
+    // TEST WIZARD
+    // =====================================================
+    public function wizard()
+    {
+        return view('auth/wizard');
     }
 
     // =====================================================
