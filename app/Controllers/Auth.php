@@ -27,14 +27,6 @@ class Auth extends Controller
     }
 
     // =====================================================
-    // TEST WIZARD
-    // =====================================================
-    public function wizard()
-    {
-        return view('auth/wizard');
-    }
-
-    // =====================================================
     // REGISTER MEMBER
     // =====================================================
     public function register()
@@ -43,7 +35,7 @@ class Auth extends Controller
 
             helper('password');
 
-            $userModel = new \App\Models\UserModel();
+            $userModel = new UserModel();
 
             $data = [
                 'name'                  => trim($this->request->getPost('name')),
@@ -173,7 +165,7 @@ class Auth extends Controller
                     ->with('error','Username/Nomor Induk dan password wajib diisi.');
             }
 
-            $userModel = new \App\Models\UserModel();
+            $userModel = new UserModel();
             $user = $userModel->getUser($identity);
 
             if (!$user) {
@@ -249,10 +241,10 @@ class Auth extends Controller
                 ->with('error','Password minimal 6 karakter.');
         }
 
-        $userModel = new \App\Models\UserModel();
+        $userModel = new UserModel();
 
         $userModel->update(session('user_id'), [
-            'password' => hashPassword($password, PASSWORD_DEFAULT),
+            'password' => hashPassword($password),
             'must_change_password' => 0
         ]);
 
@@ -275,7 +267,7 @@ class Auth extends Controller
                 ->with('error', 'Username / Nomor Induk dan password wajib diisi.');
         }
 
-        $userModel = new \App\Models\UserModel();
+        $userModel = new UserModel();
         $user = $userModel->getUser($identity);
 
         if (!$user) {
