@@ -80,8 +80,15 @@ class Transactions extends BaseController
     | FORM CREATE (STAFF)
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | FORM CREATE (STAFF)
+    |--------------------------------------------------------------------------
+    |*/
     public function create()
     {
+        $db = \Config\Database::connect();
+
         $data['members'] = $this->userModel
             ->where('role', 'member')
             ->where('is_validated', 1)
@@ -91,6 +98,12 @@ class Transactions extends BaseController
             ->where('is_active', 1)
             ->where('stok_tersedia >', 0)
             ->findAll();
+
+        // Get all available copies
+        $data['book_items'] = $db->table('book_items')
+            ->where('status', 'available')
+            ->get()
+            ->getResultArray();
 
         return view('transactions/create', $data);
     }
@@ -104,12 +117,25 @@ class Transactions extends BaseController
     {
         try {
             $memberId = $this->request->getPost('member_id');
-            $bookIds  = $this->request->getPost('book_ids');
+            $bookItemIds = $this->request->getPost('book_item_ids') ?: [];
+            $jenisPeminjaman = $this->request->getPost('jenis_peminjaman') ?: 'pendek';
+            $customDueDate = $this->request->getPost('jatuh_tempo') ?: null;
 
             $kode = $this->service->borrow(
                 $memberId,
-                $bookIds,
-                session('user_id')
+                $bookItemIds,
+                session('user_id'),
+                $jenisPeminjaman,
+                $customDueDate
+            );
+
+            // Fetch transaction ID to log activity
+            $trx = $this->transactionModel->where('kode_transaksi', $kode)->first();
+            $transactionId = $trx ? $trx['id'] : 0;
+
+            $this->logActivity(
+                "Mencatat transaksi peminjaman {$kode} (ID {$transactionId})",
+                $memberId
             );
 
             return redirect()->to('/transactions')
@@ -120,11 +146,6 @@ class Transactions extends BaseController
                 ->with('error', $e->getMessage())
                 ->withInput();
         }
-
-        $this->logActivity(
-            "Create transaksi peminjaman ID {$transactionId}",
-            $memberId
-        );
     }
 
     /*
@@ -138,18 +159,14 @@ class Transactions extends BaseController
 
         $data['details'] = $this->transactionModel
             ->db->table('transaction_details td')
-            ->select('td.*, b.judul')
+            ->select('td.*, b.judul, bi.kode_inventaris')
             ->join('books b', 'b.id = td.book_id')
+            ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
             ->where('transaction_id', $id)
             ->get()
             ->getResultArray();
 
         return view('transactions/return', $data);
-
-        $this->logActivity(
-            "Create transaksi peminjaman ID {$transactionId}",
-            $memberId
-        );
     }
 
 
@@ -161,12 +178,11 @@ class Transactions extends BaseController
     public function returnProcess($id)
     {
         try {
-
-            $lostBooks = $this->request->getPost('lost_books') ?? [];
+            $lostBookItemIds = $this->request->getPost('lost_books') ?: [];
 
             $denda = $this->service->return(
                 $id,
-                $lostBooks,
+                $lostBookItemIds,
                 session('user_id')
             );
 
@@ -193,6 +209,8 @@ class Transactions extends BaseController
                 td.id,
                 td.lost_settlement_status,
                 td.lost_note,
+                td.book_item_id,
+                bi.kode_inventaris as original_kode_inventaris,
                 b.judul,
                 t.kode_transaksi,
                 u.name as member_name,
@@ -200,6 +218,7 @@ class Transactions extends BaseController
             ')
             ->join('transactions t', 't.id = td.transaction_id')
             ->join('books b', 'b.id = td.book_id')
+            ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
             ->join('users u', 'u.id = t.user_id')
             ->where('td.is_lost', 1)
             ->orderBy('t.created_at', 'DESC');
@@ -225,6 +244,8 @@ class Transactions extends BaseController
         }
 
         $transactionId = $detail['transaction_id'];
+        $bookId = $detail['book_id'];
+        $oldItemId = $detail['book_item_id'];
 
         // Ambil transaksi untuk tahu member
         $transaction = $db->table('transactions')
@@ -234,39 +255,93 @@ class Transactions extends BaseController
 
         $memberId = $transaction['user_id'] ?? null;
 
-        // =============================
-        // Update status replaced
-        // =============================
-        $db->table('transaction_details')
-            ->where('id', $detailId)
-            ->update([
-                'lost_settlement_status' => 'replaced'
-            ]);
-
-        // =============================
-        // Tambah stok kembali
-        // =============================
-        $book = $db->table('books')
-            ->where('id', $detail['book_id'])
+        // Ambil data salinan fisik yang hilang
+        $oldItem = $db->table('book_items')
+            ->where('id', $oldItemId)
             ->get()
             ->getRowArray();
 
-        $db->table('books')
-            ->where('id', $detail['book_id'])
-            ->update([
-                'stok_total'     => $book['stok_total'] + 1,
-                'stok_tersedia'  => $book['stok_tersedia'] + 1
+        $oldKode = $oldItem ? $oldItem['kode_inventaris'] : 'Unknown';
+
+        // Ambil input catatan dari form
+        $userNotes = $this->request->getPost('lost_note') ?: 'Diganti dengan buku baru';
+
+        try {
+            $db->transStart();
+
+            // 1. Dapatkan info buku catalog
+            $book = $db->table('books')
+                ->where('id', $bookId)
+                ->get()
+                ->getRowArray();
+
+            if (!$book) {
+                throw new \Exception('Buku tidak ditemukan');
+            }
+
+            // 2. Buat salinan fisik baru sebagai pengganti
+            // Cari nomor urut copy terakhir untuk buku ini
+            $lastItem = $db->table('book_items')
+                ->where('book_id', $bookId)
+                ->orderBy('nomor_urut', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            $nextNumber = 1;
+            if ($lastItem) {
+                $nextNumber = intval($lastItem['nomor_urut']) + 1;
+            }
+
+            $urutCopyPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            $newKodeInventaris = "{$book['kode_buku']} / {$urutCopyPadded}";
+
+            $db->table('book_items')->insert([
+                'book_id'         => $bookId,
+                'kode_inventaris' => $newKodeInventaris,
+                'sumber_dana'     => $oldItem ? $oldItem['sumber_dana'] : 'Ganti Rugi',
+                'tahun_pengadaan' => intval(date('Y')),
+                'nomor_urut'      => $nextNumber,
+                'status'          => 'available',
+                'created_at'      => date('Y-m-d H:i:s'),
+                'updated_at'      => date('Y-m-d H:i:s'),
             ]);
 
-        // =============================
-        // LOG ACTIVITY
-        // =============================
-        $this->logActivity(
-            "Buku hilang telah diganti (Transaksi ID {$transactionId})",
-            $memberId
-        );
+            // 3. Update transaction detail: status = replaced, simpan catatan penggantian
+            $settlementText = "Menggantikan salinan fisik [{$oldKode}] yang hilang. Kode inventaris baru: [{$newKodeInventaris}]. Catatan: {$userNotes}";
 
-        return redirect()->to('/lost-books')
-            ->with('success', 'Buku hilang telah diganti dan stok diperbarui');
+            $db->table('transaction_details')
+                ->where('id', $detailId)
+                ->update([
+                    'lost_settlement_status' => 'replaced',
+                    'lost_note' => $settlementText
+                ]);
+
+            // 4. Update stok total dan tersedia di parent book
+            $db->table('books')
+                ->where('id', $bookId)
+                ->update([
+                    'stok_total'     => $book['stok_total'] + 1,
+                    'stok_tersedia'  => $book['stok_tersedia'] + 1
+                ]);
+
+            // 5. LOG ACTIVITY
+            $this->logActivity(
+                "Penyelesaian buku hilang: menggantikan [{$oldKode}] dengan [{$newKodeInventaris}] (Transaksi ID {$transactionId})",
+                $memberId
+            );
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new \Exception('Gagal memproses penyelesaian buku hilang');
+            }
+
+            return redirect()->to('/lost-books')
+                ->with('success', 'Penyelesaian buku hilang berhasil. Salinan fisik baru ditambahkan dengan kode: ' . $newKodeInventaris);
+
+        } catch (\Exception $e) {
+            return redirect()->to('/lost-books')
+                ->with('error', $e->getMessage());
+        }
     }
 }

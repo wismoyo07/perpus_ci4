@@ -74,6 +74,11 @@ $routes->group('books', ['filter' => 'auth', 'role:admin,staff'], function($rout
     $routes->post('archive/(:num)', 'Books::archive/$1');
     $routes->post('restore/(:num)', 'Books::restore/$1');
 
+    // Physical copy inventory management
+    $routes->get('items/(:num)', 'Books::items/$1');
+    $routes->post('items/store/(:num)', 'Books::storeItem/$1');
+    $routes->post('items/delete/(:num)', 'Books::deleteItem/$1');
+
 });
 
 

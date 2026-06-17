@@ -27,7 +27,7 @@
             <tr>
                 <th>Kode</th>
                 <th>Member</th>
-                <th>Jenis</th>
+                <th>Tipe Pinjam</th>
                 <th>Tgl Pinjam</th>
                 <th>Jatuh Tempo</th>
                 <th>Status</th>
@@ -42,16 +42,23 @@
             <tr>
                 <td><?= esc($trx['kode_transaksi']) ?></td>
 
-                <td><?= esc($trx['member_name']) ?></td>
-
                 <td>
-                    <span class="badge bg-secondary">
+                    <?= esc($trx['member_name']) ?><br>
+                    <span class="badge bg-secondary" style="font-size: 0.75rem;">
                         <?= esc($trx['jenis_pengguna']) ?>
                     </span>
                 </td>
 
-                <td><?= $trx['tanggal_pinjam'] ?></td>
-                <td><?= $trx['jatuh_tempo'] ?></td>
+                <td>
+                    <?php if(($trx['jenis_peminjaman'] ?? 'pendek') === 'panjang'): ?>
+                        <span class="badge bg-dark">Jangka Panjang</span>
+                    <?php else: ?>
+                        <span class="badge bg-info text-white">Jangka Pendek</span>
+                    <?php endif; ?>
+                </td>
+
+                <td><?= date('d/m/Y', strtotime($trx['tanggal_pinjam'])) ?></td>
+                <td><?= date('d/m/Y', strtotime($trx['jatuh_tempo'])) ?></td>
 
                 <td>
                     <?php if($trx['status'] === 'dipinjam'): ?>

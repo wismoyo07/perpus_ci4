@@ -18,7 +18,8 @@ class TransactionModel extends Model
         'status',
         'total_denda',
         'borrowed_by',
-        'returned_by'
+        'returned_by',
+        'jenis_peminjaman'
     ];
 
     protected $useTimestamps = true;
