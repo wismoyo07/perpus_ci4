@@ -171,5 +171,156 @@ class Books extends BaseController
 
         return view('books/member_list', $data);
     }
+
+    public function items($bookId)
+    {
+        $book = $this->bookModel->find($bookId);
+        if (!$book) {
+            return redirect()->to('/books')->with('error', 'Buku tidak ditemukan');
+        }
+
+        $db = \Config\Database::connect();
+        $items = $db->table('book_items')
+            ->where('book_id', $bookId)
+            ->orderBy('nomor_urut', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $data = [
+            'book'  => $book,
+            'items' => $items
+        ];
+
+        return view('books/items', $data);
+    }
+
+    public function storeItem($bookId)
+    {
+        try {
+            $book = $this->bookModel->find($bookId);
+            if (!$book) {
+                return redirect()->to('/books')->with('error', 'Buku tidak ditemukan');
+            }
+
+            $db = \Config\Database::connect();
+            $sumber = $this->request->getPost('sumber_dana') ?: 'BOS';
+            $tahun = intval($this->request->getPost('tahun_pengadaan')) ?: intval(date('Y'));
+
+            // Auto-generate next nomor_urut
+            $lastItem = $db->table('book_items')
+                ->where('book_id', $bookId)
+                ->orderBy('nomor_urut', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            $nextNumber = 1;
+            if ($lastItem) {
+                $nextNumber = intval($lastItem['nomor_urut']) + 1;
+            }
+
+            $urutCopyPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            $kodeInventaris = "{$book['kode_buku']} / {$urutCopyPadded}";
+
+            $db->transStart();
+
+            // Insert copy record
+            $db->table('book_items')->insert([
+                'book_id'         => $bookId,
+                'kode_inventaris' => $kodeInventaris,
+                'sumber_dana'     => $sumber,
+                'tahun_pengadaan' => $tahun,
+                'nomor_urut'      => $nextNumber,
+                'status'          => 'available'
+            ]);
+
+            // Update counters
+            $this->bookModel->update($bookId, [
+                'stok_total'     => $book['stok_total'] + 1,
+                'stok_tersedia'  => $book['stok_tersedia'] + 1
+            ]);
+
+            // Log activity
+            $db->table('activity_logs')->insert([
+                'user_id'   => session('user_id'),
+                'aktivitas' => "Menambahkan salinan fisik book ID {$bookId} dengan kode {$kodeInventaris}",
+                'created_at'=> date('Y-m-d H:i:s')
+            ]);
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new \Exception('Gagal menyimpan salinan fisik');
+            }
+
+            return redirect()->to('/books/items/' . $bookId)
+                ->with('success', 'Salinan fisik berhasil ditambahkan: ' . $kodeInventaris);
+
+        } catch (\Exception $e) {
+            return redirect()->to('/books/items/' . $bookId)
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    public function deleteItem($itemId)
+    {
+        $db = \Config\Database::connect();
+        $item = $db->table('book_items')
+            ->where('id', $itemId)
+            ->get()
+            ->getRowArray();
+
+        if (!$item) {
+            return redirect()->back()->with('error', 'Salinan fisik tidak ditemukan');
+        }
+
+        $bookId = $item['book_id'];
+        $book = $this->bookModel->find($bookId);
+
+        if ($item['status'] !== 'available') {
+            return redirect()->to('/books/items/' . $bookId)
+                ->with('error', 'Hanya salinan fisik yang tersedia yang dapat dihapus.');
+        }
+
+        // Cek riwayat transaksi
+        $used = $db->table('transaction_details')
+            ->where('book_item_id', $itemId)
+            ->countAllResults();
+
+        if ($used > 0) {
+            return redirect()->to('/books/items/' . $bookId)
+                ->with('error', 'Salinan ini memiliki riwayat transaksi dan tidak dapat dihapus secara fisik.');
+        }
+
+        try {
+            $db->transStart();
+
+            $db->table('book_items')->where('id', $itemId)->delete();
+
+            $this->bookModel->update($bookId, [
+                'stok_total'     => max(0, $book['stok_total'] - 1),
+                'stok_tersedia'  => max(0, $book['stok_tersedia'] - 1)
+            ]);
+
+            // Log activity
+            $db->table('activity_logs')->insert([
+                'user_id'   => session('user_id'),
+                'aktivitas' => "Menghapus salinan fisik book ID {$bookId} dengan kode {$item['kode_inventaris']}",
+                'created_at'=> date('Y-m-d H:i:s')
+            ]);
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new \Exception('Gagal menghapus salinan fisik');
+            }
+
+            return redirect()->to('/books/items/' . $bookId)
+                ->with('success', 'Salinan fisik berhasil dihapus');
+
+        } catch (\Exception $e) {
+            return redirect()->to('/books/items/' . $bookId)
+                ->with('error', $e->getMessage());
+        }
+    }
 }
 

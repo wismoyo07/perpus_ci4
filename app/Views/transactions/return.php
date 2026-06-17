@@ -44,10 +44,11 @@
                                 <input class="form-check-input lost-checkbox"
                                        type="checkbox"
                                        name="lost_books[]"
-                                       value="<?= $d['book_id'] ?>">
+                                       value="<?= $d['book_item_id'] ?>">
 
                                 <label class="form-check-label">
-                                    <?= esc($d['judul']) ?>
+                                    <strong><?= esc($d['judul']) ?></strong><br>
+                                    <small class="text-muted">Kode Inv: <?= esc($d['kode_inventaris'] ?: '-') ?></small>
                                 </label>
                             </div>
                         </div>

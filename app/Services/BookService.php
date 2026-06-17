@@ -61,6 +61,25 @@ class BookService
 
         $id = $this->bookModel->insert($data);
 
+        // Auto-create physical copy records (book_items)
+        $parts = explode('/', $data['kode_buku']);
+        $sumber = (count($parts) >= 2) ? trim($parts[1]) : 'BOS';
+        $tahun = (count($parts) >= 3) ? intval(trim($parts[2])) : intval(date('Y'));
+
+        for ($copy = 1; $copy <= $data['stok_total']; $copy++) {
+            $urutPadded = str_pad($copy, 3, '0', STR_PAD_LEFT);
+            $kodeInventaris = "{$data['kode_buku']} / {$urutPadded}";
+
+            $this->db->table('book_items')->insert([
+                'book_id'         => $id,
+                'kode_inventaris' => $kodeInventaris,
+                'sumber_dana'     => $sumber,
+                'tahun_pengadaan' => $tahun,
+                'nomor_urut'      => $copy,
+                'status'          => 'available'
+            ]);
+        }
+
         $this->logModel->insert([
             'user_id'  => $actorId,
             'aktivitas'=> "Menambahkan buku: {$data['judul']}"
@@ -89,16 +108,9 @@ class BookService
             }
         }
 
-        $stokDipinjam = $book['stok_total'] - $book['stok_tersedia'];
-
-        if (isset($data['stok_total']) && $data['stok_total'] < $stokDipinjam) {
-            throw new \Exception('Tidak bisa mengurangi stok total di bawah jumlah buku dipinjam');
-        }
-
-        if (isset($data['stok_tersedia']) &&
-            $data['stok_tersedia'] > $data['stok_total']) {
-            throw new \Exception('Stok tersedia tidak boleh melebihi stok total');
-        }
+        // Protect stock total & tersedia from manual changes during generic edit
+        unset($data['stok_total']);
+        unset($data['stok_tersedia']);
 
         $this->bookModel->update($id, $data);
 

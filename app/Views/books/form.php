@@ -82,7 +82,11 @@
                                min="0"
                                required
                                class="form-control"
+                               <?= isset($book) ? 'disabled' : '' ?>
                                value="<?= old('stok_total', $book['stok_total'] ?? 0) ?>">
+                        <?php if(isset($book)): ?>
+                            <small class="text-muted">Kelola stok via <a href="/books/items/<?= $book['id'] ?>">Inventaris Salinan</a></small>
+                        <?php endif; ?>
                     </div>
 
                     <!-- STOK TERSEDIA -->
@@ -93,10 +97,13 @@
                                min="0"
                                required
                                class="form-control"
+                               <?= isset($book) ? 'disabled' : '' ?>
                                value="<?= old('stok_tersedia', $book['stok_tersedia'] ?? 0) ?>">
-                        <small class="text-muted">
-                            Tidak boleh melebihi stok total
-                        </small>
+                        <?php if(!isset($book)): ?>
+                            <small class="text-muted">
+                                Tidak boleh melebihi stok total
+                            </small>
+                        <?php endif; ?>
                     </div>
 
                     <!-- STATUS (Edit Only) -->

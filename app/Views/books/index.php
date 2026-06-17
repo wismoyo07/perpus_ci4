@@ -47,6 +47,12 @@
 
                     <?php if($b['is_active']): ?>
 
+                        <!-- INVENTARIS -->
+                        <a href="/books/items/<?= $b['id'] ?>"
+                           class="btn btn-sm btn-info text-white">
+                            <i class="bi bi-box"></i> Inventaris
+                        </a>
+
                         <!-- EDIT -->
                         <a href="/books/edit/<?= $b['id'] ?>"
                         class="btn btn-sm btn-warning">

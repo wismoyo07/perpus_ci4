@@ -33,20 +33,20 @@ class Reports extends BaseController
             ->where('td.is_lost', 0)
             ->countAllResults();
 
-        // 6. Jumlah buku dipinjam jangka pendek (durasi <= 30 hari)
+        // 6. Jumlah buku dipinjam jangka pendek
         $shortTermBorrowed = $db->table('transaction_details td')
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
-            ->where('DATEDIFF(t.jatuh_tempo, t.tanggal_pinjam) <=', 30)
+            ->where('t.jenis_peminjaman', 'pendek')
             ->countAllResults();
 
-        // 7. Jumlah buku dipinjam jangka panjang (durasi > 30 hari)
+        // 7. Jumlah buku dipinjam jangka panjang
         $longTermBorrowed = $db->table('transaction_details td')
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
-            ->where('DATEDIFF(t.jatuh_tempo, t.tanggal_pinjam) >', 30)
+            ->where('t.jenis_peminjaman', 'panjang')
             ->countAllResults();
 
         // 8. Jumlah buku hilang
@@ -122,14 +122,14 @@ class Reports extends BaseController
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
-            ->where('DATEDIFF(t.jatuh_tempo, t.tanggal_pinjam) <=', 30)
+            ->where('t.jenis_peminjaman', 'pendek')
             ->countAllResults();
 
         $longTermBorrowed = $db->table('transaction_details td')
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
-            ->where('DATEDIFF(t.jatuh_tempo, t.tanggal_pinjam) >', 30)
+            ->where('t.jenis_peminjaman', 'panjang')
             ->countAllResults();
 
         $lostBooks = $db->table('transaction_details')
