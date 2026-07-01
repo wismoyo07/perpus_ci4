@@ -25,8 +25,9 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
+                <th width="60">No</th>
                 <th>Kode</th>
-                <th>Member</th>
+                <th>Nama Anggota</th>
                 <th>Tipe Pinjam</th>
                 <th>Tgl Pinjam</th>
                 <th>Jatuh Tempo</th>
@@ -38,13 +39,29 @@
         </thead>
         
         <tbody>
+            <?php 
+            $page = $pager->getCurrentPage();
+            $perPage = 10;
+            $i = ($page - 1) * $perPage + 1;
+            ?>
             <?php foreach ($transactions as $trx): ?>
             <tr>
+                <td><?= $i++ ?></td>
                 <td><?= esc($trx['kode_transaksi']) ?></td>
 
                 <td>
-                    <?= esc($trx['member_name']) ?><br>
-                    <span class="badge bg-secondary" style="font-size: 0.75rem;">
+                    <?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $trx['member_name'])) ?><br>
+                    <?php
+                    $badgeClass = 'bg-secondary';
+                    if ($trx['jenis_pengguna'] === 'siswa') {
+                        $badgeClass = 'bg-success';
+                    } elseif ($trx['jenis_pengguna'] === 'guru') {
+                        $badgeClass = 'bg-primary';
+                    } elseif ($trx['jenis_pengguna'] === 'pegawai') {
+                        $badgeClass = 'bg-info';
+                    }
+                    ?>
+                    <span class="badge <?= $badgeClass ?>" style="font-size: 0.75rem; text-transform: capitalize;">
                         <?= esc($trx['jenis_pengguna']) ?>
                     </span>
                 </td>

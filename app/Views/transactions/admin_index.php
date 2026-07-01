@@ -13,8 +13,9 @@
                 <table class="table table-hover align-middle mb-0 text-nowrap">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Kode</th>
-                            <th>Member</th>
+                            <th class="ps-4" width="60">No</th>
+                            <th>Kode</th>
+                            <th>Nama Anggota</th>
                             <th>Tipe Pinjam</th>
                             <th>Tgl Pinjam</th>
                             <th>Jatuh Tempo</th>
@@ -26,15 +27,31 @@
                     <tbody>
                         <?php if (empty($transactions)): ?>
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">Belum ada transaksi.</td>
+                                <td colspan="9" class="text-center py-4 text-muted">Belum ada transaksi.</td>
                             </tr>
                         <?php else: ?>
+                            <?php 
+                            $page = $pager->getCurrentPage();
+                            $perPage = 10;
+                            $i = ($page - 1) * $perPage + 1;
+                            ?>
                             <?php foreach ($transactions as $trx): ?>
                                 <tr>
-                                    <td class="ps-4 fw-bold text-dark"><?= esc($trx['kode_transaksi']) ?></td>
+                                    <td class="ps-4 text-muted"><?= $i++ ?></td>
+                                    <td class="fw-bold text-dark"><?= esc($trx['kode_transaksi']) ?></td>
                                     <td>
-                                        <?= esc($trx['member_name']) ?><br>
-                                        <span class="badge bg-secondary" style="font-size: 0.75rem;">
+                                        <?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $trx['member_name'])) ?><br>
+                                        <?php
+                                        $badgeClass = 'bg-secondary';
+                                        if ($trx['jenis_pengguna'] === 'siswa') {
+                                            $badgeClass = 'bg-success';
+                                        } elseif ($trx['jenis_pengguna'] === 'guru') {
+                                            $badgeClass = 'bg-primary';
+                                        } elseif ($trx['jenis_pengguna'] === 'pegawai') {
+                                            $badgeClass = 'bg-info';
+                                        }
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?>" style="font-size: 0.75rem; text-transform: capitalize;">
                                             <?= esc($trx['jenis_pengguna']) ?>
                                         </span>
                                     </td>
