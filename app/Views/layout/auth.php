@@ -75,8 +75,46 @@ $address = ($setting && $setting['alamat']) ? $setting['alamat'] : '';
         </div>
     </div>
 
-    <!-- ONLY VITE ENTRY POINT - Everything else bundled by Vite -->
-    <script type="module" src="<?=  base_url('assets/src/js/pages/login-register.js'); ?>"></script>
+    <!-- Password Visibility Toggle & Validation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle Password Visibility
+            const toggles = document.querySelectorAll('.nk-toggle-password');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        if (isPassword) {
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    }
+                });
+            });
+
+            // Form Validation Styling
+            const forms = document.querySelectorAll('.nk-auth-form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        });
+    </script>
 </body>
 
 </html>
