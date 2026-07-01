@@ -31,12 +31,31 @@ class Dashboard extends BaseController
         $userModel = new UserModel();
         $bookModel = new BookModel();
         $trxModel  = new TransactionModel();
+        $logModel  = new \App\Models\ActivityLogModel();
+
+        // Get 5 latest transactions
+        $recentTrx = $trxModel->select('transactions.*, users.name as member_name')
+            ->join('users', 'users.id = transactions.user_id', 'left')
+            ->orderBy('transactions.id', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
+
+        // Get 5 latest activity logs
+        $recentLogs = $logModel->select('activity_logs.*, users.name as user_name')
+            ->join('users', 'users.id = activity_logs.user_id', 'left')
+            ->orderBy('activity_logs.id', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
 
         $data = [
             'total_users'  => $userModel->countAll(),
             'total_books'  => $bookModel->countAll(),
             'total_trx'    => $trxModel->countAll(),
-            'total_late'   => $trxModel->where('status','terlambat')->countAllResults()
+            'total_late'   => $trxModel->where('status','terlambat')->countAllResults(),
+            'recent_trx'   => $recentTrx,
+            'recent_logs'  => $recentLogs
         ];
 
         return view('dashboard/admin', $data);

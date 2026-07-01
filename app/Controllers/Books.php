@@ -24,8 +24,8 @@ class Books extends BaseController
     */
     public function index()
     {
-
         $status = $this->request->getGet('status');
+        $search = $this->request->getGet('search');
 
         $builder = $this->bookModel;
 
@@ -35,8 +35,19 @@ class Books extends BaseController
             $builder->where('is_active', 0);
         }
 
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('judul', $search)
+                ->orLike('pengarang', $search)
+                ->orLike('kode_buku', $search)
+                ->orLike('penerbit', $search)
+                ->groupEnd();
+        }
+
         $data['books'] = $builder->orderBy('created_at', 'DESC')->paginate(10);
         $data['pager'] = $this->bookModel->pager;
+        $data['search'] = $search;
+        $data['status'] = $status;
 
         return view('books/index', $data);
     }

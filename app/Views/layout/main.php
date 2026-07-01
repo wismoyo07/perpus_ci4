@@ -31,6 +31,33 @@
         .notika-content-wrapper {
             padding: 30px 0;
         }
+        /* Custom Pager Styling to Match Notika Theme */
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .pagination .page-item .page-link {
+            color: #666;
+            border: 1px solid #e9ecef;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+        .pagination .page-item .page-link:hover {
+            background-color: rgba(0, 194, 146, 0.05);
+            color: #00c292;
+            border-color: #00c292;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #00c292;
+            border-color: #00c292;
+            color: #fff;
+            font-weight: 600;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #ccc;
+            background-color: #fcfcfc;
+            border-color: #e9ecef;
+        }
     </style>
 </head>
 <body>
