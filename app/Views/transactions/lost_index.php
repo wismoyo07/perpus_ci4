@@ -29,11 +29,11 @@
                             <th class="ps-4" width="60">No</th>
                             <th width="150">Kode Transaksi</th>
                             <th width="200">Peminjam</th>
-                            <th>Buku / Kode Inventaris</th>
+                            <th width="180">Buku / Kode Inventaris</th>
                             <th class="text-nowrap" width="130">Tgl Pinjam</th>
                             <th width="180">Status</th>
-                            <th>Catatan Penyelesaian</th>
-                            <th class="pe-4 text-end" width="350">Aksi</th>
+                            <th width="250">Catatan Penyelesaian</th>
+                            <th class="pe-4 text-end" width="150">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
