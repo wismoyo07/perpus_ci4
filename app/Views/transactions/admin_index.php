@@ -109,9 +109,17 @@
                             <?php foreach ($transactions as $trx): ?>
                                 <tr>
                                     <td class="ps-4 text-muted"><?= $i++ ?></td>
-                                    <td class="fw-bold text-dark"><?= esc($trx['kode_transaksi']) ?></td>
+                                    <td class="fw-bold text-dark">
+                                        <?php if ($trx['status'] === 'selesai'): ?>
+                                            <a href="#" data-bs-toggle="collapse" data-bs-target="#books-<?= $trx['id'] ?>" class="text-success fw-bold text-decoration-none d-inline-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-circle-chevron-down"></i> <?= esc($trx['kode_transaksi']) ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <?= esc($trx['kode_transaksi']) ?>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
-                                        <div class="fw-bold text-dark"><?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $trx['member_name'])) ?></div>
+                                        <?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $trx['member_name'])) ?><br>
                                         <?php
                                         $badgeClass = 'bg-secondary';
                                         if ($trx['jenis_pengguna'] === 'siswa') {
@@ -122,29 +130,9 @@
                                             $badgeClass = 'bg-info';
                                         }
                                         ?>
-                                        <span class="badge <?= $badgeClass ?> mb-2" style="font-size: 0.75rem; text-transform: capitalize;">
+                                        <span class="badge <?= $badgeClass ?>" style="font-size: 0.75rem; text-transform: capitalize;">
                                             <?= esc($trx['jenis_pengguna']) ?>
                                         </span>
-
-                                        <!-- Buku yang dipinjam -->
-                                        <div class="mt-2 border-top pt-2 text-wrap" style="font-size: 0.825rem; max-width: 450px;">
-                                            <span class="text-muted fw-bold mb-1 d-block" style="font-size: 0.75rem;"><i class="fa-solid fa-book text-success me-1"></i> Buku yang Dipinjam:</span>
-                                            <ul class="list-unstyled ps-0 mb-0 text-wrap">
-                                                <?php foreach ($trx['details'] ?? [] as $det): ?>
-                                                    <li class="mb-2 border-bottom pb-1" style="border-bottom-style: dashed !important; border-bottom-color: #eee !important; white-space: normal !important;">
-                                                        <span class="fw-bold text-success">[<?= esc($det['kode_inventaris'] ?: $det['kode_buku'] ?: '-') ?>]</span> 
-                                                        <strong><?= esc($det['judul']) ?></strong>
-                                                        <div class="text-muted small mt-1" style="font-size: 0.75rem; padding-left: 5px;">
-                                                            <span>Pengarang: <?= esc($det['pengarang'] ?: '-') ?></span> | 
-                                                            <span>Penerbit: <?= esc($det['penerbit'] ?: '-') ?></span>
-                                                            <?php if ($det['is_lost']): ?>
-                                                                <br><span class="badge bg-danger mt-1 text-white">Hilang</span>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
                                     </td>
                                     <td>
                                         <?php if(($trx['jenis_peminjaman'] ?? 'pendek') === 'panjang'): ?>
@@ -181,6 +169,45 @@
                                         </small>
                                     </td>
                                 </tr>
+                                <?php if ($trx['status'] === 'selesai'): ?>
+                                    <tr class="collapse bg-light" id="books-<?= $trx['id'] ?>">
+                                        <td colspan="9" class="p-3">
+                                            <div class="card border-0 shadow-none bg-white rounded-3 p-3">
+                                                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-book text-success me-2"></i> Daftar Buku yang Dikembalikan:</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered align-middle mb-0" style="white-space: normal !important;">
+                                                        <thead class="table-light text-uppercase fs-8 text-muted">
+                                                            <tr>
+                                                                <th width="180">Kode Buku / Inv</th>
+                                                                <th>Judul</th>
+                                                                <th>Pengarang</th>
+                                                                <th>Penerbit</th>
+                                                                <th width="120">Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach ($trx['details'] ?? [] as $det): ?>
+                                                                <tr>
+                                                                    <td class="fw-bold text-success">[<?= esc($det['kode_inventaris'] ?: $det['kode_buku'] ?: '-') ?>]</td>
+                                                                    <td><strong><?= esc($det['judul']) ?></strong></td>
+                                                                    <td><?= esc($det['pengarang'] ?: '-') ?></td>
+                                                                    <td><?= esc($det['penerbit'] ?: '-') ?></td>
+                                                                    <td>
+                                                                        <?php if ($det['is_lost']): ?>
+                                                                            <span class="badge bg-danger">Hilang</span>
+                                                                        <?php else: ?>
+                                                                            <span class="badge bg-success">Kembali</span>
+                                                                        <?php endif; ?>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
