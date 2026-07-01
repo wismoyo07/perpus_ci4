@@ -27,13 +27,13 @@
                     <thead class="table-light text-uppercase fs-7 text-muted">
                         <tr>
                             <th class="ps-4" width="60">No</th>
-                            <th>Kode Transaksi</th>
-                            <th>Peminjam</th>
+                            <th width="150">Kode Transaksi</th>
+                            <th width="200">Peminjam</th>
                             <th>Buku / Kode Inventaris</th>
-                            <th>Tgl Pinjam</th>
-                            <th>Status</th>
+                            <th class="text-nowrap" width="130">Tgl Pinjam</th>
+                            <th width="180">Status</th>
                             <th>Catatan Penyelesaian</th>
-                            <th class="pe-4 text-end" style="min-width: 250px;">Aksi</th>
+                            <th class="pe-4 text-end" width="350">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
