@@ -42,6 +42,8 @@ class Auth extends Controller
                 'member_code'           => trim($this->request->getPost('member_code')),
                 'member_code_nation'    => trim($this->request->getPost('member_code_nation')),
                 'class'                 => trim($this->request->getPost('class')),
+                'phone'                 => trim($this->request->getPost('phone')),
+                'whatsapp'              => trim($this->request->getPost('whatsapp')),
                 'username'              => trim($this->request->getPost('username')),
                 'password'              => hashPassword($this->request->getPost('password')),
                 'role'                  => 'member',
@@ -116,6 +118,22 @@ class Auth extends Controller
                 'errors' => [
                     'required' => 'NIS / NIP wajib diisi.'
                 ]
+            ],
+            'phone' => [
+                'rules'  => 'required|min_length[9]|max_length[20]',
+                'errors' => [
+                    'required' => 'Nomor telepon wajib diisi.',
+                    'min_length' => 'Nomor telepon minimal 9 karakter.',
+                    'max_length' => 'Nomor telepon maksimal 20 karakter.'
+                ]
+            ],
+            'whatsapp' => [
+                'rules'  => 'required|min_length[9]|max_length[20]',
+                'errors' => [
+                    'required' => 'Nomor WhatsApp wajib diisi.',
+                    'min_length' => 'Nomor WhatsApp minimal 9 karakter.',
+                    'max_length' => 'Nomor WhatsApp maksimal 20 karakter.'
+                ]
             ]
         ];
 
@@ -134,7 +152,9 @@ class Auth extends Controller
             'jenis_pengguna' => $this->request->getPost('jenis_pengguna'),
             'member_code' => $this->request->getPost('member_code'),
             'member_code_nation' => $this->request->getPost('member_code_nation'),
-            'class' => $this->request->getPost('class')
+            'class' => $this->request->getPost('class'),
+            'phone' => trim($this->request->getPost('phone')),
+            'whatsapp' => trim($this->request->getPost('whatsapp'))
         ];
 
         $newUserId = $this->userModel->insert($data);

@@ -73,6 +73,32 @@
                 placeholder="Siswa → NISN | Guru/Pegawai → NUPTK | Kosongkan Jika belum ada" required>
         </div>
 
+        <!-- Nomor Telepon/HP -->
+        <div class="mb-3">
+            <label for="phone" class="form-label">Nomor Telepon / HP</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                <input type="text" name="phone" id="phone" class="form-control" placeholder="Masukkan nomor telepon/HP" required value="<?= old('phone') ?>">
+            </div>
+            <div class="invalid-feedback">Isikan nomor telepon yang valid.</div>
+        </div>
+
+        <!-- Sync Whatsapp Checkbox -->
+        <div class="form-check mb-3 text-start">
+            <input class="form-check-input" type="checkbox" id="syncWhatsapp" checked>
+            <label class="form-check-label" for="syncWhatsapp">Nomor WhatsApp sama dengan nomor telepon/HP</label>
+        </div>
+
+        <!-- Nomor WhatsApp -->
+        <div class="mb-3" id="whatsapp-container" style="display: none;">
+            <label for="whatsapp" class="form-label">Nomor WhatsApp</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fa-brands fa-whatsapp text-success"></i></span>
+                <input type="text" name="whatsapp" id="whatsapp" class="form-control" placeholder="Masukkan nomor WhatsApp berbeda" value="<?= old('whatsapp') ?>">
+            </div>
+            <div class="invalid-feedback">Isikan nomor WhatsApp yang valid.</div>
+        </div>
+
         <div class="mb-3">
             <label for="regUsername" class="form-label">Username</label>
             <div class="input-group">
@@ -173,6 +199,38 @@
             classContainer.style.display = 'block';
         }
     });
+
+    // Toggle Whatsapp input based on checkbox
+    const phoneInput = document.getElementById('phone');
+    const syncCheckbox = document.getElementById('syncWhatsapp');
+    const whatsappContainer = document.getElementById('whatsapp-container');
+    const whatsappInput = document.getElementById('whatsapp');
+
+    function updateWhatsapp() {
+        if (syncCheckbox.checked) {
+            whatsappContainer.style.display = 'none';
+            whatsappInput.value = phoneInput.value;
+            whatsappInput.removeAttribute('required');
+        } else {
+            whatsappContainer.style.display = 'block';
+            whatsappInput.setAttribute('required', 'required');
+            if (!whatsappInput.value) {
+                whatsappInput.value = phoneInput.value;
+            }
+        }
+    }
+
+    if (syncCheckbox && phoneInput) {
+        syncCheckbox.addEventListener('change', updateWhatsapp);
+        phoneInput.addEventListener('input', function() {
+            if (syncCheckbox.checked) {
+                whatsappInput.value = this.value;
+            }
+        });
+        
+        // Initial call
+        updateWhatsapp();
+    }
 </script>
 
 <?= $this->endSection() ?>

@@ -15,6 +15,8 @@ class UserModel extends Model
         'member_code',
         'member_code_nation',
         'class',
+        'phone',
+        'whatsapp',
         'username',
         'password',
         'role',
