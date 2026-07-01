@@ -4,7 +4,7 @@
 <!-- Login -->
 <div class="nk-auth-card toggled">
     <div class="nk-auth-card-header">
-        <h2>Sign In</h2>
+        <h2>Selamat Datang</h2>
         <p>Masukan Username dan Password Akun Anda</p>
     </div>
 
@@ -48,16 +48,12 @@
             <div class="invalid-feedback">Ketikan Password Anda, Minimal 6 karakter.</div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
-                <label class="form-check-label" for="rememberMe">Ingat Saya</label>
-            </div>
+        <div class="text-end mb-4">
             <a href="#" class="nk-auth-link" data-auth-switch="#l-forget-password">Lupa password?</a>
         </div>
 
         <button type="submit" class="btn btn-primary w-100 nk-auth-btn">
-            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Selamat Datang
+            <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Sign In
         </button>
     </form>
 
