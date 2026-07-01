@@ -30,6 +30,14 @@ class Transactions extends BaseController
     */
     public function index()
     {
+        $search        = $this->request->getGet('search');
+        $jenis_pinjam  = $this->request->getGet('jenis_pinjam');
+        $status        = $this->request->getGet('status');
+        $start_pinjam  = $this->request->getGet('start_pinjam');
+        $end_pinjam    = $this->request->getGet('end_pinjam');
+        $start_kembali = $this->request->getGet('start_kembali');
+        $end_kembali   = $this->request->getGet('end_kembali');
+
         $builder = $this->transactionModel
             ->select('
                 transactions.*,
@@ -40,11 +48,50 @@ class Transactions extends BaseController
             ')
             ->join('users u', 'u.id = transactions.user_id')
             ->join('users sb', 'sb.id = transactions.borrowed_by')
-            ->join('users sr', 'sr.id = transactions.returned_by', 'left')
-            ->orderBy('transactions.created_at', 'DESC');
+            ->join('users sr', 'sr.id = transactions.returned_by', 'left');
 
-        $data['transactions'] = $builder->paginate(10);
-        $data['pager'] = $this->transactionModel->pager;
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('transactions.kode_transaksi', $search)
+                ->orLike('u.name', $search)
+                ->orLike('sb.name', $search)
+                ->orLike('sr.name', $search)
+                ->groupEnd();
+        }
+
+        if (!empty($jenis_pinjam)) {
+            $builder->where('transactions.jenis_peminjaman', $jenis_pinjam);
+        }
+
+        if (!empty($status)) {
+            $builder->where('transactions.status', $status);
+        }
+
+        if (!empty($start_pinjam)) {
+            $builder->where('transactions.tanggal_pinjam >=', $start_pinjam);
+        }
+        if (!empty($end_pinjam)) {
+            $builder->where('transactions.tanggal_pinjam <=', $end_pinjam);
+        }
+
+        if (!empty($start_kembali)) {
+            $builder->where('transactions.tanggal_kembali >=', $start_kembali);
+        }
+        if (!empty($end_kembali)) {
+            $builder->where('transactions.tanggal_kembali <=', $end_kembali);
+        }
+
+        $builder->orderBy('transactions.created_at', 'DESC');
+
+        $data['transactions']  = $builder->paginate(10);
+        $data['pager']         = $this->transactionModel->pager;
+        $data['search']        = $search;
+        $data['jenis_pinjam']  = $jenis_pinjam;
+        $data['status']        = $status;
+        $data['start_pinjam']  = $start_pinjam;
+        $data['end_pinjam']    = $end_pinjam;
+        $data['start_kembali'] = $start_kembali;
+        $data['end_kembali']   = $end_kembali;
 
         return view('transactions/index', $data);
     }
@@ -53,9 +100,17 @@ class Transactions extends BaseController
     |--------------------------------------------------------------------------
     | ADMIN VIEW ONLY
     |--------------------------------------------------------------------------
-    */
+    |*/
     public function adminIndex()
     {
+        $search        = $this->request->getGet('search');
+        $jenis_pinjam  = $this->request->getGet('jenis_pinjam');
+        $status        = $this->request->getGet('status');
+        $start_pinjam  = $this->request->getGet('start_pinjam');
+        $end_pinjam    = $this->request->getGet('end_pinjam');
+        $start_kembali = $this->request->getGet('start_kembali');
+        $end_kembali   = $this->request->getGet('end_kembali');
+
         $builder = $this->transactionModel
             ->select('
                 transactions.*,
@@ -66,11 +121,50 @@ class Transactions extends BaseController
             ')
             ->join('users u', 'u.id = transactions.user_id')
             ->join('users sb', 'sb.id = transactions.borrowed_by')
-            ->join('users sr', 'sr.id = transactions.returned_by', 'left')
-            ->orderBy('transactions.created_at', 'DESC');
+            ->join('users sr', 'sr.id = transactions.returned_by', 'left');
 
-        $data['transactions'] = $builder->paginate(10);
-        $data['pager'] = $this->transactionModel->pager;
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('transactions.kode_transaksi', $search)
+                ->orLike('u.name', $search)
+                ->orLike('sb.name', $search)
+                ->orLike('sr.name', $search)
+                ->groupEnd();
+        }
+
+        if (!empty($jenis_pinjam)) {
+            $builder->where('transactions.jenis_peminjaman', $jenis_pinjam);
+        }
+
+        if (!empty($status)) {
+            $builder->where('transactions.status', $status);
+        }
+
+        if (!empty($start_pinjam)) {
+            $builder->where('transactions.tanggal_pinjam >=', $start_pinjam);
+        }
+        if (!empty($end_pinjam)) {
+            $builder->where('transactions.tanggal_pinjam <=', $end_pinjam);
+        }
+
+        if (!empty($start_kembali)) {
+            $builder->where('transactions.tanggal_kembali >=', $start_kembali);
+        }
+        if (!empty($end_kembali)) {
+            $builder->where('transactions.tanggal_kembali <=', $end_kembali);
+        }
+
+        $builder->orderBy('transactions.created_at', 'DESC');
+
+        $data['transactions']  = $builder->paginate(10);
+        $data['pager']         = $this->transactionModel->pager;
+        $data['search']        = $search;
+        $data['jenis_pinjam']  = $jenis_pinjam;
+        $data['status']        = $status;
+        $data['start_pinjam']  = $start_pinjam;
+        $data['end_pinjam']    = $end_pinjam;
+        $data['start_kembali'] = $start_kembali;
+        $data['end_kembali']   = $end_kembali;
 
         return view('transactions/admin_index', $data);
     }
