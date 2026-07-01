@@ -1,9 +1,16 @@
+<?php
+$db = \Config\Database::connect();
+$setting = $db->table('app_settings')->where('id', 1)->get()->getRowArray();
+$logoUrl = ($setting && $setting['logo']) ? base_url('uploads/settings/' . $setting['logo']) : null;
+$appName = ($setting && $setting['nama_lembaga']) ? $setting['nama_lembaga'] : 'Perpustakaan';
+$address = ($setting && $setting['alamat']) ? $setting['alamat'] : '';
+?>
 <!doctype html>
 <html lang="en" data-page-module="login-register">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login Register | Notika - Modern Vite Template</title>
+    <title>Masuk | <?= esc($appName) ?></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -14,7 +21,7 @@
 
     <link rel="stylesheet" href="<?=  base_url('assets/src/css/widgets-consistent.css'); ?>">
 
-    <meta name="description" content="Login and registration - Notika Admin Template">
+    <meta name="description" content="Login and registration - <?= esc($appName) ?>">
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -32,23 +39,31 @@
         <!-- Left branding panel -->
         <div class="nk-auth-brand">
             <div class="nk-auth-brand-inner">
-                <div class="nk-auth-logo">
-                    <img src="<?=  base_url('assets/img/logo/notika-logo-horizontal-white.svg'); ?>" alt="Notika" height="40">
+                <div class="nk-auth-logo mb-3">
+                    <?php if ($logoUrl): ?>
+                        <img src="<?= $logoUrl ?>" alt="Logo" style="max-height: 80px; width: auto; object-fit: contain;">
+                    <?php else: ?>
+                        <i class="fa-solid fa-book-open text-white" style="font-size: 60px;"></i>
+                    <?php endif; ?>
                 </div>
-                <h1>Welcome to Notika</h1>
-                <p>Modern admin dashboard template built with Bootstrap 5 and Vite.</p>
+                <h1 class="text-white mt-3"><?= esc($appName) ?></h1>
+                <?php if ($address): ?>
+                    <p class="text-white-50"><i class="fa-solid fa-location-dot me-1"></i> <?= esc($address) ?></p>
+                <?php else: ?>
+                    <p class="text-white-50">Sistem Informasi Perpustakaan Digital</p>
+                <?php endif; ?>
                 <div class="nk-auth-features">
                     <div class="nk-auth-feature">
                         <i class="fa-solid fa-shield"></i>
                         <span>Secure Authentication</span>
                     </div>
                     <div class="nk-auth-feature">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <span>Real-time Analytics</span>
+                        <i class="fa-solid fa-book"></i>
+                        <span>Katalog Buku Digital</span>
                     </div>
                     <div class="nk-auth-feature">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>Lightning Fast</span>
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Informasi Sirkulasi</span>
                     </div>
                 </div>
             </div>
