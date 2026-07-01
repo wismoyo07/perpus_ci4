@@ -74,8 +74,8 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        <?= $pager->links() ?>
+    <div class="d-flex justify-content-center mt-4">
+        <?= $pager->links('default', 'notika') ?>
     </div>
 
 </div>

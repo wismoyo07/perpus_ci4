@@ -153,7 +153,7 @@
 <!-- Books Table Card End -->
 
 <div class="d-flex justify-content-center">
-    <?= $pager->links() ?>
+    <?= $pager->links('default', 'notika') ?>
 </div>
 
 <?= $this->endSection() ?>

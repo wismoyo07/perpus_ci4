@@ -24,6 +24,8 @@
     </tbody>
 </table>
 
-<?= $pager->links() ?>
+<div class="d-flex justify-content-center mt-3">
+    <?= $pager->links('default', 'notika') ?>
+</div>
 
 <?= $this->endSection() ?>
