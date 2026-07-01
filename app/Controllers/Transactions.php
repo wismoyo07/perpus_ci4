@@ -346,6 +346,7 @@ class Transactions extends BaseController
                 b.judul,
                 t.kode_transaksi,
                 u.name as member_name,
+                u.jenis_pengguna,
                 t.tanggal_pinjam
             ')
             ->join('transactions t', 't.id = td.transaction_id')
@@ -355,7 +356,20 @@ class Transactions extends BaseController
             ->where('td.is_lost', 1)
             ->orderBy('t.created_at', 'DESC');
 
-        $data['lostBooks'] = $builder->get()->getResultArray();
+        // Manual Pagination
+        $pager = \Config\Services::pager();
+        $page  = (int) ($this->request->getGet('page') ?? 1);
+        if ($page < 1) {
+            $page = 1;
+        }
+        $perPage = 10;
+
+        $total = $builder->countAllResults(false);
+        $lostBooks = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        $data['lostBooks'] = $lostBooks;
+        $data['pager']     = $pager->makeLinks($page, $perPage, $total, 'notika');
+        $data['page']      = $page;
 
         return view('transactions/lost_index', $data);
     }
