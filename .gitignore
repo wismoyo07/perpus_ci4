@@ -135,6 +135,7 @@ _modules/*
 #-------------------------
 # Local analysis reports
 #-------------------------
+/analysis/
 /analysis_*.md
 
 # Local development rules and reference notes

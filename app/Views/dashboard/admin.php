@@ -2,46 +2,67 @@
 
 <?= $this->section('content') ?>
 
-<h2>Dashboard Admin</h2>
-
-<div class="row mt-4">
-
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                Total User
-                <h3><?= $total_users ?></h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                Total Buku
-                <h3><?= $total_books ?></h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                Total Transaksi
-                <h3><?= $total_trx ?></h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card bg-danger text-white">
-            <div class="card-body">
-                Terlambat
-                <h3><?= $total_late ?></h3>
-            </div>
-        </div>
-    </div>
-
+<div class="mb-4">
+    <h2 class="text-dark fw-bold">Dashboard Admin</h2>
+    <p class="text-muted">Ringkasan status dan aktivitas sistem perpustakaan digital.</p>
 </div>
+
+<!-- Notika Status Area Start -->
+<div class="notika-status-area">
+    <div class="row">
+        <!-- Total User Card -->
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div class="wb-traffic-inner">
+                <div class="website-traffic-ctn">
+                    <h2><span class="counter"><?= esc($total_users) ?></span></h2>
+                    <p>Total User</p>
+                </div>
+                <div class="sparkline-bar-stats1">
+                    <i class="fa-solid fa-users text-success" style="font-size: 28px;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Buku Card -->
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div class="wb-traffic-inner">
+                <div class="website-traffic-ctn">
+                    <h2><span class="counter"><?= esc($total_books) ?></span></h2>
+                    <p>Total Buku</p>
+                </div>
+                <div class="sparkline-bar-stats2">
+                    <i class="fa-solid fa-book text-info" style="font-size: 28px;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Transaksi Card -->
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div class="wb-traffic-inner">
+                <div class="website-traffic-ctn">
+                    <h2><span class="counter"><?= esc($total_trx) ?></span></h2>
+                    <p>Total Transaksi</p>
+                </div>
+                <div class="sparkline-bar-stats3">
+                    <i class="fa-solid fa-arrow-right-arrow-left text-warning" style="font-size: 28px;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Terlambat Card -->
+        <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div class="wb-traffic-inner">
+                <div class="website-traffic-ctn">
+                    <h2><span class="counter"><?= esc($total_late) ?></span></h2>
+                    <p>Transaksi Terlambat</p>
+                </div>
+                <div class="sparkline-bar-stats4">
+                    <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size: 28px;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Notika Status Area End -->
 
 <?= $this->endSection() ?>
