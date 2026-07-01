@@ -85,6 +85,25 @@ class Transactions extends BaseController
 
         $data['transactions']  = $builder->paginate(10);
         $data['pager']         = $this->transactionModel->pager;
+
+        $db = \Config\Database::connect();
+        foreach ($data['transactions'] as &$trx) {
+            $trx['details'] = $db->table('transaction_details td')
+                ->select('
+                    td.*,
+                    b.kode_buku,
+                    b.judul,
+                    b.pengarang,
+                    b.penerbit,
+                    bi.kode_inventaris
+                ')
+                ->join('books b', 'b.id = td.book_id')
+                ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
+                ->where('td.transaction_id', $trx['id'])
+                ->get()
+                ->getResultArray();
+        }
+
         $data['search']        = $search;
         $data['jenis_pinjam']  = $jenis_pinjam;
         $data['status']        = $status;
@@ -158,6 +177,25 @@ class Transactions extends BaseController
 
         $data['transactions']  = $builder->paginate(10);
         $data['pager']         = $this->transactionModel->pager;
+
+        $db = \Config\Database::connect();
+        foreach ($data['transactions'] as &$trx) {
+            $trx['details'] = $db->table('transaction_details td')
+                ->select('
+                    td.*,
+                    b.kode_buku,
+                    b.judul,
+                    b.pengarang,
+                    b.penerbit,
+                    bi.kode_inventaris
+                ')
+                ->join('books b', 'b.id = td.book_id')
+                ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
+                ->where('td.transaction_id', $trx['id'])
+                ->get()
+                ->getResultArray();
+        }
+
         $data['search']        = $search;
         $data['jenis_pinjam']  = $jenis_pinjam;
         $data['status']        = $status;

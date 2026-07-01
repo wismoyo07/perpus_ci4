@@ -106,7 +106,7 @@
                 <th>Tipe Pinjam</th>
                 <th>Tgl Pinjam</th>
                 <th>Jatuh Tempo</th>
-                <th>Status</th>
+                <th>Tgl Kembali / Status</th>
                 <th>Denda</th>
                 <th>Staff</th>
                 <th width="150">Aksi</th>
@@ -125,7 +125,7 @@
                 <td><?= esc($trx['kode_transaksi']) ?></td>
 
                 <td>
-                    <?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $trx['member_name'])) ?><br>
+                    <div class="fw-bold text-dark"><?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $trx['member_name'])) ?></div>
                     <?php
                     $badgeClass = 'bg-secondary';
                     if ($trx['jenis_pengguna'] === 'siswa') {
@@ -136,9 +136,29 @@
                         $badgeClass = 'bg-info';
                     }
                     ?>
-                    <span class="badge <?= $badgeClass ?>" style="font-size: 0.75rem; text-transform: capitalize;">
+                    <span class="badge <?= $badgeClass ?> mb-2" style="font-size: 0.75rem; text-transform: capitalize;">
                         <?= esc($trx['jenis_pengguna']) ?>
                     </span>
+
+                    <!-- Buku yang dipinjam -->
+                    <div class="mt-2 border-top pt-2" style="font-size: 0.825rem; max-width: 450px;">
+                        <span class="text-muted fw-bold mb-1 d-block" style="font-size: 0.75rem;"><i class="fa-solid fa-book text-success me-1"></i> Buku yang Dipinjam:</span>
+                        <ul class="list-unstyled ps-0 mb-0">
+                            <?php foreach ($trx['details'] ?? [] as $det): ?>
+                                <li class="mb-2 border-bottom pb-1" style="border-bottom-style: dashed !important; border-bottom-color: #eee !important;">
+                                    <span class="fw-bold text-success">[<?= esc($det['kode_inventaris'] ?: $det['kode_buku'] ?: '-') ?>]</span> 
+                                    <strong><?= esc($det['judul']) ?></strong>
+                                    <div class="text-muted small mt-1" style="font-size: 0.75rem; padding-left: 5px;">
+                                        <span>Pengarang: <?= esc($det['pengarang'] ?: '-') ?></span> | 
+                                        <span>Penerbit: <?= esc($det['penerbit'] ?: '-') ?></span>
+                                        <?php if ($det['is_lost']): ?>
+                                            <br><span class="badge bg-danger mt-1 text-white">Hilang</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
                 </td>
 
                 <td>
@@ -153,12 +173,19 @@
                 <td><?= date('d/m/Y', strtotime($trx['jatuh_tempo'])) ?></td>
 
                 <td>
-                    <?php if($trx['status'] === 'dipinjam'): ?>
-                        <span class="badge bg-primary">Dipinjam</span>
-                    <?php elseif($trx['status'] === 'terlambat'): ?>
-                        <span class="badge bg-danger">Terlambat</span>
-                    <?php else: ?>
+                    <?php if ($trx['status'] === 'selesai'): ?>
+                        <?php if ($trx['tanggal_kembali']): ?>
+                            <div class="fw-bold text-dark mb-1" style="font-size: 0.85rem;"><?= date('d/m/Y', strtotime($trx['tanggal_kembali'])) ?></div>
+                        <?php else: ?>
+                            <div class="text-muted small mb-1">-</div>
+                        <?php endif; ?>
                         <span class="badge bg-success">Selesai</span>
+                    <?php else: ?>
+                        <?php if ($trx['status'] === 'dipinjam'): ?>
+                            <span class="badge bg-primary">Dipinjam</span>
+                        <?php elseif ($trx['status'] === 'terlambat'): ?>
+                            <span class="badge bg-danger">Terlambat</span>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </td>
 
