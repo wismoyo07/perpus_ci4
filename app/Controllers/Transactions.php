@@ -334,27 +334,70 @@ class Transactions extends BaseController
     */
     public function lostIndex()
     {
+        $this->response->setHeader('Cache-Control', 'no-store, max-age=0, no-cache');
         $db = \Config\Database::connect();
+
+        $status    = $this->request->getGet('status');
+        $startDate = $this->request->getGet('start_date');
+        $endDate   = $this->request->getGet('end_date');
 
         $builder = $db->table('transaction_details td')
             ->select('
                 td.id,
                 td.lost_settlement_status,
                 td.lost_note,
+                td.lost_settlement_amount,
                 td.book_item_id,
                 bi.kode_inventaris as original_kode_inventaris,
                 b.judul,
                 t.kode_transaksi,
+                t.tanggal_kembali as tanggal_hilang,
                 u.name as member_name,
                 u.jenis_pengguna,
-                t.tanggal_pinjam
+                t.tanggal_pinjam,
+                v.name as verifier_name,
+                td.settled_at
             ')
             ->join('transactions t', 't.id = td.transaction_id')
             ->join('books b', 'b.id = td.book_id')
             ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
             ->join('users u', 'u.id = t.user_id')
-            ->where('td.is_lost', 1)
-            ->orderBy('t.created_at', 'DESC');
+            ->join('users v', 'v.id = td.settled_by', 'left')
+            ->where('td.is_lost', 1);
+
+        if (!empty($status)) {
+            $builder->where('td.lost_settlement_status', $status);
+        }
+
+        if (!empty($startDate)) {
+            $builder->where('t.tanggal_kembali >=', $startDate);
+        }
+        if (!empty($endDate)) {
+            $builder->where('t.tanggal_kembali <=', $endDate);
+        }
+
+        $builder->orderBy('t.tanggal_kembali', 'DESC')->orderBy('t.updated_at', 'DESC');
+
+        // Agregasi statistik
+        $statBuilder = $db->table('transaction_details td')
+            ->join('transactions t', 't.id = td.transaction_id')
+            ->where('td.is_lost', 1);
+            
+        if (!empty($startDate)) {
+            $statBuilder->where('t.tanggal_kembali >=', $startDate);
+        }
+        if (!empty($endDate)) {
+            $statBuilder->where('t.tanggal_kembali <=', $endDate);
+        }
+
+        $allStats = $statBuilder->select('
+            COUNT(td.id) as total_hilang,
+            SUM(CASE WHEN td.lost_settlement_status = "pending" THEN 1 ELSE 0 END) as total_pending,
+            SUM(CASE WHEN td.lost_settlement_status = "replaced" THEN 1 ELSE 0 END) as total_replaced,
+            SUM(CASE WHEN td.lost_settlement_status = "paid" THEN 1 ELSE 0 END) as total_paid,
+            SUM(CASE WHEN td.lost_settlement_status = "written_off" THEN 1 ELSE 0 END) as total_written_off,
+            SUM(CASE WHEN td.lost_settlement_status = "paid" THEN td.lost_settlement_amount ELSE 0 END) as total_amount
+        ')->get()->getRowArray();
 
         // Manual Pagination
         $pager = \Config\Services::pager();
@@ -367,9 +410,15 @@ class Transactions extends BaseController
         $total = $builder->countAllResults(false);
         $lostBooks = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
 
-        $data['lostBooks'] = $lostBooks;
-        $data['pager']     = $pager->makeLinks($page, $perPage, $total, 'notika');
-        $data['page']      = $page;
+        $data = [
+            'lostBooks'  => $lostBooks,
+            'pager'      => $pager->makeLinks($page, $perPage, $total, 'notika'),
+            'page'       => $page,
+            'status'     => $status,
+            'start_date' => $startDate,
+            'end_date'   => $endDate,
+            'stats'      => $allStats
+        ];
 
         return view('transactions/lost_index', $data);
     }
@@ -409,8 +458,10 @@ class Transactions extends BaseController
 
         $oldKode = $oldItem ? $oldItem['kode_inventaris'] : 'Unknown';
 
-        // Ambil input catatan dari form
-        $userNotes = $this->request->getPost('lost_note') ?: 'Diganti dengan buku baru';
+        // Ambil input dari form modal
+        $settlementType = $this->request->getPost('settlement_type') ?: 'replaced';
+        $userNotes = $this->request->getPost('lost_note') ?: 'Penyelesaian buku hilang';
+        $amount = intval($this->request->getPost('lost_settlement_amount') ?: 0);
 
         try {
             $db->transStart();
@@ -425,56 +476,87 @@ class Transactions extends BaseController
                 throw new \Exception('Buku tidak ditemukan');
             }
 
-            // 2. Buat salinan fisik baru sebagai pengganti
-            // Cari nomor urut copy terakhir untuk buku ini
-            $lastItem = $db->table('book_items')
-                ->where('book_id', $bookId)
-                ->orderBy('nomor_urut', 'DESC')
-                ->get()
-                ->getRowArray();
+            $settlementText = "";
+            $newKodeInventaris = "";
 
-            $nextNumber = 1;
-            if ($lastItem) {
-                $nextNumber = intval($lastItem['nomor_urut']) + 1;
+            if ($settlementType === 'replaced') {
+                // A. Ganti Buku Fisik
+                // Cari nomor urut copy terakhir untuk buku ini
+                $lastItem = $db->table('book_items')
+                    ->where('book_id', $bookId)
+                    ->orderBy('nomor_urut', 'DESC')
+                    ->get()
+                    ->getRowArray();
+
+                $nextNumber = 1;
+                if ($lastItem) {
+                    $nextNumber = intval($lastItem['nomor_urut']) + 1;
+                }
+
+                $urutCopyPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+                $newKodeInventaris = "{$book['kode_buku']} / {$urutCopyPadded}";
+
+                $db->table('book_items')->insert([
+                    'book_id'         => $bookId,
+                    'kode_inventaris' => $newKodeInventaris,
+                    'sumber_dana'     => $oldItem ? $oldItem['sumber_dana'] : 'Ganti Rugi',
+                    'tahun_pengadaan' => intval(date('Y')),
+                    'nomor_urut'      => $nextNumber,
+                    'status'          => 'available',
+                    'created_at'      => date('Y-m-d H:i:s'),
+                    'updated_at'      => date('Y-m-d H:i:s'),
+                ]);
+
+                // Update stok total dan tersedia di parent book
+                $db->table('books')
+                    ->where('id', $bookId)
+                    ->update([
+                        'stok_total'     => $book['stok_total'] + 1,
+                        'stok_tersedia'  => $book['stok_tersedia'] + 1
+                    ]);
+
+                $settlementText = "Menggantikan salinan fisik [{$oldKode}] yang hilang dengan salinan baru: [{$newKodeInventaris}]. Catatan: {$userNotes}";
+
+            } elseif ($settlementType === 'paid') {
+                // B. Ganti Uang
+                // Kurangi stok total di parent book karena buku hilang permanen dan diganti uang
+                $db->table('books')
+                    ->where('id', $bookId)
+                    ->update([
+                        'stok_total' => max(0, $book['stok_total'] - 1)
+                    ]);
+
+                $formattedAmount = number_format($amount, 0, ',', '.');
+                $settlementText = "Menggantikan salinan fisik [{$oldKode}] yang hilang dengan denda uang sebesar Rp {$formattedAmount}. Catatan: {$userNotes}";
+
+            } elseif ($settlementType === 'written_off') {
+                // C. Pemutihan / Penghapusan
+                // Kurangi stok total di parent book karena buku hilang permanen tanpa ganti rugi
+                $db->table('books')
+                    ->where('id', $bookId)
+                    ->update([
+                        'stok_total' => max(0, $book['stok_total'] - 1)
+                    ]);
+
+                $settlementText = "Pemutihan/penghapusan salinan fisik [{$oldKode}] yang hilang dari inventaris. Alasan: {$userNotes}";
+            } else {
+                throw new \Exception('Tipe penyelesaian tidak valid');
             }
 
-            $urutCopyPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-            $newKodeInventaris = "{$book['kode_buku']} / {$urutCopyPadded}";
-
-            $db->table('book_items')->insert([
-                'book_id'         => $bookId,
-                'kode_inventaris' => $newKodeInventaris,
-                'sumber_dana'     => $oldItem ? $oldItem['sumber_dana'] : 'Ganti Rugi',
-                'tahun_pengadaan' => intval(date('Y')),
-                'nomor_urut'      => $nextNumber,
-                'status'          => 'available',
-                'created_at'      => date('Y-m-d H:i:s'),
-                'updated_at'      => date('Y-m-d H:i:s'),
-            ]);
-
-            // 3. Update transaction detail: status = replaced, simpan catatan penggantian
-            $settlementText = "Menggantikan salinan fisik [{$oldKode}] yang hilang. Kode inventaris baru: [{$newKodeInventaris}]. Catatan: {$userNotes}";
-
+            // Update transaction detail
             $db->table('transaction_details')
                 ->where('id', $detailId)
                 ->update([
-                    'lost_settlement_status' => 'replaced',
-                    'lost_note' => $settlementText
+                    'lost_settlement_status' => $settlementType,
+                    'lost_note'              => $settlementText,
+                    'lost_settlement_amount' => ($settlementType === 'paid') ? $amount : null,
+                    'settled_by'             => session('user_id'),
+                    'settled_at'             => date('Y-m-d H:i:s')
                 ]);
 
-            // 4. Update stok total dan tersedia di parent book
-            $db->table('books')
-                ->where('id', $bookId)
-                ->update([
-                    'stok_total'     => $book['stok_total'] + 1,
-                    'stok_tersedia'  => $book['stok_tersedia'] + 1
-                ]);
-
-            // 5. LOG ACTIVITY
-            $this->logActivity(
-                "Penyelesaian buku hilang: menggantikan [{$oldKode}] dengan [{$newKodeInventaris}] (Transaksi ID {$transactionId})",
-                $memberId
-            );
+            // LOG ACTIVITY
+            $logMsg = "Penyelesaian buku hilang (Tipe: {$settlementType}): " . ($newKodeInventaris ? "menggantikan [{$oldKode}] dengan [{$newKodeInventaris}]" : "penghapusan [{$oldKode}]") . " (Transaksi ID {$transactionId})";
+            $this->logActivity($logMsg, $memberId);
 
             $db->transComplete();
 
@@ -483,7 +565,7 @@ class Transactions extends BaseController
             }
 
             return redirect()->to('/lost-books')
-                ->with('success', 'Penyelesaian buku hilang berhasil. Salinan fisik baru ditambahkan dengan kode: ' . $newKodeInventaris);
+                ->with('success', 'Penyelesaian buku hilang berhasil diproses dengan metode: ' . ($settlementType === 'replaced' ? 'Ganti Buku Fisik' : ($settlementType === 'paid' ? 'Ganti Uang' : 'Pemutihan')));
 
         } catch (\Exception $e) {
             return redirect()->to('/lost-books')

@@ -25,7 +25,7 @@ class Users extends BaseController
 
     public function index()
     {
-        $userModel = new \App\Models\UserModel();
+        $this->response->setHeader('Cache-Control', 'no-store, max-age=0, no-cache');
 
         $status = $this->request->getGet('status');
         $roleFilter = $this->request->getGet('role');
@@ -34,7 +34,7 @@ class Users extends BaseController
         $currentRole = session('role');
         $currentUserId = session('user_id');
 
-        $builder = $userModel;
+        $builder = $this->userModel;
 
         // Staff hanya lihat member
         if ($currentRole === 'staff') {
@@ -64,7 +64,7 @@ class Users extends BaseController
         }
 
         $users = $builder->paginate(10); // 10 per halaman
-        $pager = $userModel->pager;
+        $pager = $this->userModel->pager;
 
         return view('users/index', [
             'users' => $users,
@@ -329,13 +329,38 @@ class Users extends BaseController
     public function update($id)
     {
         $user = $this->userModel->find($id);
+        if (!$user) {
+            return redirect()->back()->with('error', 'User tidak ditemukan.');
+        }
+
         $currentRole = session('role');
+
+        // Validation rules
+        $rules = [
+            'name' => 'required',
+            'jenis_pengguna' => 'required|in_list[siswa,guru,pegawai]'
+        ];
+
+        // Unique validation of NIS/NIP and NISN/NUPTK only if Admin is updating
+        if ($currentRole === 'admin') {
+            $rules['member_code'] = 'required|is_unique[users.member_code,id,' . $id . ']';
+            $rules['member_code_nation'] = 'permit_empty|is_unique[users.member_code_nation,id,' . $id . ']';
+        }
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', 'Validasi gagal: Nomor Induk sudah digunakan atau data tidak lengkap.');
+        }
 
         $data = [
             'name' => $this->request->getPost('name'),
-            'member_code' => $this->request->getPost('member_code'),
             'jenis_pengguna' => $this->request->getPost('jenis_pengguna')
         ];
+
+        // Only Admin can update member_code and member_code_nation
+        if ($currentRole === 'admin') {
+            $data['member_code'] = $this->request->getPost('member_code');
+            $data['member_code_nation'] = $this->request->getPost('member_code_nation') ?: null;
+        }
 
         // =========================
         // ROLE UPDATE (ADMIN ONLY)
@@ -405,7 +430,7 @@ class Users extends BaseController
                 ->with('error','Tidak ada aksi dipilih.');
         }
 
-        $userModel = new \App\Models\UserModel();
+        $userModel = $this->userModel;
 
         // ============================
         // VALIDASI ADMIN TERAKHIR

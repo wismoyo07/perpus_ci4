@@ -94,6 +94,7 @@ $routes->group('lost-books', [
 
     $routes->get('/', 'Transactions::lostIndex');
     $routes->post('settle/(:num)', 'Transactions::settleLost/$1');
+    $routes->get('export', 'Reports::exportLostBooks');
 
 });
 

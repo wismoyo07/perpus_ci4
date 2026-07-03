@@ -167,6 +167,10 @@
                     <i class="fa-solid fa-user-check" style="font-size: 18px;"></i>
                     <span>Validasi Anggota Baru</span>
                 </a>
+                <a href="/books/create" class="btn btn-primary w-100 py-3 mb-2 d-flex align-items-center justify-content-center gap-2 rounded-3 fw-bold shadow-sm">
+                    <i class="fa-solid fa-book-medical" style="font-size: 18px;"></i>
+                    <span>Tambah Buku Baru</span>
+                </a>
                 <div class="text-center mt-3">
                     <small class="text-muted">Gunakan menu navigasi atas untuk fitur administratif lainnya.</small>
                 </div>

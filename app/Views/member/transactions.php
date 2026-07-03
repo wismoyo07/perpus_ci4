@@ -90,7 +90,15 @@ foreach ($trx['details'] ?? [] as $d) {
 
                                     <?php if($d['lost_settlement_status'] === 'replaced'): ?>
                                         <span class="badge bg-success">
-                                            Hilang (Diganti)
+                                            Hilang (Diganti Buku)
+                                        </span>
+                                    <?php elseif($d['lost_settlement_status'] === 'paid'): ?>
+                                        <span class="badge bg-info text-white">
+                                            Hilang (Denda Lunas)
+                                        </span>
+                                    <?php elseif($d['lost_settlement_status'] === 'written_off'): ?>
+                                        <span class="badge bg-secondary">
+                                            Hilang (Pemutihan)
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-danger">

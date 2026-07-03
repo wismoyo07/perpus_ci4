@@ -26,37 +26,21 @@ $secondSegment = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : null;
                     
                     <!-- Manajemen Buku (Dropdown) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?= $currentSegment === 'books' ? 'active' : '' ?>" 
+                        <a class="nav-link dropdown-toggle <?= in_array($currentSegment, ['books', 'transactions', 'lost-books']) || ($currentSegment === 'admin' && $secondSegment === 'transactions') ? 'active' : '' ?>" 
                            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-book"></i>
                             <span>Manajemen Buku</span>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/books">Daftar Buku</a></li>
-                            <li><a class="dropdown-item" href="/books/create">Tambah Buku</a></li>
-                            <li><a class="dropdown-item" href="/books?status=archived">Buku Archive</a></li>
+                            <li>
+                                <?php 
+                                $transUrl = ($role === 'admin') ? '/admin/transactions' : '/transactions';
+                                ?>
+                                <a class="dropdown-item" href="<?= $transUrl ?>">Pinjam Kembali</a>
+                            </li>
+                            <li><a class="dropdown-item" href="/lost-books">Buku Hilang</a></li>
                         </ul>
-                    </li>
-
-                    <!-- Transaksi -->
-                    <li class="nav-item">
-                        <?php 
-                        $transUrl = ($role === 'admin') ? '/admin/transactions' : '/transactions';
-                        ?>
-                        <a class="nav-link <?= $currentSegment === 'transactions' || ($currentSegment === 'admin' && $secondSegment === 'transactions') ? 'active' : '' ?>" 
-                           href="<?= $transUrl ?>">
-                            <i class="fa-solid fa-arrow-right-arrow-left"></i>
-                            <span>Transaksi</span>
-                        </a>
-                    </li>
-
-                    <!-- Buku Hilang -->
-                    <li class="nav-item">
-                        <a class="nav-link <?= $currentSegment === 'lost-books' ? 'active' : '' ?>" 
-                           href="/lost-books">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                            <span>Buku Hilang</span>
-                        </a>
                     </li>
 
                     <!-- Manajemen User -->

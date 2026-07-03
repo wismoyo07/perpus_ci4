@@ -5,6 +5,9 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2"><i class="bi bi-file-earmark-bar-graph text-primary"></i> Laporan Transaksi & Inventaris</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/lost-books" class="btn btn-danger shadow-sm me-2">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> Laporan Buku Hilang
+        </a>
         <a href="/reports/print" target="_blank" class="btn btn-primary shadow-sm">
             <i class="bi bi-printer-fill me-1"></i> Cetak Laporan Resmi
         </a>
