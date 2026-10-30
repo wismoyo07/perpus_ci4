@@ -30,8 +30,18 @@ class TransactionService
     */
     public function borrow(int $memberId, array $bookItemIds, int $staffId, string $jenisPeminjaman = 'pendek', string $customDueDate = null)
     {
-        $this->db->transStart();
+        if (empty($bookItemIds)) {
+            throw new \Exception('Pilih minimal 1 buku');
+        }
 
+        return $this->runInTransaction(
+            fn () => $this->processBorrow($memberId, $bookItemIds, $staffId, $jenisPeminjaman, $customDueDate),
+            'Gagal transaksi'
+        );
+    }
+
+    protected function processBorrow(int $memberId, array $bookItemIds, int $staffId, string $jenisPeminjaman, ?string $customDueDate)
+    {
         $user = $this->userModel->find($memberId);
 
         if (!$user || !$user['is_validated']) {
@@ -144,12 +154,6 @@ class TransactionService
             ]);
         }
 
-        $this->db->transComplete();
-
-        if (!$this->db->transStatus()) {
-            throw new \Exception('Gagal transaksi');
-        }
-
         return $kode;
     }
 
@@ -160,9 +164,15 @@ class TransactionService
     */
     public function return(int $transactionId, array $lostBookItemIds, int $staffId)
     {
-        $logger = new LoggingService();
+        return $this->runInTransaction(
+            fn () => $this->processReturn($transactionId, $lostBookItemIds, $staffId),
+            'Gagal pengembalian'
+        );
+    }
 
-        $this->db->transStart();
+    protected function processReturn(int $transactionId, array $lostBookItemIds, int $staffId)
+    {
+        $logger = new LoggingService();
 
         $trx = $this->transactionModel->find($transactionId);
 
@@ -248,13 +258,33 @@ class TransactionService
             $staffId
         );
 
+        return $denda;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DB TRANSACTION
+    |--------------------------------------------------------------------------
+    | Batalkan semua perubahan jika terjadi exception di tengah proses.
+    */
+    protected function runInTransaction(callable $callback, string $failMessage)
+    {
+        $this->db->transStart();
+
+        try {
+            $result = $callback();
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            throw $e;
+        }
+
         $this->db->transComplete();
 
         if (!$this->db->transStatus()) {
-            throw new \Exception('Gagal pengembalian');
+            throw new \Exception($failMessage);
         }
 
-        return $denda;
+        return $result;
     }
 
     /*
