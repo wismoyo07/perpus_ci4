@@ -28,7 +28,7 @@ class TransactionService
     | BORROW
     |--------------------------------------------------------------------------
     */
-    public function borrow(int $memberId, array $bookItemIds, int $staffId, string $jenisPeminjaman = 'pendek', string $customDueDate = null)
+    public function borrow(int $memberId, array $bookItemIds, int $staffId, string $jenisPeminjaman = 'pendek', ?string $customDueDate = null)
     {
         if (empty($bookItemIds)) {
             throw new \Exception('Pilih minimal 1 buku');
