@@ -15,6 +15,8 @@ use CodeIgniter\Test\CIUnitTestCase;
  */
 final class TransactionServiceBorrowTest extends CIUnitTestCase
 {
+    private BaseConnection $dbMock;
+
     /**
      * @param int[] $counts Hasil countAllResults() berurutan: [transaksi terlambat, transaksi aktif]
      */
@@ -28,7 +30,7 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
 
         $transactionModel = $this->getMockBuilder(TransactionModel::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['__call', 'countAllResults', 'insert', 'getInsertID'])
+            ->onlyMethods(['__call', 'countAllResults', 'insert', 'getInsertID', 'find'])
             ->getMock();
         $transactionModel->method('__call')->willReturnSelf();
         $transactionModel->method('countAllResults')->willReturnOnConsecutiveCalls(...$counts);
@@ -40,6 +42,7 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
 
         $db = $this->createMock(BaseConnection::class);
         $db->method('query')->willReturn($result);
+        $this->dbMock = $db;
 
         $service = (new ReflectionClass(TransactionService::class))->newInstanceWithoutConstructor();
 
@@ -59,7 +62,7 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
     private function borrowMessage(TransactionService $service, int $jumlahBuku): string
     {
         try {
-            $service->borrow(10, range(1, $jumlahBuku), 1);
+            $service->borrow(10, $jumlahBuku > 0 ? range(1, $jumlahBuku) : [], 1);
         } catch (Exception $e) {
             return $e->getMessage();
         }
@@ -136,5 +139,46 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
         $message = $this->borrowMessage($this->makeService($this->member('siswa'), [0, 2]), 1);
 
         $this->assertSame('Salinan fisik ID 1 tidak tersedia', $message);
+    }
+
+    public function testPinjamTanpaBukuDitolakTanpaMembukaTransaksiDb(): void
+    {
+        $service = $this->makeService($this->member('siswa'));
+        $this->dbMock->expects($this->never())->method('transStart');
+
+        $message = $this->borrowMessage($service, 0);
+
+        $this->assertSame('Pilih minimal 1 buku', $message);
+    }
+
+    public function testPinjamDitolakMembatalkanTransaksiDb(): void
+    {
+        $service = $this->makeService($this->member('siswa'));
+        $this->dbMock->expects($this->once())->method('transStart');
+        $this->dbMock->expects($this->once())->method('transRollback');
+        $this->dbMock->expects($this->never())->method('transComplete');
+
+        $this->assertSame('Maksimal 3 buku per transaksi', $this->borrowMessage($service, 4));
+    }
+
+    public function testPinjamGagalDiTengahProsesMembatalkanTransaksiDb(): void
+    {
+        // Lolos cek aturan & transaksi sudah di-insert, lalu gagal karena salinan buku tidak tersedia.
+        $service = $this->makeService($this->member('guru'));
+        $this->dbMock->expects($this->once())->method('transRollback');
+        $this->dbMock->expects($this->never())->method('transComplete');
+
+        $this->assertSame('Salinan fisik ID 1 tidak tersedia', $this->borrowMessage($service, 2));
+    }
+
+    public function testPengembalianTransaksiTidakValidMembatalkanTransaksiDb(): void
+    {
+        $service = $this->makeService($this->member('siswa'));
+        $this->dbMock->expects($this->once())->method('transRollback');
+        $this->dbMock->expects($this->never())->method('transComplete');
+
+        $this->expectExceptionMessage('Transaksi tidak valid');
+
+        $service->return(99, [], 1);
     }
 }
