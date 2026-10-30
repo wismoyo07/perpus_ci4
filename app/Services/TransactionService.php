@@ -59,7 +59,7 @@ class TransactionService
         }
 
         // 🔴 limit buku per transaksi
-        $limit = in_array($user['jenis_pengguna'], ['guru','pegawai']) ? 5 : 3;
+        $limit = self::bookLimitFor($user['jenis_pengguna']);
 
         if (count($bookItemIds) > $limit) {
             throw new \Exception("Maksimal {$limit} buku per transaksi");
@@ -173,15 +173,8 @@ class TransactionService
         $user = $this->userModel->find($trx['user_id']);
         $memberId = $trx['user_id'];
 
-        $tarif = ($user['jenis_pengguna'] === 'siswa') ? 1000 : 5000;
-
         $today = date('Y-m-d');
-        $denda = 0;
-
-        if ($today > $trx['jatuh_tempo']) {
-            $selisih = (strtotime($today) - strtotime($trx['jatuh_tempo'])) / 86400;
-            $denda = $selisih * $tarif;
-        }
+        $denda = self::calculateFine($user['jenis_pengguna'], $trx['jatuh_tempo'], $today);
 
         $details = $this->db->table('transaction_details')
             ->where('transaction_id', $transactionId)
@@ -262,6 +255,32 @@ class TransactionService
         }
 
         return $denda;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ATURAN PINJAM & DENDA
+    |--------------------------------------------------------------------------
+    */
+    public static function bookLimitFor(string $jenisPengguna): int
+    {
+        return in_array($jenisPengguna, ['guru','pegawai']) ? 5 : 3;
+    }
+
+    public static function fineRateFor(string $jenisPengguna): int
+    {
+        return ($jenisPengguna === 'siswa') ? 1000 : 5000;
+    }
+
+    public static function calculateFine(string $jenisPengguna, string $jatuhTempo, string $tanggalKembali): int
+    {
+        if ($tanggalKembali <= $jatuhTempo) {
+            return 0;
+        }
+
+        $selisih = (new \DateTimeImmutable($jatuhTempo))->diff(new \DateTimeImmutable($tanggalKembali))->days;
+
+        return $selisih * self::fineRateFor($jenisPengguna);
     }
 
     /*
