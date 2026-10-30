@@ -108,7 +108,14 @@
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-semibold text-secondary">Daftar Inventaris Fisik (Buku Copy)</h6>
-                    <span class="text-muted small">Total: <?= count($items) ?> Salinan</span>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="text-muted small">Total: <?= count($items) ?> Salinan</span>
+                        <?php if (!empty($items)): ?>
+                            <a href="<?= site_url('books/items/labels/'.$book['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-print"></i> Cetak Label
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">

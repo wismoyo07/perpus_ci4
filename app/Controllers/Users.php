@@ -204,6 +204,40 @@ class Users extends BaseController
        STAFF LIST
     =============================== */
 
+    /* ===============================
+       CETAK KARTU ANGGOTA
+    =============================== */
+
+    public function cards()
+    {
+        $ids = array_filter(array_map('intval', (array) $this->request->getGet('selected')));
+
+        if (empty($ids)) {
+            return redirect()->to('/users')
+                ->with('error', 'Pilih minimal 1 user untuk dicetak kartunya.');
+        }
+
+        $builder = $this->userModel->whereIn('id', $ids);
+
+        // Staff hanya boleh mencetak kartu member
+        if (session('role') === 'staff') {
+            $builder = $builder->where('role', 'member');
+        }
+
+        $setting = (new \App\Models\AppSettingModel())->find(1) ?? [
+            'nama_lembaga' => 'Perpustakaan Sekolah',
+            'logo'         => null,
+            'alamat'       => '',
+        ];
+
+        helper('barcode');
+
+        return view('users/cards', [
+            'users'   => $builder->orderBy('name', 'ASC')->findAll(),
+            'setting' => $setting,
+        ]);
+    }
+
     public function staffIndex()
     {
         $data['staff'] = $this->userModel

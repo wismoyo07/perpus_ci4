@@ -73,6 +73,7 @@ $routes->group('books', ['filter' => ['auth', 'role:admin,staff']], function($ro
     $routes->get('items/(:num)', 'Books::items/$1');
     $routes->post('items/store/(:num)', 'Books::storeItem/$1');
     $routes->post('items/delete/(:num)', 'Books::deleteItem/$1');
+    $routes->get('items/labels/(:num)', 'Books::labels/$1');
 
 });
 
@@ -141,6 +142,7 @@ $routes->group('users', [
 ], function($routes){
 
     $routes->get('/', 'Users::index');
+    $routes->get('cards', 'Users::cards');
     $routes->get('create', 'Users::create');
     $routes->post('store', 'Users::store');
     $routes->get('edit/(:num)', 'Users::edit/$1');
