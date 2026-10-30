@@ -51,10 +51,6 @@ $routes->get('member/dashboard', 'Dashboard::member', [
     'filter' => ['auth','role:member']
 ]);
 
-$routes->group('books', ['filter' => 'role:admin,staff'], function($routes) {
-    $routes->get('/', 'Books::index');
-});
-
 /*
 |--------------------------------------------------------------------------
 | BOOKS ROUTES
@@ -62,7 +58,7 @@ $routes->group('books', ['filter' => 'role:admin,staff'], function($routes) {
 | Hanya admin & staff
 */
 
-$routes->group('books', ['filter' => 'auth', 'role:admin,staff'], function($routes) {
+$routes->group('books', ['filter' => ['auth', 'role:admin,staff']], function($routes) {
 
     $routes->get('/', 'Books::index');
     $routes->get('create', 'Books::create');
