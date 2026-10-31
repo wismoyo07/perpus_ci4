@@ -38,6 +38,11 @@ $routes->get('dashboard', 'Dashboard::index', [
     'filter' => 'auth'
 ]);
 
+// AKSES DITOLAK (tujuan redirect dari RoleFilter)
+$routes->get('unauthorized', 'Dashboard::unauthorized', [
+    'filter' => 'auth'
+]);
+
 // ROLE BASED DASHBOARD
 $routes->get('admin/dashboard', 'Dashboard::admin', [
     'filter' => ['auth','role:admin']
