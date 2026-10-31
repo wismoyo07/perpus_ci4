@@ -26,6 +26,21 @@ class Dashboard extends BaseController
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | AKSES DITOLAK (tujuan redirect RoleFilter)
+    |--------------------------------------------------------------------------
+    */
+    public function unauthorized()
+    {
+        $this->response->setStatusCode(403);
+
+        return view('auth/unauthorized', [
+            'title'   => 'Akses Ditolak',
+            'message' => session()->getFlashdata('error') ?? 'Anda tidak memiliki akses ke halaman ini.',
+        ]);
+    }
+
     public function admin()
     {
         $userModel = new UserModel();
