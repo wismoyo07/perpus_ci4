@@ -1,0 +1,16 @@
+# Simpan teks dengan LF di repo dan di working copy
+# (menghindari warning "LF will be replaced by CRLF" di Windows dengan core.autocrlf=true)
+* text=auto eol=lf
+
+# Berkas biner
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary

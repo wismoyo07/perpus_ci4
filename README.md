@@ -140,7 +140,7 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
     php spark db:seed UserDemoSeeder
     php spark db:seed BookSeeder
     ```
-    > **⚠️ Perhatian:** jalankan seeder **hanya pada database kosong**. `BookSeeder` mengosongkan (*truncate*) tabel `books` dan `book_items` sebelum mengisi data contoh, dan seeder data master akan menambah data ganda jika dijalankan ulang. Sebagai alternatif, import `db/perpustakaan.sql` yang berisi hasil yang sama.
+    > **⚠️ Perhatian:** `BookSeeder` mengosongkan (*truncate*) tabel `books` dan `book_items` sebelum mengisi data contoh, jadi **jangan jalankan pada database yang sudah berisi data buku**. Seeder data master (`DdcSeeder`, `ClassSeeder`, `SourceFundSeeder`) dan seeder akun aman dijalankan ulang: data yang sudah ada dilewati. Sebagai alternatif, import `db/perpustakaan.sql` yang berisi hasil yang sama.
 6.  **Jalankan Server Lokal:**
     ```bash
     php spark serve
