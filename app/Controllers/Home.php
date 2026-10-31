@@ -44,19 +44,19 @@ class Home extends BaseController
         // Logika Pencarian Buku
         $search = $this->request->getVar('q');
         if ($search) {
-            $books = $bookModel
+            $books = $bookModel->withDdc()
                 ->groupStart()
                     ->like('judul', $search)
                     ->orLike('pengarang', $search)
                     ->orLike('penerbit', $search)
                 ->groupEnd()
-                ->where('is_active', 1)
+                ->where('books.is_active', 1)
                 ->findAll(12);
         } else {
             // Default: 8 buku terpopuler/terbaru
-            $books = $bookModel
-                ->where('is_active', 1)
-                ->orderBy('created_at', 'DESC')
+            $books = $bookModel->withDdc()
+                ->where('books.is_active', 1)
+                ->orderBy('books.created_at', 'DESC')
                 ->findAll(8);
         }
 

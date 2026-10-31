@@ -163,7 +163,9 @@
                             </div>
                             <h5 class="card-title fw-bold text-dark mb-2 line-clamp"><?= esc($b['judul']) ?></h5>
                             <p class="text-muted small mb-1">Pengarang: <strong><?= esc($b['pengarang'] ?: '-') ?></strong></p>
-                            <p class="text-muted small mb-3">Penerbit: <strong><?= esc($b['penerbit'] ?: '-') ?></strong></p>
+                            <p class="text-muted small mb-1">Penerbit: <strong><?= esc($b['penerbit'] ?: '-') ?></strong></p>
+                            <?php $panggil = \App\Services\BookService::nomorPanggil($b); ?>
+                            <p class="text-muted small mb-3">No. Panggil: <strong><?= $panggil ? esc($panggil) : '-' ?></strong></p>
                             
                             <div class="mt-auto border-top pt-3 text-center">
                                 <div class="row text-center w-100 g-0">

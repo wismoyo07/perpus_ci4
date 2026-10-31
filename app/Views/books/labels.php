@@ -61,6 +61,11 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        .book-label .panggil {
+            font-size: 9pt;
+            font-weight: bold;
+            margin-bottom: 0.5mm;
+        }
         .book-label .kode {
             font-size: 7pt;
             font-weight: bold;
@@ -99,6 +104,9 @@
                     <div class="info">
                         <div class="lembaga"><?= esc($setting['nama_lembaga']) ?></div>
                         <div class="judul"><?= esc($book['judul']) ?></div>
+                        <?php if (!empty($book['nomor_panggil'])): ?>
+                            <div class="panggil"><?= esc($book['nomor_panggil']) ?></div>
+                        <?php endif; ?>
                         <div class="kode"><?= esc($item['kode_inventaris']) ?></div>
                     </div>
                 </div>

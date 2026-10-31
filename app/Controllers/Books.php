@@ -27,12 +27,12 @@ class Books extends BaseController
         $status = $this->request->getGet('status');
         $search = $this->request->getGet('search');
 
-        $builder = $this->bookModel;
+        $builder = $this->bookModel->withDdc();
 
         if ($status === 'active') {
-            $builder->where('is_active', 1);
+            $builder->where('books.is_active', 1);
         } elseif ($status === 'archived') {
-            $builder->where('is_active', 0);
+            $builder->where('books.is_active', 0);
         }
 
         if (!empty($search)) {
@@ -44,7 +44,7 @@ class Books extends BaseController
                 ->groupEnd();
         }
 
-        $data['books'] = $builder->orderBy('created_at', 'DESC')->paginate(10);
+        $data['books'] = $builder->orderBy('books.created_at', 'DESC')->paginate(10);
         $data['pager'] = $this->bookModel->pager;
         $data['search'] = $search;
         $data['status'] = $status;
@@ -60,7 +60,55 @@ class Books extends BaseController
 
     public function create()
     {
-        return view('books/form');
+        return view('books/form', $this->formOptions());
+    }
+
+    /**
+     * Pilihan master untuk form buku: sumber dana & kelas DDC aktif, kode barang dari Pengaturan.
+     */
+    private function formOptions(): array
+    {
+        $db = \Config\Database::connect();
+
+        return [
+            'sources'    => $db->table('source_fund')->where('is_active', 1)->orderBy('id', 'ASC')->get()->getResultArray(),
+            'categoryGroups' => $this->ddcGroups($db->table('category')->where('is_active', 1)->orderBy('code_ddc', 'ASC')->get()->getResultArray()),
+            'kodeBarang' => $this->service->kodeBarang(),
+        ];
+    }
+
+    /**
+     * Kelompokkan klasifikasi DDC per kelas utama (angka pertama kode) untuk <optgroup>.
+     *
+     * @return array<string, array{label: string, items: list<array>}>
+     */
+    private function ddcGroups(array $categories): array
+    {
+        $groups = [];
+        foreach ($categories as $c) {
+            $digit = $c['code_ddc'][0];
+            $groups[$digit] ??= ['label' => "{$digit}00", 'items' => []];
+            $groups[$digit]['items'][] = $c + ['level' => \App\Libraries\DdcData::level($c['code_ddc'])];
+
+            if ($c['code_ddc'] === "{$digit}00") {
+                $groups[$digit]['label'] = "{$c['code_ddc']} — {$c['desc_ddc']}";
+            }
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Buku beserta kelas DDC dan nomor panggilnya.
+     */
+    private function findWithDdc($id): ?array
+    {
+        $book = $this->bookModel->withDdc()->where('books.id', $id)->first();
+        if ($book) {
+            $book['nomor_panggil'] = BookService::nomorPanggil($book);
+        }
+
+        return $book;
     }
 
     public function store()
@@ -94,7 +142,7 @@ class Books extends BaseController
                 ->with('error', 'Buku tidak ditemukan');
         }
 
-        return view('books/form', $data);
+        return view('books/form', $data + $this->formOptions());
     }
 
     public function update($id)
@@ -173,8 +221,8 @@ class Books extends BaseController
 
     public function listMember()
     {
-        $data['books'] = $this->bookModel
-            ->where('is_active', 1)
+        $data['books'] = $this->bookModel->withDdc()
+            ->where('books.is_active', 1)
             ->orderBy('judul', 'ASC')
             ->paginate(10);
 
@@ -185,7 +233,7 @@ class Books extends BaseController
 
     public function items($bookId)
     {
-        $book = $this->bookModel->find($bookId);
+        $book = $this->findWithDdc($bookId);
         if (!$book) {
             return redirect()->to('/books')->with('error', 'Buku tidak ditemukan');
         }
@@ -198,8 +246,9 @@ class Books extends BaseController
             ->getResultArray();
 
         $data = [
-            'book'  => $book,
-            'items' => $items
+            'book'    => $book,
+            'items'   => $items,
+            'sources' => $this->formOptions()['sources'],
         ];
 
         return view('books/items', $data);
@@ -212,7 +261,7 @@ class Books extends BaseController
     */
     public function labels($bookId)
     {
-        $book = $this->bookModel->find($bookId);
+        $book = $this->findWithDdc($bookId);
         if (!$book) {
             return redirect()->to('/books')->with('error', 'Buku tidak ditemukan');
         }
@@ -249,8 +298,8 @@ class Books extends BaseController
             }
 
             $db = \Config\Database::connect();
-            $sumber = $this->request->getPost('sumber_dana') ?: 'BOS';
-            $tahun = intval($this->request->getPost('tahun_pengadaan')) ?: intval(date('Y'));
+            $sumber = $this->service->validSumberDana($this->request->getPost('sumber_dana') ?: 'BOS');
+            $tahun = $this->service->validTahun($this->request->getPost('tahun_pengadaan') ?: date('Y'));
 
             // Auto-generate next nomor_urut
             $lastItem = $db->table('book_items')
@@ -264,8 +313,8 @@ class Books extends BaseController
                 $nextNumber = intval($lastItem['nomor_urut']) + 1;
             }
 
-            $urutCopyPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-            $kodeInventaris = "{$book['kode_buku']} / {$urutCopyPadded}";
+            // Kode mengikuti sumber dana & tahun salinan ini
+            $kodeInventaris = $this->service->itemKode($book, $sumber, $tahun, $nextNumber);
 
             $db->transStart();
 

@@ -193,6 +193,18 @@ $routes->get('activity-logs', 'ActivityLogs::index', [
 ]);
 
 // Pengaturan Identitas Sekolah (Admin Only)
+// DATA MASTER: sumber dana & kelas DDC (admin)
+$routes->group('admin/master', ['filter' => ['auth', 'role:admin']], function($routes) {
+    $routes->get('sumber-dana', 'MasterData::sumberDana');
+    $routes->post('sumber-dana/store', 'MasterData::storeSumberDana');
+    $routes->post('sumber-dana/update/(:num)', 'MasterData::updateSumberDana/$1');
+    $routes->post('sumber-dana/toggle/(:num)', 'MasterData::toggleSumberDana/$1');
+    $routes->get('ddc', 'MasterData::ddc');
+    $routes->post('ddc/store', 'MasterData::storeDdc');
+    $routes->post('ddc/update/(:num)', 'MasterData::updateDdc/$1');
+    $routes->post('ddc/toggle/(:num)', 'MasterData::toggleDdc/$1');
+});
+
 $routes->group('admin/settings', ['filter' => ['auth', 'role:admin']], function($routes) {
     $routes->get('/', 'AppSetting::index');
     $routes->post('update', 'AppSetting::update');

@@ -42,4 +42,43 @@ final class RouteAccessTest extends CIUnitTestCase
 
         $result->assertRedirectTo('/auth/login');
     }
+
+    public static function adminOnlyProvider(): array
+    {
+        return [
+            'master sumber dana'        => ['get', 'admin/master/sumber-dana'],
+            'tambah sumber dana'        => ['post', 'admin/master/sumber-dana/store'],
+            'ubah sumber dana'          => ['post', 'admin/master/sumber-dana/update/1'],
+            'nonaktifkan sumber dana'   => ['post', 'admin/master/sumber-dana/toggle/1'],
+            'master ddc'                => ['get', 'admin/master/ddc'],
+            'tambah ddc'                => ['post', 'admin/master/ddc/store'],
+            'ubah ddc'                  => ['post', 'admin/master/ddc/update/1'],
+            'nonaktifkan ddc'           => ['post', 'admin/master/ddc/toggle/1'],
+            'pengaturan (kode barang)'  => ['post', 'admin/settings/update'],
+        ];
+    }
+
+    #[DataProvider('adminOnlyProvider')]
+    public function testStaffDitolakDariDataMaster(string $method, string $path): void
+    {
+        $result = $this->withSession(['logged_in' => true, 'role' => 'staff', 'user_id' => 2])
+            ->call($method, $path);
+
+        $result->assertRedirectTo('/unauthorized');
+    }
+
+    #[DataProvider('adminOnlyProvider')]
+    public function testMemberDitolakDariDataMaster(string $method, string $path): void
+    {
+        $result = $this->withSession(['logged_in' => true, 'role' => 'member', 'user_id' => 5])
+            ->call($method, $path);
+
+        $result->assertRedirectTo('/unauthorized');
+    }
+
+    #[DataProvider('adminOnlyProvider')]
+    public function testTamuDitolakDariDataMaster(string $method, string $path): void
+    {
+        $this->call($method, $path)->assertRedirectTo('/auth/login');
+    }
 }

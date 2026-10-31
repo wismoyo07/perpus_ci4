@@ -32,11 +32,15 @@
                         <input type="text"
                                name="kode_buku"
                                class="form-control"
-                               placeholder="03.11.01.01.001 / BOS / 2024 / 005"
-                               pattern="^\d{2}\.\d{2}\.\d{2}\.\d{2}\.\d{3}\s*\/\s*[A-Za-z0-9-]+\s*\/\s*\d{4}\s*\/\s*\d{3,}$"
+                               placeholder="<?= esc($kodeBarang) ?> / BOS / <?= date('Y') ?> / 005"
+                               pattern="^[0-9][0-9.]*\s*\/\s*[A-Za-z0-9-]+\s*\/\s*\d{4}\s*\/\s*\d{3,}$"
                                value="<?= old('kode_buku', $book['kode_buku'] ?? '') ?>">
                         <small class="text-muted">
-                            Contoh: <b>03.11.01.01.001 / BOS / 2024 / 005</b>. Kosongkan untuk auto-generate.
+                            <?php if (isset($book)): ?>
+                                Format: kode barang / sumber dana / tahun / nomor urut.
+                            <?php else: ?>
+                                Kosongkan agar dibuat otomatis dari kode barang <b><?= esc($kodeBarang) ?></b>, sumber dana, dan tahun pengadaan di bawah.
+                            <?php endif; ?>
                         </small>
                     </div>
 
@@ -67,6 +71,72 @@
                                class="form-control"
                                value="<?= old('penerbit', $book['penerbit'] ?? '') ?>">
                     </div>
+
+                </div>
+
+                <hr>
+
+                <h6 class="text-secondary mb-3">Klasifikasi &amp; Pengadaan</h6>
+
+                <div class="row">
+
+                    <!-- KLASIFIKASI DDC (kelas / divisi / seksi) -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Klasifikasi DDC</label>
+                        <?php $selectedCategory = old('category_id', $book['category_id'] ?? ''); ?>
+                        <select name="category_id" class="form-select">
+                            <option value="">— Belum diklasifikasi —</option>
+                            <?php foreach ($categoryGroups as $group): ?>
+                                <optgroup label="<?= esc($group['label']) ?>">
+                                    <?php foreach ($group['items'] as $c): ?>
+                                        <option value="<?= $c['id'] ?>" <?= (string) $selectedCategory === (string) $c['id'] ? 'selected' : '' ?>>
+                                            <?= $c['level'] === 'seksi' ? '&nbsp;&nbsp;&nbsp;' : '' ?><?= esc($c['code_ddc']) ?> — <?= esc($c['desc_ddc']) ?><?= $c['level'] === 'kelas' ? ' (umum)' : '' ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endforeach; ?>
+                        </select>
+                        <small class="text-muted">Pilih divisi yang paling sesuai. Jika Nomor DDC diisi, klasifikasi dipilih otomatis (seksi → divisi → kelas).</small>
+                    </div>
+
+                    <!-- NOMOR DDC -->
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Nomor DDC <span class="text-muted">(opsional)</span></label>
+                        <input type="text"
+                               name="ddc_number"
+                               class="form-control"
+                               placeholder="005.133"
+                               pattern="^\d{3}(\.\d+)?$"
+                               value="<?= old('ddc_number', $book['ddc_number'] ?? '') ?>">
+                        <small class="text-muted">Jika diisi, klasifikasi dipilih otomatis dari nomor ini. Dipakai untuk nomor panggil di label.</small>
+                    </div>
+
+                    <?php if (!isset($book)): ?>
+                        <!-- SUMBER DANA -->
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Sumber Dana *</label>
+                            <?php $selectedSource = old('sumber_dana', 'BOS'); ?>
+                            <select name="sumber_dana" class="form-select" required>
+                                <?php foreach ($sources as $s): ?>
+                                    <option value="<?= esc($s['kode']) ?>" <?= $selectedSource === $s['kode'] ? 'selected' : '' ?>>
+                                        <?= esc($s['kode']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <!-- TAHUN PENGADAAN -->
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Tahun *</label>
+                            <input type="number"
+                                   name="tahun_pengadaan"
+                                   class="form-control"
+                                   min="1900"
+                                   max="<?= date('Y') + 1 ?>"
+                                   required
+                                   value="<?= old('tahun_pengadaan', date('Y')) ?>">
+                        </div>
+                    <?php endif; ?>
 
                 </div>
 
