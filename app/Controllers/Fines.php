@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\AppSettingModel;
+use App\Models\FinePaymentModel;
 use App\Services\TransactionService;
 use Config\Database;
 
@@ -28,7 +30,7 @@ class Fines extends BaseController
 
         $builder = $db->table('fines f')
             ->select('f.*, t.kode_transaksi, t.jatuh_tempo, t.tanggal_kembali,
-                      td.lost_reported_at, td.lost_settlement_status,
+                      td.lost_reported_at, td.lost_settlement_status, fp.nomor_kwitansi,
                       b.judul, bi.kode_inventaris,
                       u.name AS member_name, u.member_code, u.jenis_pengguna, p.name AS petugas_name')
             ->join('transactions t', 't.id = f.transaction_id')
@@ -36,7 +38,8 @@ class Fines extends BaseController
             ->join('books b', 'b.id = td.book_id', 'left')
             ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
             ->join('users u', 'u.id = f.user_id')
-            ->join('users p', 'p.id = f.diproses_by', 'left');
+            ->join('users p', 'p.id = f.diproses_by', 'left')
+            ->join('fine_payments fp', 'fp.id = f.payment_id', 'left');
 
         if (in_array($status, self::STATUSES, true)) {
             $builder->where('f.status', $status);
@@ -47,6 +50,7 @@ class Fines extends BaseController
                 ->orLike('u.member_code', $search)
                 ->orLike('t.kode_transaksi', $search)
                 ->orLike('b.judul', $search)
+                ->orLike('fp.nomor_kwitansi', $search)
                 ->groupEnd();
         }
         if (!empty($startDate)) {
@@ -60,15 +64,7 @@ class Fines extends BaseController
         $builder->orderBy("FIELD(f.status, 'belum_lunas', 'ditahan', 'lunas', 'dibebaskan')", '', false)
             ->orderBy('f.created_at', 'ASC');
 
-        $stats = $db->table('fines')
-            ->select("
-                SUM(status = 'belum_lunas') AS jml_belum, COALESCE(SUM(CASE WHEN status = 'belum_lunas' THEN jumlah END), 0) AS rp_belum,
-                SUM(status = 'ditahan') AS jml_tahan,     COALESCE(SUM(CASE WHEN status = 'ditahan' THEN jumlah END), 0) AS rp_tahan,
-                SUM(status = 'lunas') AS jml_lunas,       COALESCE(SUM(CASE WHEN status = 'lunas' THEN jumlah END), 0) AS rp_lunas,
-                SUM(status = 'dibebaskan') AS jml_bebas,  COALESCE(SUM(CASE WHEN status = 'dibebaskan' THEN jumlah_awal END), 0) AS rp_bebas
-            ", false)
-            ->get()
-            ->getRowArray();
+        $stats = (new \App\Models\FineModel())->totals();
 
         $pager   = \Config\Services::pager();
         $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
@@ -96,16 +92,62 @@ class Fines extends BaseController
             $jenis   = (string) $this->request->getPost('jenis');
             $catatan = $this->request->getPost('catatan');
 
+            // Pelunasan selalu lewat kwitansi
+            if ($jenis === 'lunas') {
+                return $this->paid((new TransactionService())->payFines([(int) $id], (int) session('user_id'), $catatan));
+            }
+
             $fine = (new TransactionService())->settleFine((int) $id, $jenis, $catatan, (int) session('user_id'));
 
             $nominal = number_format((float) $fine['jumlah'], 0, ',', '.');
-            $pesan   = $jenis === 'lunas'
-                ? "Denda {$fine['kode_transaksi']} sebesar Rp {$nominal} dicatat LUNAS."
-                : "Denda {$fine['kode_transaksi']} sebesar Rp {$nominal} DIBEBASKAN.";
 
-            return redirect()->back()->with('success', $pesan);
+            return redirect()->back()->with('success', "Denda {$fine['kode_transaksi']} sebesar Rp {$nominal} DIBEBASKAN.");
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    /** Lunasi beberapa denda milik satu anggota dalam satu kwitansi. */
+    public function pay()
+    {
+        try {
+            $payment = (new TransactionService())->payFines(
+                (array) $this->request->getPost('fine_ids'),
+                (int) session('user_id'),
+                $this->request->getPost('catatan')
+            );
+
+            return $this->paid($payment);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /** Cetak kwitansi. Cetakan pertama asli, berikutnya diberi tanda SALINAN. */
+    public function receipt($id)
+    {
+        $model   = new FinePaymentModel();
+        $payment = $model->receiptData((int) $id);
+        if (!$payment) {
+            return redirect()->to('/fines')->with('error', 'Kwitansi tidak ditemukan.');
+        }
+
+        $model->update($payment['id'], ['jumlah_cetak' => (int) $payment['jumlah_cetak'] + 1]);
+
+        return view('fines/receipt', [
+            'payment' => $payment,
+            'salinan' => (int) $payment['jumlah_cetak'] > 0,
+            'setting' => (new AppSettingModel())->find(1),
+            'backUrl' => '/fines?status=lunas',
+        ]);
+    }
+
+    private function paid(array $payment)
+    {
+        $nominal = number_format((float) $payment['total'], 0, ',', '.');
+
+        return redirect()->to('/fines?status=lunas')
+            ->with('success', "Pembayaran Rp {$nominal} dicatat LUNAS dengan kwitansi {$payment['nomor_kwitansi']}.")
+            ->with('receipt_id', $payment['id']);
     }
 }

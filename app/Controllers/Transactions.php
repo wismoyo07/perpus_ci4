@@ -88,6 +88,7 @@ class Transactions extends BaseController
 
         $data['transactions']  = $builder->paginate(10);
         $data['pager']         = $this->transactionModel->pager;
+        $data['transactions']  = (new \App\Models\FineModel())->attachSummary($data['transactions']);
 
         $db = \Config\Database::connect();
         foreach ($data['transactions'] as &$trx) {
@@ -183,6 +184,7 @@ class Transactions extends BaseController
 
         $data['transactions']  = $builder->paginate(10);
         $data['pager']         = $this->transactionModel->pager;
+        $data['transactions']  = (new \App\Models\FineModel())->attachSummary($data['transactions']);
 
         $db = \Config\Database::connect();
         foreach ($data['transactions'] as &$trx) {

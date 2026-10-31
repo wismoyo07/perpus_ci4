@@ -241,8 +241,36 @@
         </tbody>
     </table>
 
-    <!-- 3. Tabel Riwayat Lengkap Transaksi -->
-    <h5 class="fw-bold mb-2">III. Log Riwayat Sirkulasi Transaksi</h5>
+    <!-- 3. Ringkasan Denda -->
+    <h5 class="fw-bold mb-2">III. Ringkasan Denda</h5>
+    <table class="table table-bordered table-laporan align-middle mb-4">
+        <thead>
+            <tr>
+                <th style="width: 8%;">No.</th>
+                <th>Status Denda</th>
+                <th style="width: 20%;">Jumlah Denda</th>
+                <th style="width: 25%;">Nominal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ([
+                ['Diterima (Lunas)', 'rp_lunas', 'jml_lunas'],
+                ['Belum Dibayar', 'rp_belum', 'jml_belum'],
+                ['Ditahan (menunggu penyelesaian buku hilang)', 'rp_tahan', 'jml_tahan'],
+                ['Dibebaskan (nominal awal)', 'rp_bebas', 'jml_bebas'],
+            ] as $i => [$label, $rp, $jml]): ?>
+            <tr>
+                <td class="text-center"><?= $i + 1 ?></td>
+                <td><?= $label ?></td>
+                <td class="text-center"><?= (int) $fine_totals[$jml] ?></td>
+                <td class="text-end">Rp <?= number_format((float) $fine_totals[$rp], 0, ',', '.') ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <!-- 4. Tabel Riwayat Lengkap Transaksi -->
+    <h5 class="fw-bold mb-2">IV. Log Riwayat Sirkulasi Transaksi</h5>
     <table class="table table-bordered table-laporan align-middle mb-5">
         <thead>
             <tr>
@@ -277,7 +305,7 @@
                                 Selesai
                             <?php endif; ?>
                         </td>
-                        <td class="text-end">Rp <?= number_format($t['total_denda'], 0, ',', '.') ?></td>
+                        <td class="text-end">Rp <?= number_format($t['total_denda'], 0, ',', '.') ?><?php $fs = fine_summary_status($t['fine']); ?><?php if ($fs): ?><br><small><?= $fs['label'] ?><?= $fs['sisa'] > 0 ? ' (sisa Rp ' . number_format($fs['sisa'], 0, ',', '.') . ')' : '' ?></small><?php endif; ?></td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

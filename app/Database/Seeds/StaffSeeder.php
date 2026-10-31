@@ -32,7 +32,7 @@ class StaffSeeder extends Seeder
             'member_code' => 'STF-001',
             'is_validated' => 1,
             'is_archived' => 0,
-            'must_change_password' => 0
+            'must_change_password' => 1
         ]);
 
         echo "User Staff berhasil dibuat.\n";

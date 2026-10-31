@@ -33,6 +33,14 @@ $routes->get('logout', 'Auth::logout', [
     'filter' => 'auth'
 ]);
 
+// PROFIL SAYA (semua role)
+$routes->group('profile', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'Profile::index');
+    $routes->post('contact', 'Profile::updateContact');
+    $routes->post('password', 'Profile::updatePassword');
+    $routes->get('card', 'Profile::card');
+});
+
 // DASHBOARD UMUM
 $routes->get('dashboard', 'Dashboard::index', [
     'filter' => 'auth'
@@ -94,6 +102,8 @@ $routes->group('books', ['filter' => ['auth', 'role:admin,staff']], function($ro
 $routes->group('fines', ['filter' => ['auth', 'role:admin,staff']], function($routes) {
     $routes->get('/', 'Fines::index');
     $routes->post('settle/(:num)', 'Fines::settle/$1');
+    $routes->post('pay', 'Fines::pay');
+    $routes->get('receipt/(:num)', 'Fines::receipt/$1');
 });
 
 $routes->group('lost-books', [
@@ -144,6 +154,8 @@ $routes->group('member', [
 ], function($routes) {
 
     $routes->get('transactions', 'Member::transactions');
+    $routes->get('fines', 'Member::fines');
+    $routes->get('fines/receipt/(:num)', 'Member::receipt/$1');
 
 });
 

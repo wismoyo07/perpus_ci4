@@ -124,13 +124,14 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                 <input type="password" class="form-control" id="regPassword" name="password"
-                    placeholder="Create a password" required minlength="8" autocomplete="new-password">
+                    placeholder="Create a password" required minlength="8" maxlength="64" autocomplete="new-password">
                 <button type="button" class="input-group-text nk-toggle-password"
                     aria-label="Toggle password visibility" data-target="regPassword">
                     <i class="fa-solid fa-eye"></i>
                 </button>
             </div>
-            <div class="invalid-feedback">Password must be at least 8 characters.</div>
+            <div class="invalid-feedback">Password minimal 8 karakter.</div>
+            <?= $this->include('auth/_password_hints') ?>
         </div>
 
         <div class="mb-3">

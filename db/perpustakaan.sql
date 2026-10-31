@@ -205,6 +205,45 @@ INSERT INTO `class` VALUES (11,'IX-A'),(12,'IX-B'),(13,'IX-C'),(14,'IX-D'),(15,'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `fine_payments`
+--
+
+DROP TABLE IF EXISTS `fine_payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fine_payments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nomor_kwitansi` varchar(30) COLLATE utf8mb4_general_ci NOT NULL,
+  `tahun` smallint NOT NULL,
+  `urutan` int NOT NULL,
+  `user_id` int NOT NULL,
+  `total` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `dibayar_at` datetime NOT NULL,
+  `diterima_by` int NOT NULL,
+  `catatan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `jumlah_cetak` int NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nomor_kwitansi` (`nomor_kwitansi`),
+  UNIQUE KEY `tahun_urutan` (`tahun`,`urutan`),
+  KEY `fine_payments_diterima_by_foreign` (`diterima_by`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `fine_payments_diterima_by_foreign` FOREIGN KEY (`diterima_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fine_payments_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fine_payments`
+--
+
+LOCK TABLES `fine_payments` WRITE;
+/*!40000 ALTER TABLE `fine_payments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fine_payments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `fines`
 --
 
@@ -225,6 +264,7 @@ CREATE TABLE `fines` (
   `catatan` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `diproses_by` int DEFAULT NULL,
   `diproses_at` datetime DEFAULT NULL,
+  `payment_id` int DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -232,7 +272,9 @@ CREATE TABLE `fines` (
   KEY `fines_transaction_id_foreign` (`transaction_id`),
   KEY `fines_diproses_by_foreign` (`diproses_by`),
   KEY `user_id_status` (`user_id`,`status`),
+  KEY `fines_payment_id_foreign` (`payment_id`),
   CONSTRAINT `fines_diproses_by_foreign` FOREIGN KEY (`diproses_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fines_payment_id_foreign` FOREIGN KEY (`payment_id`) REFERENCES `fine_payments` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fines_transaction_detail_id_foreign` FOREIGN KEY (`transaction_detail_id`) REFERENCES `transaction_details` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fines_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fines_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -264,7 +306,7 @@ CREATE TABLE `migrations` (
   `time` int NOT NULL,
   `batch` int unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -273,7 +315,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'2026-02-17-113210','App\\Database\\Migrations\\CreateUsers','default','App',1793464308,1),(2,'2026-02-17-113310','App\\Database\\Migrations\\CreateBooks','default','App',1793464308,1),(3,'2026-02-17-113410','App\\Database\\Migrations\\CreateTransactions','default','App',1793464308,1),(4,'2026-02-17-113510','App\\Database\\Migrations\\CreateActivityLogs','default','App',1793464308,1),(5,'2026-02-21-000004','App\\Database\\Migrations\\CreateTransactionDetails','default','App',1793464308,1),(6,'2026-03-09-000003','App\\Database\\Migrations\\CreateBookItems','default','App',1793464308,1),(7,'2026-03-09-000007','App\\Database\\Migrations\\CreateAppSettings','default','App',1793464308,1),(8,'2026-03-09-161011','App\\Database\\Migrations\\MasterClass','default','App',1793464309,1),(9,'2026-06-17-000001','App\\Database\\Migrations\\AddPhase2Columns','default','App',1793464309,1),(10,'2026-07-01-052000','App\\Database\\Migrations\\AddContactColumnsToUsers','default','App',1793464309,1),(11,'2026-07-03-084500','App\\Database\\Migrations\\UpdateLostSettlementColumns','default','App',1793464309,1),(12,'2026-10-31-100000','App\\Database\\Migrations\\AddKodeBarangToAppSettings','default','App',1793464309,1),(13,'2026-10-31-100100','App\\Database\\Migrations\\UpdateMasterSourceFundAndCategory','default','App',1793464309,1),(14,'2026-10-31-100200','App\\Database\\Migrations\\AddDdcToBooks','default','App',1793464309,1),(15,'2026-10-31-100300','App\\Database\\Migrations\\AddDdcDivisions','default','App',1793464310,1),(16,'2026-11-01-090000','App\\Database\\Migrations\\LateFinesPerBook','default','App',1793464310,1),(17,'2026-11-01-100000','App\\Database\\Migrations\\AddPartialReturnToTransactionDetails','default','App',1793464310,1),(18,'2026-11-02-090000','App\\Database\\Migrations\\DedupeClassTable','default','App',1793464310,1);
+INSERT INTO `migrations` VALUES (1,'2026-02-17-113210','App\\Database\\Migrations\\CreateUsers','default','App',1793464308,1),(2,'2026-02-17-113310','App\\Database\\Migrations\\CreateBooks','default','App',1793464308,1),(3,'2026-02-17-113410','App\\Database\\Migrations\\CreateTransactions','default','App',1793464308,1),(4,'2026-02-17-113510','App\\Database\\Migrations\\CreateActivityLogs','default','App',1793464308,1),(5,'2026-02-21-000004','App\\Database\\Migrations\\CreateTransactionDetails','default','App',1793464308,1),(6,'2026-03-09-000003','App\\Database\\Migrations\\CreateBookItems','default','App',1793464308,1),(7,'2026-03-09-000007','App\\Database\\Migrations\\CreateAppSettings','default','App',1793464308,1),(8,'2026-03-09-161011','App\\Database\\Migrations\\MasterClass','default','App',1793464309,1),(9,'2026-06-17-000001','App\\Database\\Migrations\\AddPhase2Columns','default','App',1793464309,1),(10,'2026-07-01-052000','App\\Database\\Migrations\\AddContactColumnsToUsers','default','App',1793464309,1),(11,'2026-07-03-084500','App\\Database\\Migrations\\UpdateLostSettlementColumns','default','App',1793464309,1),(12,'2026-10-31-100000','App\\Database\\Migrations\\AddKodeBarangToAppSettings','default','App',1793464309,1),(13,'2026-10-31-100100','App\\Database\\Migrations\\UpdateMasterSourceFundAndCategory','default','App',1793464309,1),(14,'2026-10-31-100200','App\\Database\\Migrations\\AddDdcToBooks','default','App',1793464309,1),(15,'2026-10-31-100300','App\\Database\\Migrations\\AddDdcDivisions','default','App',1793464310,1),(16,'2026-11-01-090000','App\\Database\\Migrations\\LateFinesPerBook','default','App',1793464310,1),(17,'2026-11-01-100000','App\\Database\\Migrations\\AddPartialReturnToTransactionDetails','default','App',1793464310,1),(18,'2026-11-02-090000','App\\Database\\Migrations\\DedupeClassTable','default','App',1793464310,1),(19,'2026-11-03-090000','App\\Database\\Migrations\\CreateFinePayments','default','App',1793467876,2);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -435,7 +477,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Super Administrator','ADM-001',NULL,NULL,NULL,NULL,'admin','$2y$12$wGNI3N.maxlLE0ZkRNcWBeUaJurInaHLW3o/gr8A7Wcxhc64y2OVK','admin','guru',1,0,0,'2026-10-31 16:31:53','2026-10-31 16:31:53',NULL),(2,'Staff Perpustakaan','STF-001',NULL,NULL,NULL,NULL,'staff','$2y$12$Vr7XY71N500l2gHRmwwLtuyMARTo44DyvZImXEAVMVFrHt7grI0k.','staff','pegawai',1,0,0,'2026-10-31 16:31:53','2026-10-31 16:31:53',NULL),(3,'Lina Petugas','STF-002',NULL,NULL,NULL,NULL,'lina_petugas','$2y$12$sfRA5bEbajbTF.SfqCSnQ.WvRnw9s.Ir1hFTGEGpk7eT6BBS5kwnu','staff','pegawai',1,0,0,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(4,'Bambang Pegawai','PEG-001',NULL,NULL,NULL,NULL,'bambang_pegawai','$2y$12$XCV02Wmjor4Pt5NGZ8pYGO4qrJdw1./jzKY0ZCNYqWmHdS7r687Oi','member','pegawai',1,0,0,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(5,'Dra. Endang Guru','GRU-001',NULL,NULL,NULL,NULL,'endang_guru','$2y$12$0mFCzTf6E.OIhNF/PfWpP.Rd8RnXvRpn0.gOFk5nARwIOlwTbwyCe','member','guru',1,0,0,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(6,'Siti Rahmawati (Siswa)','SSW-001',NULL,NULL,NULL,NULL,'siti_siswa','$2y$12$gLlaVswe5jSYeLyeeGAAre3MCx0fFNWSzogGjRN0ozMlNcmPM82vq','member','siswa',1,0,0,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(7,'Rian Hidayat (Siswa)','SSW-002',NULL,NULL,NULL,NULL,'rian_siswa','$2y$12$1XbH2GCA8WchB90RgGd9xubBPILIvu.YTHhzw4VOIB.b8l3DhmZ1K','member','siswa',1,0,0,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL);
+INSERT INTO `users` VALUES (1,'Super Administrator','ADM-001',NULL,NULL,NULL,NULL,'admin','$2y$12$wGNI3N.maxlLE0ZkRNcWBeUaJurInaHLW3o/gr8A7Wcxhc64y2OVK','admin','guru',1,0,1,'2026-10-31 16:31:53','2026-10-31 16:31:53',NULL),(2,'Staff Perpustakaan','STF-001',NULL,NULL,NULL,NULL,'staff','$2y$12$Vr7XY71N500l2gHRmwwLtuyMARTo44DyvZImXEAVMVFrHt7grI0k.','staff','pegawai',1,0,1,'2026-10-31 16:31:53','2026-10-31 16:31:53',NULL),(3,'Lina Petugas','STF-002',NULL,NULL,NULL,NULL,'lina_petugas','$2y$12$sfRA5bEbajbTF.SfqCSnQ.WvRnw9s.Ir1hFTGEGpk7eT6BBS5kwnu','staff','pegawai',1,0,1,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(4,'Bambang Pegawai','PEG-001',NULL,NULL,NULL,NULL,'bambang_pegawai','$2y$12$XCV02Wmjor4Pt5NGZ8pYGO4qrJdw1./jzKY0ZCNYqWmHdS7r687Oi','member','pegawai',1,0,1,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(5,'Dra. Endang Guru','GRU-001',NULL,NULL,NULL,NULL,'endang_guru','$2y$12$0mFCzTf6E.OIhNF/PfWpP.Rd8RnXvRpn0.gOFk5nARwIOlwTbwyCe','member','guru',1,0,1,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(6,'Siti Rahmawati (Siswa)','SSW-001',NULL,NULL,NULL,NULL,'siti_siswa','$2y$12$gLlaVswe5jSYeLyeeGAAre3MCx0fFNWSzogGjRN0ozMlNcmPM82vq','member','siswa',1,0,1,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL),(7,'Rian Hidayat (Siswa)','SSW-002',NULL,NULL,NULL,NULL,'rian_siswa','$2y$12$1XbH2GCA8WchB90RgGd9xubBPILIvu.YTHhzw4VOIB.b8l3DhmZ1K','member','siswa',1,0,1,'2026-10-31 16:31:56','2026-10-31 16:31:56',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -452,4 +494,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-31 23:31:58
+-- Dump completed on 2026-11-01  0:31:17

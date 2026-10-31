@@ -108,7 +108,7 @@
                                                 <span class="badge bg-success text-white">Selesai</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end pe-3 text-danger fw-bold">Rp <?= number_format($trx['total_denda'], 0, ',', '.') ?></td>
+                                        <td class="text-end pe-3"><span class="text-danger fw-bold">Rp <?= number_format($trx['total_denda'], 0, ',', '.') ?></span><?= fine_badge($trx['fine'], $trx['status']) ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>

@@ -82,6 +82,38 @@
                     <?php endif; ?>
                 </div>
 
+                <!-- KELAS (SISWA) -->
+                <?php if ($user['jenis_pengguna'] === 'siswa'): ?>
+                    <div class="mb-3">
+                        <label for="class" class="form-label small fw-bold text-secondary">Kelas</label>
+                        <select name="class" id="class" class="form-select">
+                            <option value="">- Pilih Kelas -</option>
+                            <?php $kelasAda = false; ?>
+                            <?php foreach ($list_kelas as $k): ?>
+                                <?php $kelasAda = $kelasAda || $k['class_name'] === $user['class']; ?>
+                                <option value="<?= esc($k['class_name']) ?>" <?= $k['class_name'] === $user['class'] ? 'selected' : '' ?>><?= esc($k['class_name']) ?></option>
+                            <?php endforeach; ?>
+                            <?php if (!$kelasAda && !empty($user['class'])): ?>
+                                <option value="<?= esc($user['class']) ?>" selected><?= esc($user['class']) ?> (tidak ada di data kelas)</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                <?php endif; ?>
+
+                <!-- KONTAK -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label small fw-bold text-secondary">Nomor Telepon</label>
+                        <input type="text" name="phone" id="phone" maxlength="20" class="form-control"
+                               value="<?= esc(old('phone', $user['phone'] ?? '')) ?>">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="whatsapp" class="form-label small fw-bold text-secondary">Nomor WhatsApp</label>
+                        <input type="text" name="whatsapp" id="whatsapp" maxlength="20" class="form-control"
+                               value="<?= esc(old('whatsapp', $user['whatsapp'] ?? '')) ?>">
+                    </div>
+                </div>
+
                 <!-- JENIS PENGGUNA (GURU/PEGAWAI BISA DIUBAH, SISWA TETAP SISWA) -->
                 <?php if($user['jenis_pengguna'] !== 'siswa'): ?>
                     <div class="mb-3">

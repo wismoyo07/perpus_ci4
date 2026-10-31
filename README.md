@@ -33,7 +33,9 @@ Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang dibuat ole
 | **Member** (Siswa 1) | Siswa | `siti_siswa` | `Siti##123` | `SSW-001` |
 | **Member** (Siswa 2) | Siswa | `rian_siswa` | `Rian##123` | `SSW-002` |
 
-> **⚠️ Penting untuk server produksi:** akun dan password di atas bersifat publik. Setelah instalasi di server, segera ganti password akun admin/staff dan hapus atau arsipkan akun member demo.
+> **Login pertama wajib ganti password.** Password di atas hanya berlaku sekali. Setiap akun demo diminta membuat password baru saat pertama kali login, dan setelah itu password di tabel ini tidak berlaku lagi. Hal yang sama berlaku untuk akun yang dibuat atau direset petugas (password awal `123456`).
+>
+> **⚠️ Penting untuk server produksi:** akun di atas bersifat publik. Hapus atau arsipkan akun member demo yang tidak diperlukan.
 
 ---
 
@@ -49,12 +51,14 @@ Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang dibuat ole
 | Hapus Buku (*Delete*) | ✔ | ✔ | ✘ |
 | Cetak Label Buku (QR Code) | ✔ | ✔ | ✘ |
 | Manajemen User (Tambah, Edit, Validasi, Reset Sandi) | ✔ | ✔ (Hanya Member) | ✘ |
-| Cetak Kartu Anggota (Barcode) | ✔ | ✔ (Hanya Member) | ✘ |
+| Cetak Kartu Anggota (Barcode) | ✔ | ✔ (Hanya Member) | ✔ (Kartu Sendiri, lewat Profil) |
+| Profil Saya (Kontak & Ganti Password) | ✔ | ✔ | ✔ |
 | Hapus User (*Delete*) | ✔ | ✘ | ✘ |
 | Sirkulasi Transaksi (Peminjaman & Kembali) | ✔ (View) | ✔ (Penuh) | ✘ |
 | Laporkan Buku Hilang (selama masa pinjam) | ✘ | ✔ | ✘ |
 | Settle Buku Hilang (*Lost Books*) | ✔ | ✔ | ✘ |
-| Pembayaran Denda Keterlambatan (Lunas / Dibebaskan) | ✔ | ✔ | ✘ |
+| Pembayaran Denda Keterlambatan (Lunas / Dibebaskan) & Cetak Kwitansi | ✔ | ✔ | ✘ |
+| Denda Saya (Status Denda & Kwitansi Sendiri) | ✘ | ✘ | ✔ |
 | Laporan & Cetak Dokumen Resmi | ✔ | ✔ | ✘ |
 | Pengaturan Identitas Sekolah (Logo/Kop, Kode Barang Buku, Batas Hari Denda) | ✔ | ✘ | ✘ |
 | Data Master (Sumber Dana & Kelas DDC) | ✔ | ✘ | ✘ |
@@ -78,6 +82,9 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
 *   **Denda Keterlambatan:**
     *   Dihitung **per buku** sejak H+1 jatuh tempo, paling banyak sejumlah **batas maksimal hari** yang diatur di **Pengaturan** (default **10 hari**; isi 0 untuk tanpa batas).
     *   Denda tercatat saat buku dikembalikan dengan status **Belum Lunas**. Petugas menandainya **Lunas** atau **Dibebaskan** (wajib dengan alasan) melalui menu **Manajemen Buku → Denda Keterlambatan**.
+    *   **Kwitansi:** setiap pelunasan dibuatkan kwitansi bernomor urut per tahun (`KW/2026/0001`, ukuran A5). Petugas bisa mencentang beberapa denda milik **satu anggota** lalu klik **Bayar & Buat Kwitansi**, sehingga semuanya masuk satu kwitansi. Cetakan berikutnya ditandai **SALINAN**. Denda yang dibebaskan tidak mendapat kwitansi, dan denda yang dilunasi sebelum v1.6.0 tidak memiliki kwitansi.
+    *   **Status denda** (Belum Lunas / Ditahan / Lunas / Dibebaskan, beserta sisa yang belum dibayar) tampil di samping nominal denda di daftar transaksi, dashboard admin, riwayat anggota, dan laporan. Laporan juga memuat ringkasan denda diterima, belum dibayar, ditahan, dan dibebaskan.
+    *   Anggota melihat dendanya sendiri di menu **Denda Saya**, termasuk tautan cetak kwitansi.
     *   Anggota yang masih memiliki denda **belum lunas** tidak dapat melakukan peminjaman baru.
 *   **Buku Hilang:**
     *   Buku baru bisa **dinyatakan hilang mulai H+1 jatuh tempo**. Saat peminjam melapor, petugas membuka transaksi (**Pinjam Kembali → Detail / Kembali**) lalu **Laporkan Hilang** dengan tanggal laporan (minimal H+1). Denda buku itu **berhenti bertambah** di tanggal laporan dan **ditahan** (tidak menghalangi peminjaman) sampai ada penyelesaian. Laporan hilang tidak bisa dibatalkan; bila buku ternyata ada, selesaikan dengan **Buku Ditemukan** di menu Buku Hilang.
@@ -87,12 +94,23 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
         *   **Ganti buku baru** atau **ganti uang** → denda keterlambatan **dihapus**. Salinan pengganti dicatat dengan sumber dana **PRIBADI** (Pembelian Pribadi, karena dibeli peminjam) dan tahun penggantian, sehingga kode inventarisnya berprefiks `… / PRIBADI / tahun / …`.
         *   **Pemutihan** → sesuai surat keputusan: denda **dihapus**, **dibayar sebagian**, atau **dibayar penuh** (nomor/isi surat wajib dicatat).
 
-### C. Cetak Kartu Anggota & Label Buku
+### C. Profil Pengguna & Password
+*   Menu **Profil Saya** (klik nama di kanan atas) tersedia untuk semua pengguna. Isinya data identitas, ringkasan pinjaman dan denda untuk anggota, serta tombol cetak kartu anggota sendiri.
+*   Pengguna hanya bisa mengubah **telepon, WhatsApp, dan password** sendiri. Nama, NIS/NIP, NISN/NUPTK, kelas, jenis pengguna, dan role diubah petugas di menu **Users → Edit**.
+*   **Aturan password** (berlaku untuk registrasi, wajib ganti password, dan Profil):
+    *   8–64 karakter.
+    *   Memuat huruf kecil, huruf besar, angka, dan karakter khusus (``! @ # $ % ^ & * ( ) - _ = + [ ] { } ; : ' " , . < > / ? \ | ` ~``).
+    *   Tidak boleh memakai spasi, huruf beraksen (é, ñ), atau emoji.
+    *   Tidak boleh sama dengan username, password lama, atau password default `123456`.
+*   Ganti password di Profil memerlukan password lama.
+*   Akun yang wajib ganti password tidak bisa membuka halaman lain sebelum password diganti.
+
+### D. Cetak Kartu Anggota & Label Buku
 *   **Kartu anggota:** menu **Users**, centang anggota lalu klik **Cetak Kartu** (atau tombol **Kartu** per baris). Ukuran kartu 85,6 × 54 mm (10 kartu per A4) dengan barcode NIS/NIP.
 *   **Label buku:** menu **Buku → Salinan**, klik **Cetak Label**. Ukuran label 62 × 32 mm (24 label per A4) dengan QR code berisi kode inventaris dan nomor panggil (jika buku sudah diklasifikasi DDC). Salinan berstatus hilang tidak ikut dicetak.
 *   Barcode dan QR code dibuat di server (SVG), sehingga pencetakan tidak memerlukan koneksi internet ke layanan pihak ketiga.
 
-### D. Penomoran Buku & Klasifikasi DDC
+### E. Penomoran Buku & Klasifikasi DDC
 *   **Kode buku** dibuat otomatis dengan format `kode barang / sumber dana / tahun / nomor urut`, misalnya `03.11.01.01.001 / APBD / 2025 / 001`.
     *   **Kode barang** diatur di menu **Pengaturan** (default `03.11.01.01.001`).
     *   **Sumber dana** dan **tahun pengadaan** dipilih saat menambah buku. Nomor urut berjalan per kombinasi kode barang, sumber dana, dan tahun.

@@ -164,7 +164,7 @@
                         <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="fw-medium text-danger">Rp <?= number_format($trx['total_denda'], 0, ',', '.') ?></td>
+                                    <td><span class="fw-medium text-danger">Rp <?= number_format($trx['total_denda'], 0, ',', '.') ?></span><?= fine_badge($trx['fine'], $trx['status']) ?></td>
                                     <td class="pe-4">
                                         <small class="text-muted">
                                             Pinjam: <?= esc($trx['staff_borrow']) ?><br>

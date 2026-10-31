@@ -21,12 +21,20 @@ $appName = ($setting && $setting['nama_lembaga']) ? $setting['nama_lembaga'] : '
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 text-md-end text-sm-start mt-md-0 mt-2">
                 <div class="d-flex justify-content-md-end justify-content-start align-items-center gap-3">
-                    <span class="text-muted d-none d-sm-inline">
-                        Selamat Datang, <strong><?= esc(session()->get('name')) ?></strong> (<span class="badge bg-success-subtle text-success"><?= esc(ucfirst(session()->get('role'))) ?></span>)
-                    </span>
-                    <a href="/logout" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
-                        <i class="fa-solid fa-right-from-bracket"></i> Keluar
-                    </a>
+                    <span class="text-muted d-none d-sm-inline">Selamat Datang,</span>
+                    <div class="dropdown">
+                        <button class="btn btn-light btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-circle-user text-success"></i>
+                            <strong><?= esc(session()->get('name')) ?></strong>
+                            <span class="badge bg-success-subtle text-success"><?= esc(ucfirst(session()->get('role'))) ?></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-id-card me-2 text-muted"></i> Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="/profile#password"><i class="fa-solid fa-key me-2 text-muted"></i> Ganti Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Keluar</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

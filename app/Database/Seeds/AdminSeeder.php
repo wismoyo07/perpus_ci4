@@ -32,7 +32,7 @@ class AdminSeeder extends Seeder
             'member_code' => 'ADM-001',
             'is_validated' => 1,
             'is_archived' => 0,
-            'must_change_password' => 0
+            'must_change_password' => 1
         ]);
 
         echo "Admin default berhasil dibuat.\n";

@@ -91,10 +91,9 @@ class Auth extends Controller
             ],
 
             'password' => [
-                'rules'  => 'required|regex_match[/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/]',
+                'rules'  => 'required|strong_password[username]',
                 'errors' => [
-                    'required'    => 'Password wajib diisi.',
-                    'regex_match' => 'Password minimal 8 karakter, harus mengandung huruf besar, huruf kecil, angka, dan simbol.'
+                    'required' => 'Password wajib diisi.',
                 ]
             ],
 
@@ -252,21 +251,16 @@ class Auth extends Controller
 
     public function processForceChange()
     {
-        helper('password');
-        
-        $password = $this->request->getPost('password');
+        $errors = (new \App\Services\AccountService())->changePassword(
+            (int) session('user_id'),
+            null,
+            (string) $this->request->getPost('password'),
+            (string) $this->request->getPost('confirm_password')
+        );
 
-        if (strlen($password) < 6) {
-            return redirect()->back()
-                ->with('error','Password minimal 6 karakter.');
+        if ($errors !== []) {
+            return redirect()->back()->with('errors', $errors);
         }
-
-        $userModel = new UserModel();
-
-        $userModel->update(session('user_id'), [
-            'password' => hashPassword($password),
-            'must_change_password' => 0
-        ]);
 
         session()->remove('force_password_change');
 
@@ -331,6 +325,10 @@ class Auth extends Controller
             return redirect()->back()
                 ->with('error', 'Akun kamu telah diarsipkan, Hubungi Staff Perpustakaan untuk Aktifkan Akun.');
         }
+
+        // Catat waktu login; waktu login sebelumnya ditampilkan di Profil
+        session()->set('previous_login', $user['last_login']);
+        $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
 
         // ===============================
         // FORCE CHANGE PASSWORD

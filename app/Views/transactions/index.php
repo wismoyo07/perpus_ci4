@@ -182,7 +182,7 @@
                     <?php endif; ?>
                 </td>
 
-                <td>Rp <?= number_format($trx['total_denda'],0,',','.') ?></td>
+                <td>Rp <?= number_format($trx['total_denda'],0,',','.') ?><?= fine_badge($trx['fine'], $trx['status']) ?></td>
 
                 <td>
                     <small>
