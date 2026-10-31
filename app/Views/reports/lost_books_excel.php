@@ -151,6 +151,8 @@
                                 Paid (Ganti Uang)
                             <?php elseif($l['lost_settlement_status'] === 'written_off'): ?>
                                 Written Off (Pemutihan)
+                            <?php elseif($l['lost_settlement_status'] === 'found'): ?>
+                                Found (Ditemukan)
                             <?php else: ?>
                                 PENDING
                             <?php endif; ?>

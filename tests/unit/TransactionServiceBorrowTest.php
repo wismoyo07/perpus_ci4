@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\FineModel;
 use App\Models\TransactionModel;
 use App\Models\UserModel;
 use App\Services\TransactionService;
@@ -18,9 +19,9 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
     private BaseConnection $dbMock;
 
     /**
-     * @param int[] $counts Hasil countAllResults() berurutan: [transaksi terlambat, transaksi aktif]
+     * @param int[] $counts Hasil hitungan: [pinjaman terlambat, transaksi aktif, denda belum lunas (tabel fines)]
      */
-    private function makeService(?array $member, array $counts = [0, 0]): TransactionService
+    private function makeService(?array $member, array $counts = [0, 0, 0]): TransactionService
     {
         $userModel = $this->getMockBuilder(UserModel::class)
             ->disableOriginalConstructor()
@@ -33,8 +34,15 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
             ->onlyMethods(['__call', 'countAllResults', 'insert', 'getInsertID', 'find'])
             ->getMock();
         $transactionModel->method('__call')->willReturnSelf();
-        $transactionModel->method('countAllResults')->willReturnOnConsecutiveCalls(...$counts);
+        $transactionModel->method('countAllResults')->willReturnOnConsecutiveCalls($counts[0], $counts[1]);
         $transactionModel->method('getInsertID')->willReturn(1);
+
+        $fineModel = $this->getMockBuilder(FineModel::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['__call', 'countAllResults'])
+            ->getMock();
+        $fineModel->method('__call')->willReturnSelf();
+        $fineModel->method('countAllResults')->willReturn($counts[2] ?? 0);
 
         // Salinan buku tidak ditemukan: borrow() berhenti di sini setelah lolos semua cek aturan.
         $result = $this->createMock(BaseResult::class);
@@ -46,7 +54,7 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
 
         $service = (new ReflectionClass(TransactionService::class))->newInstanceWithoutConstructor();
 
-        foreach (['db' => $db, 'userModel' => $userModel, 'transactionModel' => $transactionModel] as $prop => $value) {
+        foreach (['db' => $db, 'userModel' => $userModel, 'transactionModel' => $transactionModel, 'fineModel' => $fineModel] as $prop => $value) {
             $property = new ReflectionProperty(TransactionService::class, $prop);
             $property->setValue($service, $value);
         }
@@ -122,23 +130,30 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
 
     public function testMemberDenganKeterlambatanDitolak(): void
     {
-        $message = $this->borrowMessage($this->makeService($this->member('guru'), [1, 1]), 1);
+        $message = $this->borrowMessage($this->makeService($this->member('guru'), [1, 1, 0]), 1);
 
         $this->assertSame('Member masih memiliki keterlambatan', $message);
     }
 
     public function testMemberDengan3TransaksiAktifDitolak(): void
     {
-        $message = $this->borrowMessage($this->makeService($this->member('guru'), [0, 3]), 1);
+        $message = $this->borrowMessage($this->makeService($this->member('guru'), [0, 3, 0]), 1);
 
         $this->assertSame('Member memiliki 3 transaksi aktif', $message);
     }
 
     public function testMemberDengan2TransaksiAktifMasihBolehPinjam(): void
     {
-        $message = $this->borrowMessage($this->makeService($this->member('siswa'), [0, 2]), 1);
+        $message = $this->borrowMessage($this->makeService($this->member('siswa'), [0, 2, 0]), 1);
 
         $this->assertSame('Salinan fisik ID 1 tidak tersedia', $message);
+    }
+
+    public function testMemberDenganDendaBelumLunasDitolak(): void
+    {
+        $message = $this->borrowMessage($this->makeService($this->member('siswa'), [0, 0, 1]), 1);
+
+        $this->assertSame('Member masih memiliki denda yang belum dilunasi', $message);
     }
 
     public function testPinjamTanpaBukuDitolakTanpaMembukaTransaksiDb(): void
@@ -179,6 +194,6 @@ final class TransactionServiceBorrowTest extends CIUnitTestCase
 
         $this->expectExceptionMessage('Transaksi tidak valid');
 
-        $service->return(99, [], 1);
+        $service->return(99, [], [], 1);
     }
 }

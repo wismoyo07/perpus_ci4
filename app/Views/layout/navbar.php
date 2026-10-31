@@ -26,7 +26,7 @@ $secondSegment = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : null;
                     
                     <!-- Manajemen Buku (Dropdown) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?= in_array($currentSegment, ['books', 'transactions', 'lost-books']) || ($currentSegment === 'admin' && $secondSegment === 'transactions') ? 'active' : '' ?>" 
+                        <a class="nav-link dropdown-toggle <?= in_array($currentSegment, ['books', 'transactions', 'lost-books', 'fines']) || ($currentSegment === 'admin' && $secondSegment === 'transactions') ? 'active' : '' ?>" 
                            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-book"></i>
                             <span>Manajemen Buku</span>
@@ -40,6 +40,7 @@ $secondSegment = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : null;
                                 <a class="dropdown-item" href="<?= $transUrl ?>">Pinjam Kembali</a>
                             </li>
                             <li><a class="dropdown-item" href="/lost-books">Buku Hilang</a></li>
+                            <li><a class="dropdown-item" href="/fines">Denda Keterlambatan</a></li>
                         </ul>
                     </li>
 

@@ -157,6 +157,11 @@
                                             <?php elseif ($trx['status'] === 'terlambat'): ?>
                                                 <span class="badge bg-danger">Terlambat</span>
                                             <?php endif; ?>
+                                            <?php
+                            $kembaliN = count(array_filter($trx['details'], static fn ($x) => !empty($x['returned_at']) || $x['is_lost']));
+                            if ($kembaliN > 0): ?>
+                            <div class="small text-muted mt-1"><?= $kembaliN ?>/<?= count($trx['details']) ?> buku kembali/hilang</div>
+                        <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
                                     <td class="fw-medium text-danger">Rp <?= number_format($trx['total_denda'], 0, ',', '.') ?></td>

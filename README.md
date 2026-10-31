@@ -52,9 +52,11 @@ Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang dibuat ole
 | Cetak Kartu Anggota (Barcode) | ✔ | ✔ (Hanya Member) | ✘ |
 | Hapus User (*Delete*) | ✔ | ✘ | ✘ |
 | Sirkulasi Transaksi (Peminjaman & Kembali) | ✔ (View) | ✔ (Penuh) | ✘ |
+| Laporkan Buku Hilang (selama masa pinjam) | ✘ | ✔ | ✘ |
 | Settle Buku Hilang (*Lost Books*) | ✔ | ✔ | ✘ |
+| Pembayaran Denda Keterlambatan (Lunas / Dibebaskan) | ✔ | ✔ | ✘ |
 | Laporan & Cetak Dokumen Resmi | ✔ | ✔ | ✘ |
-| Pengaturan Identitas Sekolah (Logo/Kop, Kode Barang Buku) | ✔ | ✘ | ✘ |
+| Pengaturan Identitas Sekolah (Logo/Kop, Kode Barang Buku, Batas Hari Denda) | ✔ | ✘ | ✘ |
 | Data Master (Sumber Dana & Kelas DDC) | ✔ | ✘ | ✘ |
 | Riwayat Log Aktivitas Sistem | ✔ | ✘ | ✘ |
 
@@ -63,16 +65,27 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
 
 *   **Guru / Pegawai:**
     *   Maksimal **5 Buku** per transaksi.
-    *   Denda keterlambatan: **Rp 5.000,-** per hari.
+    *   Denda keterlambatan: **Rp 5.000,-** per buku per hari.
 *   **Siswa:**
     *   Maksimal **3 Buku** per transaksi.
-    *   Denda keterlambatan: **Rp 1.000,-** per hari.
+    *   Denda keterlambatan: **Rp 1.000,-** per buku per hari.
 *   **Ketentuan Umum:**
     *   Durasi peminjaman default: **10 hari** (Peminjaman Jangka Pendek) atau **180 hari** (Jangka Panjang).
     *   Satu transaksi minimal berisi **1 buku**, dan anggota tidak dapat meminjam judul yang sama yang masih dipinjamnya.
     *   Anggota maksimal memiliki **3 transaksi aktif** (status `dipinjam`/`terlambat`) sekaligus.
-    *   Anggota yang memiliki transaksi berstatus `terlambat` tidak diperbolehkan melakukan peminjaman baru sampai transaksi tersebut diselesaikan.
-    *   Status `terlambat` diperbarui oleh perintah `php spark transactions:updateLate`. Jadwalkan perintah ini **sekali sehari** (lihat bagian 5).
+    *   **Pengembalian per buku:** buku dalam satu transaksi bisa dikembalikan satu per satu (sebelum maupun sesudah jatuh tempo). Di halaman **Detail / Kembali**, pilih aksi tiap buku: *Dikembalikan sekarang*, *Belum dibawa*, atau *Hilang* (mulai H+1). Buku yang belum dibawa tetap dipinjam dan **dendanya terus berjalan** sampai dikembalikan. Transaksi selesai setelah semua buku dikembalikan atau dinyatakan hilang.
+    *   Peminjaman berstatus **terlambat otomatis sejak H+1** setelah jatuh tempo (diperbarui setiap halaman sirkulasi/dashboard dibuka). Anggota dengan pinjaman terlambat tidak diperbolehkan meminjam lagi sampai transaksinya diselesaikan. Perintah `php spark transactions:updateLate` tetap bisa dijadwalkan harian (lihat bagian 6) sebagai cadangan.
+*   **Denda Keterlambatan:**
+    *   Dihitung **per buku** sejak H+1 jatuh tempo, paling banyak sejumlah **batas maksimal hari** yang diatur di **Pengaturan** (default **10 hari**; isi 0 untuk tanpa batas).
+    *   Denda tercatat saat buku dikembalikan dengan status **Belum Lunas**. Petugas menandainya **Lunas** atau **Dibebaskan** (wajib dengan alasan) melalui menu **Manajemen Buku → Denda Keterlambatan**.
+    *   Anggota yang masih memiliki denda **belum lunas** tidak dapat melakukan peminjaman baru.
+*   **Buku Hilang:**
+    *   Buku baru bisa **dinyatakan hilang mulai H+1 jatuh tempo**. Saat peminjam melapor, petugas membuka transaksi (**Pinjam Kembali → Detail / Kembali**) lalu **Laporkan Hilang** dengan tanggal laporan (minimal H+1). Denda buku itu **berhenti bertambah** di tanggal laporan dan **ditahan** (tidak menghalangi peminjaman) sampai ada penyelesaian. Laporan hilang tidak bisa dibatalkan; bila buku ternyata ada, selesaikan dengan **Buku Ditemukan** di menu Buku Hilang.
+    *   **Laporan dini** (sebelum H+1, alasan wajib): denda langsung sebesar **batas maksimal hari × tarif**, langsung ditagih, dan **tetap berlaku** walaupun buku nanti ditemukan atau diganti. Aturan ini mencegah buku dinyatakan hilang lebih awal hanya untuk menghindari denda. Laporan dini membutuhkan batas maksimal hari denda (bukan 0).
+    *   Penyelesaian di menu **Buku Hilang** menentukan denda keterlambatan buku itu:
+        *   **Buku ditemukan** → salinan kembali ke rak; denda sampai tanggal laporan **tetap dibayar**.
+        *   **Ganti buku baru** atau **ganti uang** → denda keterlambatan **dihapus**. Salinan pengganti dicatat dengan sumber dana **PRIBADI** (Pembelian Pribadi, karena dibeli peminjam) dan tahun penggantian, sehingga kode inventarisnya berprefiks `… / PRIBADI / tahun / …`.
+        *   **Pemutihan** → sesuai surat keputusan: denda **dihapus**, **dibayar sebagian**, atau **dibayar penuh** (nomor/isi surat wajib dicatat).
 
 ### C. Cetak Kartu Anggota & Label Buku
 *   **Kartu anggota:** menu **Users**, centang anggota lalu klik **Cetak Kartu** (atau tombol **Kartu** per baris). Ukuran kartu 85,6 × 54 mm (10 kartu per A4) dengan barcode NIS/NIP.

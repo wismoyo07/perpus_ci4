@@ -18,6 +18,13 @@
         </div>
     </div>
 
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success"><?= esc(session()->getFlashdata('success')) ?></div>
+    <?php endif; ?>
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger"><?= esc(session()->getFlashdata('error')) ?></div>
+    <?php endif; ?>
+
     <!-- STATS SUMMARY CARDS -->
     <div class="row g-3 mb-4">
         <!-- Total Hilang -->
@@ -95,6 +102,7 @@
                         <option value="replaced" <?= $status === 'replaced' ? 'selected' : '' ?>>Ganti Buku Fisik</option>
                         <option value="paid" <?= $status === 'paid' ? 'selected' : '' ?>>Ganti Uang (Denda)</option>
                         <option value="written_off" <?= $status === 'written_off' ? 'selected' : '' ?>>Pemutihan</option>
+                        <option value="found" <?= $status === 'found' ? 'selected' : '' ?>>Ditemukan</option>
                     </select>
                 </div>
                 <!-- Rentang Awal -->
@@ -129,7 +137,8 @@
                             <th width="180">Peminjam</th>
                             <th width="180">Buku / Kode Inv Asal</th>
                             <th width="130">Status Ganti</th>
-                            <th width="110">Denda Uang</th>
+                            <th width="110">Ganti Uang</th>
+                            <th width="140">Denda Telat</th>
                             <th width="240">Catatan Penyelesaian</th>
                             <th class="pe-4" width="130">Petugas Settle</th>
                         </tr>
@@ -137,7 +146,7 @@
                     <tbody>
                         <?php if (empty($lostBooks)): ?>
                             <tr>
-                                <td colspan="9" class="text-center py-5 text-muted">
+                                <td colspan="10" class="text-center py-5 text-muted">
                                     <i class="fa-solid fa-folder-open fa-2x mb-3 text-secondary"></i>
                                     <p class="mb-0">Tidak ada data buku hilang.</p>
                                 </td>
@@ -150,7 +159,8 @@
                             <?php foreach ($lostBooks as $l): ?>
                                 <tr>
                                     <td class="ps-4 text-muted"><?= $i++ ?></td>
-                                    <td><?= $l['tanggal_hilang'] ? date('d/m/Y', strtotime($l['tanggal_hilang'])) : '-' ?></td>
+                                    <?php $tglHilang = $l['lost_reported_at'] ?: $l['tanggal_hilang']; ?>
+                                    <td><?= $tglHilang ? date('d/m/Y', strtotime($tglHilang)) : '-' ?></td>
                                     <td class="fw-bold text-dark"><?= esc($l['kode_transaksi']) ?></td>
                                     <td>
                                         <?= esc(preg_replace('/\s*\(siswa\)|\s*\(guru\)|\s*\(pegawai\)/i', '', $l['member_name'])) ?><br>
@@ -185,6 +195,10 @@
                                             <span class="badge bg-secondary py-1.5 px-2 text-white">
                                                 <i class="fa-solid fa-trash-can me-1"></i> Pemutihan
                                             </span>
+                                        <?php elseif($l['lost_settlement_status'] === 'found'): ?>
+                                            <span class="badge bg-primary py-1.5 px-2 text-white">
+                                                <i class="fa-solid fa-magnifying-glass me-1"></i> Ditemukan
+                                            </span>
                                         <?php else: ?>
                                             <span class="badge bg-danger py-1.5 px-2 text-white">
                                                 <i class="fa-solid fa-clock me-1"></i> Pending
@@ -193,6 +207,14 @@
                                     </td>
                                     <td class="fw-bold <?= $l['lost_settlement_status'] === 'paid' ? 'text-dark' : 'text-muted' ?>">
                                         <?= $l['lost_settlement_status'] === 'paid' ? 'Rp '.number_format($l['lost_settlement_amount'], 0, ',', '.') : '-' ?>
+                                    </td>
+                                    <td class="small">
+                                        <?php if ($l['denda_status'] === null): ?>
+                                            <span class="text-muted">-</span>
+                                        <?php else: ?>
+                                            <span class="fw-semibold"><?= 'Rp ' . number_format((float) $l['denda_jumlah'], 0, ',', '.') ?></span>
+                                            <div class="text-muted"><?= ['ditahan' => 'Ditahan', 'belum_lunas' => 'Belum lunas', 'lunas' => 'Lunas', 'dibebaskan' => 'Dihapus/dibebaskan'][$l['denda_status']] ?></div>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="small text-secondary" style="max-width: 240px; white-space: normal;">
                                         <?= esc($l['lost_note'] ?: '-') ?>
@@ -204,7 +226,8 @@
                                                     data-bs-target="#settleModal"
                                                     data-id="<?= $l['id'] ?>"
                                                     data-title="<?= esc($l['judul']) ?>"
-                                                    data-inv="<?= esc($l['original_kode_inventaris'] ?: '-') ?>">
+                                                    data-inv="<?= esc($l['original_kode_inventaris'] ?: '-') ?>"
+                                                    data-denda="<?= $l['denda_status'] === 'ditahan' ? (int) $l['denda_awal'] : 0 ?>">
                                                 <i class="fa-solid fa-check"></i> Settle / Ganti
                                             </button>
                                         <?php else: ?>
@@ -251,10 +274,27 @@
                     <div class="mb-3">
                         <label for="settlementType" class="form-label fw-bold small text-secondary">Metode Ganti Rugi <span class="text-danger">*</span></label>
                         <select name="settlement_type" id="settlementType" class="form-select" required>
-                            <option value="replaced" selected>Ganti Buku Fisik (Menambahkan salinan baru & menambah stok)</option>
+                            <option value="replaced" selected>Ganti Buku Fisik (salinan baru dari peminjam, sumber dana PRIBADI, menambah stok)</option>
                             <option value="paid">Ganti Uang Tunai (Denda ganti rugi & mengurangi stok total)</option>
                             <option value="written_off">Pemutihan (Penghapusan aset tanpa ganti rugi & mengurangi stok total)</option>
+                            <option value="found">Buku Ditemukan (salinan yang sama kembali ke rak)</option>
                         </select>
+                        <small class="text-muted d-block mt-1" id="fineInfo"></small>
+                    </div>
+
+                    <!-- Keputusan denda keterlambatan untuk pemutihan (sesuai surat keputusan) -->
+                    <div class="mb-3 d-none p-3 border rounded bg-light" id="pemutihanFine">
+                        <label class="form-label fw-bold small text-secondary">Denda Keterlambatan Buku Ini (<span id="pemutihanDenda"></span>) <span class="text-danger">*</span></label>
+                        <select name="denda_keputusan" id="dendaKeputusan" class="form-select mb-2">
+                            <option value="dihapus">Dihapus</option>
+                            <option value="sebagian">Dibayar sebagian</option>
+                            <option value="penuh">Dibayar penuh</option>
+                        </select>
+                        <div class="input-group mb-2 d-none" id="dendaNominalGroup">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" name="denda_nominal" id="dendaNominal" class="form-control" min="1" placeholder="Nominal yang wajib dibayar">
+                        </div>
+                        <input type="text" name="denda_surat" id="dendaSurat" class="form-control" maxlength="200" placeholder="Nomor / isi surat keputusan pemutihan">
                     </div>
 
                     <!-- Nominal Denda Ganti Rugi (Hanya muncul jika ganti uang) -->
@@ -292,6 +332,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const amountContainer = document.getElementById('amountContainer');
     const settlementAmount = document.getElementById('settlementAmount');
     const settlementNote = document.getElementById('settlementNote');
+    const fineInfo = document.getElementById('fineInfo');
+    const pemutihanFine = document.getElementById('pemutihanFine');
+    const dendaKeputusan = document.getElementById('dendaKeputusan');
+    const dendaNominalGroup = document.getElementById('dendaNominalGroup');
+    const dendaNominal = document.getElementById('dendaNominal');
+    const dendaSurat = document.getElementById('dendaSurat');
+    let currentDenda = 0;
+    const rupiah = n => 'Rp ' + n.toLocaleString('id-ID');
+
+    // Keterangan & isian denda keterlambatan sesuai metode penyelesaian
+    function syncFine() {
+        const val = settlementType.value;
+        const pemutihan = val === 'written_off' && currentDenda > 0;
+        pemutihanFine.classList.toggle('d-none', !pemutihan);
+        dendaSurat.required = pemutihan;
+        const sebagian = pemutihan && dendaKeputusan.value === 'sebagian';
+        dendaNominalGroup.classList.toggle('d-none', !sebagian);
+        dendaNominal.required = sebagian;
+        dendaNominal.max = currentDenda || '';
+        document.getElementById('pemutihanDenda').textContent = rupiah(currentDenda);
+
+        if (currentDenda <= 0) {
+            fineInfo.textContent = '';
+        } else if (val === 'found') {
+            fineInfo.textContent = 'Denda keterlambatan ' + rupiah(currentDenda) + ' akan DITAGIH (menu Denda).';
+        } else if (val === 'replaced' || val === 'paid') {
+            fineInfo.textContent = 'Denda keterlambatan ' + rupiah(currentDenda) + ' akan DIHAPUS.';
+        } else {
+            fineInfo.textContent = 'Denda keterlambatan mengikuti surat keputusan pemutihan.';
+        }
+    }
+    dendaKeputusan.addEventListener('change', syncFine);
 
     // Menangani pembukaan modal dinamis
     const settleButtons = document.querySelectorAll('.btn-settle');
@@ -300,6 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const detailId = this.getAttribute('data-id');
             const title = this.getAttribute('data-title');
             const inv = this.getAttribute('data-inv');
+            currentDenda = parseInt(this.getAttribute('data-denda') || '0', 10);
 
             // Set Form action
             settleForm.setAttribute('action', `/lost-books/settle/${detailId}`);
@@ -314,6 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
             settlementAmount.removeAttribute('required');
             settlementAmount.value = '';
             settlementNote.value = 'Diganti dengan buku baru';
+            syncFine();
         });
     });
 
@@ -333,8 +407,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 settlementNote.value = 'Diganti dengan buku baru';
             } else if (val === 'written_off') {
                 settlementNote.value = 'Diputihkan dari inventaris perpustakaan';
+            } else if (val === 'found') {
+                settlementNote.value = 'Buku ditemukan dan dikembalikan oleh peminjam';
             }
         }
+        syncFine();
     });
 });
 </script>

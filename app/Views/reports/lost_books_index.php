@@ -176,6 +176,8 @@
                                             <span class="badge bg-info text-white">Ganti Uang</span>
                                         <?php elseif($l['lost_settlement_status'] === 'written_off'): ?>
                                             <span class="badge bg-secondary">Pemutihan</span>
+                                        <?php elseif($l['lost_settlement_status'] === 'found'): ?>
+                                            <span class="badge bg-primary">Ditemukan</span>
                                         <?php else: ?>
                                             <span class="badge bg-danger">Pending</span>
                                         <?php endif; ?>

@@ -23,6 +23,9 @@ final class RouteAccessTest extends CIUnitTestCase
             'salinan buku'       => ['get', 'books/items/1'],
             'cetak label buku'   => ['get', 'books/items/labels/1'],
             'cetak kartu anggota' => ['get', 'users/cards'],
+            'daftar denda'        => ['get', 'fines'],
+            'proses denda'        => ['post', 'fines/settle/1'],
+            'lapor buku hilang'   => ['post', 'transactions/report-lost/1'],
         ];
     }
 

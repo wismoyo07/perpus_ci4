@@ -15,6 +15,11 @@ class BookService
 
     public const DEFAULT_KODE_BARANG = '03.11.01.01.001';
 
+    /**
+     * Sumber dana salinan pengganti buku hilang: dibeli dengan uang pribadi peminjam.
+     */
+    public const SUMBER_PENGGANTI = 'PRIBADI';
+
     protected $bookModel;
     protected $logModel;
     protected $db;

@@ -90,6 +90,12 @@ $routes->group('books', ['filter' => ['auth', 'role:admin,staff']], function($ro
 | Route Bersama admin & staff
 */
 
+// DENDA KETERLAMBATAN: daftar & proses pembayaran (admin & staff)
+$routes->group('fines', ['filter' => ['auth', 'role:admin,staff']], function($routes) {
+    $routes->get('/', 'Fines::index');
+    $routes->post('settle/(:num)', 'Fines::settle/$1');
+});
+
 $routes->group('lost-books', [
     'filter' => ['auth', 'role:staff,admin']
 ], function($routes) {
@@ -116,6 +122,7 @@ $routes->group('transactions', [
     $routes->post('store', 'Transactions::store');
     $routes->get('return/(:num)', 'Transactions::returnForm/$1');
     $routes->post('return/(:num)', 'Transactions::returnProcess/$1');
+    $routes->post('report-lost/(:num)', 'Transactions::reportLost/$1');
 });
 
 
