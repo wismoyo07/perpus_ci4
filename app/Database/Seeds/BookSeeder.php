@@ -2,6 +2,7 @@
 
 namespace App\Database\Seeds;
 
+use App\Services\BookService;
 use CodeIgniter\Database\Seeder;
 
 class BookSeeder extends Seeder
@@ -69,6 +70,18 @@ class BookSeeder extends Seeder
             ['judul' => 'Enterprise Architecture', 'pengarang' => 'Rizal Hidayat', 'penerbit' => 'Enterprise Media', 'about' => 'Perancangan arsitektur enterprise.', 'stok' => 4],
         ];
 
+        // Nomor DDC contoh, urut sesuai daftar buku di atas
+        $ddc = [
+            '005.133', '005.133', '004.6', '005.8', '005.432', '005.7565', '005.3', '004.6782', '005.1', '005.43',
+            '005.43', '005.1', '005.133', '006.312', '006.31', '006.3', '006.78', '025.04', '004.019', '005.2762',
+            '005.2762', '005.2762', '006.74', '006.74', '005.1', '005.1', '005.71', '005.71', '005.8', '005.8',
+            '005.824', '005.74', '332.1', '332.632', '332.6', '332.6', '808.51', '658.4092', '658.404', '005.1',
+            '005.74', '004.6', '005.7', '005.12', '005.8', '004.678', '005.8', '005.86', '005.7', '658.4038',
+        ];
+
+        // id klasifikasi DDC per kode (kelas, divisi, seksi); kosong jika DdcSeeder belum dijalankan
+        $kelas = array_column($db->table('category')->get()->getResultArray(), 'id', 'code_ddc');
+
         $kodeAkun = '03.11.01.01.001';
         $sumberDana = 'BOS';
         $tahun = 2026;
@@ -84,6 +97,8 @@ class BookSeeder extends Seeder
                 'pengarang' => $b['pengarang'],
                 'penerbit' => $b['penerbit'],
                 'about' => $b['about'],
+                'category_id' => $this->klasifikasi($kelas, $ddc[$index]),
+                'ddc_number' => $ddc[$index],
                 'stok_total' => $b['stok'],
                 'stok_tersedia' => $b['stok'],
                 'is_active' => 1,
@@ -110,5 +125,19 @@ class BookSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    /**
+     * Klasifikasi paling spesifik untuk Nomor DDC (seksi -> divisi -> kelas).
+     */
+    private function klasifikasi(array $kelas, string $ddc): ?int
+    {
+        foreach (BookService::ddcCandidates($ddc) as $code) {
+            if (isset($kelas[$code])) {
+                return (int) $kelas[$code];
+            }
+        }
+
+        return null;
     }
 }

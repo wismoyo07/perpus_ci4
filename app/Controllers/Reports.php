@@ -20,7 +20,7 @@ class Reports extends BaseController
         $totalTitles = $db->table('books')->countAllResults();
 
         // 3. Jumlah kategori buku (DDC)
-        $totalCategories = $db->table('category')->countAllResults();
+        $totalCategories = $db->table('category')->where('is_active', 1)->like('code_ddc', '_00', 'none')->countAllResults();
 
         // 4. Jumlah buku tersedia
         $availableBooksResult = $db->table('books')->selectSum('stok_tersedia')->get()->getRowArray();
@@ -70,6 +70,9 @@ class Reports extends BaseController
             'total_books' => $totalBooks,
             'total_titles' => $totalTitles,
             'total_categories' => $totalCategories,
+            'ddc_distribution' => $this->ddcDistribution($db),
+            'ddc_detail' => $this->ddcDetail($db),
+            'total_ddc_detail' => $db->table('category')->where('is_active', 1)->notLike('code_ddc', '_00', 'none')->countAllResults(),
             'available_books' => $availableBooks,
             'borrowed_books' => $borrowedBooks,
             'short_term' => $shortTermBorrowed,
@@ -109,7 +112,7 @@ class Reports extends BaseController
         $totalBooksResult = $db->table('books')->selectSum('stok_total')->get()->getRowArray();
         $totalBooks = $totalBooksResult['stok_total'] ?? 0;
         $totalTitles = $db->table('books')->countAllResults();
-        $totalCategories = $db->table('category')->countAllResults();
+        $totalCategories = $db->table('category')->where('is_active', 1)->like('code_ddc', '_00', 'none')->countAllResults();
         $availableBooksResult = $db->table('books')->selectSum('stok_tersedia')->get()->getRowArray();
         $availableBooks = $availableBooksResult['stok_tersedia'] ?? 0;
 
@@ -153,6 +156,9 @@ class Reports extends BaseController
             'total_books' => $totalBooks,
             'total_titles' => $totalTitles,
             'total_categories' => $totalCategories,
+            'ddc_distribution' => $this->ddcDistribution($db),
+            'ddc_detail' => $this->ddcDetail($db),
+            'total_ddc_detail' => $db->table('category')->where('is_active', 1)->notLike('code_ddc', '_00', 'none')->countAllResults(),
             'available_books' => $availableBooks,
             'borrowed_books' => $borrowedBooks,
             'short_term' => $shortTermBorrowed,
@@ -263,5 +269,47 @@ class Reports extends BaseController
         // Default layout cetak kertas / PDF
         return view('reports/lost_books_print', $data);
     }
-}
 
+    /**
+     * Jumlah judul & eksemplar per kelas DDC aktif, ditambah buku yang belum diklasifikasi.
+     */
+    private function ddcDistribution($db): array
+    {
+        // Per kelas utama: gabungan buku di kelas itu beserta semua divisi & seksinya
+        $rows = $db->query(
+            "SELECT k.code_ddc, k.desc_ddc, COUNT(b.id) AS judul, COALESCE(SUM(b.stok_total), 0) AS eksemplar
+             FROM category k
+             LEFT JOIN category c ON LEFT(c.code_ddc, 1) = LEFT(k.code_ddc, 1)
+             LEFT JOIN books b ON b.category_id = c.id
+             WHERE k.code_ddc LIKE '_00' AND k.is_active = 1
+             GROUP BY k.id, k.code_ddc, k.desc_ddc
+             ORDER BY k.code_ddc"
+        )->getResultArray();
+
+        $belum = $db->table('books')
+            ->select('COUNT(id) AS judul, COALESCE(SUM(stok_total), 0) AS eksemplar')
+            ->where('category_id', null)
+            ->get()
+            ->getRowArray();
+
+        if ((int) $belum['judul'] > 0) {
+            $rows[] = ['code_ddc' => '-', 'desc_ddc' => 'Belum diklasifikasi', 'judul' => $belum['judul'], 'eksemplar' => $belum['eksemplar']];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Rincian per klasifikasi (kelas, divisi, seksi) yang memiliki buku.
+     */
+    private function ddcDetail($db): array
+    {
+        return $db->table('category c')
+            ->select('c.code_ddc, c.desc_ddc, COUNT(b.id) AS judul, COALESCE(SUM(b.stok_total), 0) AS eksemplar')
+            ->join('books b', 'b.category_id = c.id')
+            ->groupBy('c.id, c.code_ddc, c.desc_ddc')
+            ->orderBy('c.code_ddc', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+}

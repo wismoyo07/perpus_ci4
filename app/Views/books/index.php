@@ -90,6 +90,8 @@
                                 <td>
                                     <div class="fw-bold text-dark"><?= esc($b['judul']) ?></div>
                                     <small class="text-muted">Pengarang: <?= esc($b['pengarang'] ?? '-') ?></small>
+                                    <?php $panggil = \App\Services\BookService::nomorPanggil($b); ?>
+                                    <div><small class="<?= $panggil ? 'text-primary fw-semibold' : 'text-muted fst-italic' ?>"><?= $panggil ? 'No. Panggil: ' . esc($panggil) : 'Belum diklasifikasi DDC' ?></small></div>
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border">

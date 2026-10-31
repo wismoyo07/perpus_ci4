@@ -50,6 +50,7 @@ class AppSetting extends BaseController
         $rules = [
             'nama_lembaga' => 'required|min_length[3]|max_length[200]',
             'kode_lembaga' => 'permit_empty|max_length[50]',
+            'kode_barang_buku' => 'required|max_length[30]|regex_match[/^[0-9][0-9.]*$/]',
             'status_akreditasi' => 'permit_empty|max_length[10]',
             'alamat' => 'permit_empty',
             'kepala_sekolah' => 'permit_empty|max_length[150]',
@@ -87,6 +88,7 @@ class AppSetting extends BaseController
             'nama_lembaga' => $this->request->getPost('nama_lembaga'),
             'logo' => $logoName,
             'kode_lembaga' => $this->request->getPost('kode_lembaga'),
+            'kode_barang_buku' => trim($this->request->getPost('kode_barang_buku')),
             'status_akreditasi' => $this->request->getPost('status_akreditasi'),
             'alamat' => $this->request->getPost('alamat'),
             'kepala_sekolah' => $this->request->getPost('kepala_sekolah'),

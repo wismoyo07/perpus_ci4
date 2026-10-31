@@ -153,13 +153,60 @@
             <tr>
                 <td class="text-center">4</td>
                 <td>Jumlah Kategori Buku terdaftar (Klasifikasi DDC)</td>
-                <td class="text-center"><?= $total_categories ?> Kategori</td>
+                <td class="text-center"><?= $total_categories ?> Kelas, <?= (int) $total_ddc_detail ?> Divisi/Seksi</td>
             </tr>
             <tr>
                 <td class="text-center">5</td>
                 <td>Jumlah Buku Hilang (Dalam proses penyelesaian)</td>
                 <td class="text-center text-danger fw-bold"><?= $lost_books ?> Eksemplar</td>
             </tr>
+        </tbody>
+    </table>
+
+    <p class="fw-bold mb-2">Sebaran Koleksi per Kelas DDC</p>
+    <table class="table table-bordered table-laporan align-middle mb-4">
+        <thead>
+            <tr>
+                <th style="width: 12%;">Kelas</th>
+                <th>Deskripsi</th>
+                <th style="width: 18%;">Judul</th>
+                <th style="width: 18%;">Eksemplar</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($ddc_distribution as $d): ?>
+                <tr>
+                    <td class="text-center"><?= esc($d['code_ddc']) ?></td>
+                    <td><?= esc($d['desc_ddc']) ?></td>
+                    <td class="text-center"><?= (int) $d['judul'] ?></td>
+                    <td class="text-center"><?= (int) $d['eksemplar'] ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <p class="fw-bold mb-2">Rincian Koleksi per Divisi / Seksi DDC</p>
+    <table class="table table-bordered table-laporan align-middle mb-4">
+        <thead>
+            <tr>
+                <th width="90">Kode</th>
+                <th>Klasifikasi</th>
+                <th class="text-center" width="120">Judul</th>
+                <th class="text-center" width="120">Eksemplar</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (empty($ddc_detail)): ?>
+                <tr><td colspan="4" class="text-center text-muted">Belum ada buku yang diklasifikasi.</td></tr>
+            <?php endif; ?>
+            <?php foreach ($ddc_detail as $d): ?>
+                <tr>
+                    <td class="text-center"><?= esc($d['code_ddc']) ?></td>
+                    <td><?= esc($d['desc_ddc']) ?></td>
+                    <td class="text-center"><?= (int) $d['judul'] ?></td>
+                    <td class="text-center"><?= (int) $d['eksemplar'] ?></td>
+                </tr>
+            <?php endforeach; ?>
         </tbody>
     </table>
 

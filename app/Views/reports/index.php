@@ -111,14 +111,80 @@
                 <div class="row w-100 text-center">
                     <div class="col-6 border-end">
                         <h2 class="text-primary fw-bold mb-0"><?= $total_categories ?></h2>
-                        <small class="text-muted">Kategori DDC Terdaftar</small>
+                        <small class="text-muted">Kelas DDC Terdaftar<br><span class="small">+ <?= (int) $total_ddc_detail ?> divisi/seksi</span></small>
                     </div>
                     <div class="col-6">
-                        <h2 class="text-success fw-bold mb-0">2.0</h2>
-                        <small class="text-muted">Versi Fitur Laporan</small>
+                        <?php $belum = array_sum(array_map(static fn ($r) => $r['code_ddc'] === '-' ? (int) $r['judul'] : 0, $ddc_distribution)); ?>
+                        <h2 class="<?= $belum ? 'text-warning' : 'text-success' ?> fw-bold mb-0"><?= $belum ?></h2>
+                        <small class="text-muted">Judul Belum Diklasifikasi</small>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sebaran Koleksi per Kelas DDC -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-0">
+        <h5 class="card-title mb-0 text-secondary fw-semibold">Sebaran Koleksi per Kelas DDC</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" width="90">Kelas</th>
+                        <th>Deskripsi</th>
+                        <th class="text-center" width="120">Judul</th>
+                        <th class="text-center pe-3" width="120">Eksemplar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($ddc_distribution as $d): ?>
+                        <tr class="<?= $d['code_ddc'] === '-' ? 'table-warning' : '' ?>">
+                            <td class="ps-3 fw-bold"><?= esc($d['code_ddc']) ?></td>
+                            <td><?= esc($d['desc_ddc']) ?></td>
+                            <td class="text-center"><?= (int) $d['judul'] ?></td>
+                            <td class="text-center pe-3"><?= (int) $d['eksemplar'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Rincian per Divisi / Seksi DDC -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-0">
+        <h5 class="card-title mb-0 text-secondary fw-semibold">Rincian Koleksi per Divisi / Seksi DDC</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" width="90">Kode</th>
+                        <th>Klasifikasi</th>
+                        <th class="text-center" width="120">Judul</th>
+                        <th class="text-center pe-3" width="120">Eksemplar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($ddc_detail)): ?>
+                        <tr><td colspan="4" class="text-center text-muted">Belum ada buku yang diklasifikasi.</td></tr>
+                    <?php endif; ?>
+                    <?php foreach ($ddc_detail as $d): ?>
+                        <tr>
+                            <td class="ps-3 fw-bold"><?= esc($d['code_ddc']) ?></td>
+                            <td><?= esc($d['desc_ddc']) ?></td>
+                            <td class="text-center"><?= (int) $d['judul'] ?></td>
+                            <td class="text-center pe-3"><?= (int) $d['eksemplar'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

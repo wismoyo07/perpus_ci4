@@ -71,6 +71,13 @@ $secondSegment = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : null;
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link <?= $currentSegment === 'admin' && $secondSegment === 'master' ? 'active' : '' ?>" 
+                               href="/admin/master/ddc">
+                                <i class="fa-solid fa-database"></i>
+                                <span>Data Master</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link <?= $currentSegment === 'admin' && $secondSegment === 'settings' ? 'active' : '' ?>" 
                                href="/admin/settings">
                                 <i class="fa-solid fa-gear"></i>

@@ -9,13 +9,18 @@ class SourceFundSeeder extends Seeder
     public function run()
     {
         $data = [
-            ['source_name' => 'BOS'],
-            ['source_name' => 'APBD'],
-            ['source_name' => 'APBN'],
-            ['source_name' => 'Hibah / Donasi'],
-            ['source_name' => 'Pembelian Pribadi'],
+            ['kode' => 'BOS', 'source_name' => 'BOS'],
+            ['kode' => 'APBD', 'source_name' => 'APBD'],
+            ['kode' => 'APBN', 'source_name' => 'APBN'],
+            ['kode' => 'HIBAH', 'source_name' => 'Hibah / Donasi'],
+            ['kode' => 'PRIBADI', 'source_name' => 'Pembelian Pribadi'],
         ];
 
-        $this->db->table('source_fund')->insertBatch($data);
+        // Lewati yang sudah ada agar aman dijalankan ulang (tidak membuat data ganda)
+        foreach ($data as $row) {
+            if (!$this->db->table('source_fund')->where('kode', $row['kode'])->countAllResults()) {
+                $this->db->table('source_fund')->insert($row);
+            }
+        }
     }
 }

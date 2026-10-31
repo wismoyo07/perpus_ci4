@@ -54,7 +54,8 @@ Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang dibuat ole
 | Sirkulasi Transaksi (Peminjaman & Kembali) | ✔ (View) | ✔ (Penuh) | ✘ |
 | Settle Buku Hilang (*Lost Books*) | ✔ | ✔ | ✘ |
 | Laporan & Cetak Dokumen Resmi | ✔ | ✔ | ✘ |
-| Pengaturan Identitas Sekolah (Logo/Kop) | ✔ | ✘ | ✘ |
+| Pengaturan Identitas Sekolah (Logo/Kop, Kode Barang Buku) | ✔ | ✘ | ✘ |
+| Data Master (Sumber Dana & Kelas DDC) | ✔ | ✘ | ✘ |
 | Riwayat Log Aktivitas Sistem | ✔ | ✘ | ✘ |
 
 ### B. Aturan Bisnis Peminjaman Buku (Member Specific Rules)
@@ -75,8 +76,22 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
 
 ### C. Cetak Kartu Anggota & Label Buku
 *   **Kartu anggota:** menu **Users**, centang anggota lalu klik **Cetak Kartu** (atau tombol **Kartu** per baris). Ukuran kartu 85,6 × 54 mm (10 kartu per A4) dengan barcode NIS/NIP.
-*   **Label buku:** menu **Buku → Salinan**, klik **Cetak Label**. Ukuran label 62 × 32 mm (24 label per A4) dengan QR code berisi kode inventaris. Salinan berstatus hilang tidak ikut dicetak.
+*   **Label buku:** menu **Buku → Salinan**, klik **Cetak Label**. Ukuran label 62 × 32 mm (24 label per A4) dengan QR code berisi kode inventaris dan nomor panggil (jika buku sudah diklasifikasi DDC). Salinan berstatus hilang tidak ikut dicetak.
 *   Barcode dan QR code dibuat di server (SVG), sehingga pencetakan tidak memerlukan koneksi internet ke layanan pihak ketiga.
+
+### D. Penomoran Buku & Klasifikasi DDC
+*   **Kode buku** dibuat otomatis dengan format `kode barang / sumber dana / tahun / nomor urut`, misalnya `03.11.01.01.001 / APBD / 2025 / 001`.
+    *   **Kode barang** diatur di menu **Pengaturan** (default `03.11.01.01.001`).
+    *   **Sumber dana** dan **tahun pengadaan** dipilih saat menambah buku. Nomor urut berjalan per kombinasi kode barang, sumber dana, dan tahun.
+*   **Kode inventaris salinan** = kode buku + nomor salinan (`… / 001 / 003`). Jika salinan baru memakai sumber dana atau tahun yang berbeda dari kode bukunya, kode salinan mengikuti sumber dana dan tahun salinan tersebut (misalnya `03.11.01.01.001 / APBN / 2026 / 002 / 006`) tanpa bentrok dengan kode lain.
+*   **Klasifikasi DDC** tersedia dalam tiga tingkat, ditentukan dari kodenya:
+    *   **Kelas utama** `X00` (10 kelas, misalnya 300 Ilmu Sosial),
+    *   **Divisi** `XY0` (misalnya 370 Pendidikan, 950 Sejarah Asia),
+    *   **Seksi** untuk kode lainnya (misalnya 297 Islam).
+*   Per buku, pilih klasifikasi di dropdown (dikelompokkan per kelas utama) dan, bila perlu, isi **nomor DDC rinci** (misalnya `371.3`). Jika nomor DDC diisi, klasifikasi dipilih otomatis dari yang paling spesifik: seksi → divisi → kelas (`297.4` → 297 Islam, `371.3` → 370 Pendidikan, `005.133` → 000).
+*   **Nomor panggil** dibuat otomatis dari nomor DDC + 3 huruf pertama pengarang + huruf pertama judul, misalnya `005.133 AND p`. Ditampilkan di daftar buku, katalog, dan label.
+*   **Data Master** (menu admin): kelola daftar sumber dana dan klasifikasi DDC (kelas, divisi, seksi). Data tidak dihapus permanen, cukup dinonaktifkan. Kode sumber dana tidak bisa diubah setelah dibuat karena sudah tertulis di kode buku.
+*   Laporan menampilkan sebaran judul dan eksemplar per kelas utama (gabungan semua divisi & seksinya), rincian per divisi/seksi, dan buku yang **belum diklasifikasi**.
 
 ---
 

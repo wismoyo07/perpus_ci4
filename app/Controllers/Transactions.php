@@ -493,13 +493,15 @@ class Transactions extends BaseController
                     $nextNumber = intval($lastItem['nomor_urut']) + 1;
                 }
 
-                $urutCopyPadded = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-                $newKodeInventaris = "{$book['kode_buku']} / {$urutCopyPadded}";
+                // Pengganti mengikuti sumber dana salinan yang hilang, tahun penggantian
+                $bookService = new \App\Services\BookService();
+                $sumberDana  = $oldItem['sumber_dana'] ?? (\App\Services\BookService::parseKode($book['kode_buku'])['sumber'] ?? 'BOS');
+                $newKodeInventaris = $bookService->itemKode($book, $sumberDana, intval(date('Y')), $nextNumber);
 
                 $db->table('book_items')->insert([
                     'book_id'         => $bookId,
                     'kode_inventaris' => $newKodeInventaris,
-                    'sumber_dana'     => $oldItem ? $oldItem['sumber_dana'] : 'Ganti Rugi',
+                    'sumber_dana'     => $sumberDana,
                     'tahun_pengadaan' => intval(date('Y')),
                     'nomor_urut'      => $nextNumber,
                     'status'          => 'available',

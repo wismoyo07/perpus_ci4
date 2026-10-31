@@ -56,6 +56,14 @@
                             <td class="fw-medium"><?= esc($book['penerbit'] ?: '-') ?></td>
                         </tr>
                         <tr>
+                            <td class="text-muted">Klasifikasi:</td>
+                            <td class="fw-medium"><?= $book['code_ddc'] ? esc($book['code_ddc'] . ' — ' . $book['desc_ddc']) : '<span class="text-muted">Belum diklasifikasi</span>' ?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Nomor Panggil:</td>
+                            <td class="fw-medium"><?= esc($book['nomor_panggil'] ?: '-') ?></td>
+                        </tr>
+                        <tr>
                             <td class="text-muted">Stok Total:</td>
                             <td class="fw-medium"><span class="badge bg-secondary"><?= $book['stok_total'] ?></span></td>
                         </tr>
@@ -78,11 +86,11 @@
                         <div class="mb-3">
                             <label class="form-label small fw-medium">Sumber Dana</label>
                             <select name="sumber_dana" class="form-select" required>
-                                <option value="BOS" selected>BOS</option>
-                                <option value="APBD">APBD</option>
-                                <option value="Hibah">Hibah</option>
-                                <option value="Komite">Komite</option>
-                                <option value="Umum">Umum / Lainnya</option>
+                                <?php foreach ($sources as $s): ?>
+                                    <option value="<?= esc($s['kode']) ?>" <?= $s['kode'] === 'BOS' ? 'selected' : '' ?>>
+                                        <?= esc($s['kode']) ?> — <?= esc($s['source_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -95,6 +103,7 @@
                                    value="<?= date('Y') ?>" 
                                    required>
                         </div>
+                        <p class="small text-muted">Jika sumber dana atau tahun berbeda dari kode buku, kode salinan memakai sumber dana &amp; tahun tersebut.</p>
                         <button type="submit" class="btn btn-success w-100">
                             <i class="bi bi-plus-circle"></i> Generate Salinan Baru
                         </button>

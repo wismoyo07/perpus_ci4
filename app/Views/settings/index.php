@@ -48,6 +48,18 @@
                     </div>
 
                     <div class="row">
+                        <!-- Kode Barang Buku (awal kode buku) -->
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-medium">Kode Barang Buku *</label>
+                            <input type="text" name="kode_barang_buku" class="form-control" placeholder="03.11.01.01.001" pattern="^[0-9][0-9.]*$" required value="<?= old('kode_barang_buku', $setting['kode_barang_buku'] ?? '03.11.01.01.001') ?>">
+                        </div>
+                        <div class="col-md-8 mb-3 d-flex align-items-end">
+                            <small class="text-muted">Kode barang aset untuk buku. Menjadi awal kode buku baru, misalnya <b><?= esc($setting['kode_barang_buku'] ?? '03.11.01.01.001') ?> / BOS / <?= date('Y') ?> / 001</b>. Kode buku yang sudah ada tidak berubah.</small>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
                         <!-- Status Akreditasi & Website -->
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-medium">Status Akreditasi</label>
