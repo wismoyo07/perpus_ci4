@@ -59,7 +59,7 @@ CREATE TABLE `app_settings` (
   `kode_barang_buku` varchar(30) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '03.11.01.01.001',
   `maks_hari_denda` int NOT NULL DEFAULT '10',
   `nama_lembaga` varchar(200) COLLATE utf8mb4_general_ci NOT NULL,
-  `status_akreditasi` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status_akreditasi` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `alamat` text COLLATE utf8mb4_general_ci,
   `kepala_sekolah` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `wakil_kepala_sekolah` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -306,7 +306,7 @@ CREATE TABLE `migrations` (
   `time` int NOT NULL,
   `batch` int unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -315,7 +315,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'2026-02-17-113210','App\\Database\\Migrations\\CreateUsers','default','App',1793464308,1),(2,'2026-02-17-113310','App\\Database\\Migrations\\CreateBooks','default','App',1793464308,1),(3,'2026-02-17-113410','App\\Database\\Migrations\\CreateTransactions','default','App',1793464308,1),(4,'2026-02-17-113510','App\\Database\\Migrations\\CreateActivityLogs','default','App',1793464308,1),(5,'2026-02-21-000004','App\\Database\\Migrations\\CreateTransactionDetails','default','App',1793464308,1),(6,'2026-03-09-000003','App\\Database\\Migrations\\CreateBookItems','default','App',1793464308,1),(7,'2026-03-09-000007','App\\Database\\Migrations\\CreateAppSettings','default','App',1793464308,1),(8,'2026-03-09-161011','App\\Database\\Migrations\\MasterClass','default','App',1793464309,1),(9,'2026-06-17-000001','App\\Database\\Migrations\\AddPhase2Columns','default','App',1793464309,1),(10,'2026-07-01-052000','App\\Database\\Migrations\\AddContactColumnsToUsers','default','App',1793464309,1),(11,'2026-07-03-084500','App\\Database\\Migrations\\UpdateLostSettlementColumns','default','App',1793464309,1),(12,'2026-10-31-100000','App\\Database\\Migrations\\AddKodeBarangToAppSettings','default','App',1793464309,1),(13,'2026-10-31-100100','App\\Database\\Migrations\\UpdateMasterSourceFundAndCategory','default','App',1793464309,1),(14,'2026-10-31-100200','App\\Database\\Migrations\\AddDdcToBooks','default','App',1793464309,1),(15,'2026-10-31-100300','App\\Database\\Migrations\\AddDdcDivisions','default','App',1793464310,1),(16,'2026-11-01-090000','App\\Database\\Migrations\\LateFinesPerBook','default','App',1793464310,1),(17,'2026-11-01-100000','App\\Database\\Migrations\\AddPartialReturnToTransactionDetails','default','App',1793464310,1),(18,'2026-11-02-090000','App\\Database\\Migrations\\DedupeClassTable','default','App',1793464310,1),(19,'2026-11-03-090000','App\\Database\\Migrations\\CreateFinePayments','default','App',1793467876,2);
+INSERT INTO `migrations` VALUES (1,'2026-02-17-113210','App\\Database\\Migrations\\CreateUsers','default','App',1793464308,1),(2,'2026-02-17-113310','App\\Database\\Migrations\\CreateBooks','default','App',1793464308,1),(3,'2026-02-17-113410','App\\Database\\Migrations\\CreateTransactions','default','App',1793464308,1),(4,'2026-02-17-113510','App\\Database\\Migrations\\CreateActivityLogs','default','App',1793464308,1),(5,'2026-02-21-000004','App\\Database\\Migrations\\CreateTransactionDetails','default','App',1793464308,1),(6,'2026-03-09-000003','App\\Database\\Migrations\\CreateBookItems','default','App',1793464308,1),(7,'2026-03-09-000007','App\\Database\\Migrations\\CreateAppSettings','default','App',1793464308,1),(8,'2026-03-09-161011','App\\Database\\Migrations\\MasterClass','default','App',1793464309,1),(9,'2026-06-17-000001','App\\Database\\Migrations\\AddPhase2Columns','default','App',1793464309,1),(10,'2026-07-01-052000','App\\Database\\Migrations\\AddContactColumnsToUsers','default','App',1793464309,1),(11,'2026-07-03-084500','App\\Database\\Migrations\\UpdateLostSettlementColumns','default','App',1793464309,1),(12,'2026-10-31-100000','App\\Database\\Migrations\\AddKodeBarangToAppSettings','default','App',1793464309,1),(13,'2026-10-31-100100','App\\Database\\Migrations\\UpdateMasterSourceFundAndCategory','default','App',1793464309,1),(14,'2026-10-31-100200','App\\Database\\Migrations\\AddDdcToBooks','default','App',1793464309,1),(15,'2026-10-31-100300','App\\Database\\Migrations\\AddDdcDivisions','default','App',1793464310,1),(16,'2026-11-01-090000','App\\Database\\Migrations\\LateFinesPerBook','default','App',1793464310,1),(17,'2026-11-01-100000','App\\Database\\Migrations\\AddPartialReturnToTransactionDetails','default','App',1793464310,1),(18,'2026-11-02-090000','App\\Database\\Migrations\\DedupeClassTable','default','App',1793464310,1),(19,'2026-11-03-090000','App\\Database\\Migrations\\CreateFinePayments','default','App',1793467876,2),(20,'2026-11-04-090000','App\\Database\\Migrations\\WidenStatusAkreditasi','default','App',1793470479,3);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -494,4 +494,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-11-01  0:31:17
+-- Dump completed on 2026-11-01  1:14:39
