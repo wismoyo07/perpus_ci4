@@ -9,6 +9,8 @@ class Member extends BaseController
 {
     public function transactions()
     {
+        (new \App\Services\TransactionService())->autoLate(); // status terlambat sejak H+1
+
         $db = \Config\Database::connect();
 
         // Ambil transaksi milik member

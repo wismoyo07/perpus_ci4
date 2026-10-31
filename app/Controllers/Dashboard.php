@@ -43,6 +43,8 @@ class Dashboard extends BaseController
 
     public function admin()
     {
+        (new \App\Services\TransactionService())->autoLate(); // status terlambat sejak H+1
+
         $userModel = new UserModel();
         $bookModel = new BookModel();
         $trxModel  = new TransactionModel();
@@ -78,6 +80,8 @@ class Dashboard extends BaseController
 
     public function staff()
     {
+        (new \App\Services\TransactionService())->autoLate(); // status terlambat sejak H+1
+
         $trxModel = new TransactionModel();
 
         $data = [
@@ -90,12 +94,19 @@ class Dashboard extends BaseController
 
     public function member()
     {
+        (new \App\Services\TransactionService())->autoLate(); // status terlambat sejak H+1
+
         $trxModel = new TransactionModel();
         $userId = session()->get('user_id');
 
         $data = [
-            'my_books' => $trxModel
-                ->where('user_id', $userId)
+            // Buku yang masih di tangan anggota (belum dikembalikan dan tidak dilaporkan hilang)
+            'my_books' => \Config\Database::connect()->table('transaction_details td')
+                ->join('transactions t', 't.id = td.transaction_id')
+                ->where('t.user_id', $userId)
+                ->whereIn('t.status', ['dipinjam', 'terlambat'])
+                ->where('td.is_lost', 0)
+                ->where('td.returned_at', null)
                 ->countAllResults()
         ];
 

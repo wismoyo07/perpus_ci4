@@ -30,6 +30,9 @@ class Transactions extends BaseController
     */
     public function index()
     {
+        // Status terlambat otomatis sejak H+1 jatuh tempo
+        $this->service->autoLate();
+
         $search        = $this->request->getGet('search');
         $jenis_pinjam  = $this->request->getGet('jenis_pinjam');
         $status        = $this->request->getGet('status');
@@ -122,6 +125,9 @@ class Transactions extends BaseController
     |*/
     public function adminIndex()
     {
+        // Status terlambat otomatis sejak H+1 jatuh tempo
+        $this->service->autoLate();
+
         $search        = $this->request->getGet('search');
         $jenis_pinjam  = $this->request->getGet('jenis_pinjam');
         $status        = $this->request->getGet('status');
@@ -219,6 +225,9 @@ class Transactions extends BaseController
     |*/
     public function create()
     {
+        // Status terlambat otomatis sejak H+1 jatuh tempo
+        $this->service->autoLate();
+
         $db = \Config\Database::connect();
 
         $data['members'] = $this->userModel
@@ -287,18 +296,76 @@ class Transactions extends BaseController
     */
     public function returnForm($id)
     {
-        $data['transaction'] = $this->transactionModel->find($id);
+        $this->service->autoLate();
 
-        $data['details'] = $this->transactionModel
+        $transaction = $this->transactionModel->find($id);
+        if (!$transaction || $transaction['status'] === 'selesai') {
+            return redirect()->to('/transactions')->with('error', 'Transaksi tidak ditemukan atau sudah selesai');
+        }
+
+        $member  = $this->userModel->find($transaction['user_id']);
+        $maxDays = $this->service->maxFineDays();
+        $today   = date('Y-m-d');
+
+        $details = $this->transactionModel
             ->db->table('transaction_details td')
-            ->select('td.*, b.judul, bi.kode_inventaris')
+            ->select('td.*, b.judul, bi.kode_inventaris, f.jumlah AS denda_ditahan, f.hari_dikenakan, f.status AS denda_status')
             ->join('books b', 'b.id = td.book_id')
             ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
-            ->where('transaction_id', $id)
+            ->join('fines f', 'f.transaction_detail_id = td.id', 'left')
+            ->where('td.transaction_id', $id)
             ->get()
             ->getResultArray();
 
-        return view('transactions/return', $data);
+        // Perkiraan denda per buku bila dikembalikan hari ini (dipotong batas maksimal)
+        $tarif = TransactionService::fineRateFor($member['jenis_pengguna']);
+        foreach ($details as &$d) {
+            $d['dipinjam']       = !$d['is_lost'] && empty($d['returned_at']);
+            $d['hari_estimasi']  = $d['dipinjam'] ? TransactionService::fineDays($transaction['jatuh_tempo'], $today, $maxDays) : 0;
+            $d['denda_estimasi'] = $d['hari_estimasi'] * $tarif;
+        }
+        unset($d);
+
+        return view('transactions/return', [
+            'transaction' => $transaction,
+            'member'      => $member,
+            'details'     => $details,
+            'maxDays'     => $maxDays,
+            'tarif'       => $tarif,
+            'today'       => $today,
+            'terlambat'   => TransactionService::fineDays($transaction['jatuh_tempo'], $today, 0),
+            'hilangMulai' => TransactionService::lostReportFrom($transaction['jatuh_tempo']),
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LAPOR BUKU HILANG (selama masa pinjam)
+    |--------------------------------------------------------------------------
+    */
+    public function reportLost($detailId)
+    {
+        $trxId = $this->transactionIdOfDetail($detailId);
+
+        try {
+            $tanggal = $this->request->getPost('tanggal_lapor') ?: date('Y-m-d');
+            $dini    = $this->service->reportLost((int) $detailId, $tanggal, (int) session('user_id'), (bool) $this->request->getPost('laporan_dini'), $this->request->getPost('alasan_dini'));
+
+            $pesan = $dini
+                ? 'Buku dilaporkan hilang (laporan dini). Denda batas maksimal langsung ditagih di menu Denda dan tetap berlaku walaupun buku nanti ditemukan.'
+                : 'Buku dilaporkan hilang per ' . date('d/m/Y', strtotime($tanggal)) . '. Denda buku ini berhenti di tanggal tersebut dan ditahan sampai ada penyelesaian di menu Buku Hilang.';
+
+            return redirect()->to('/transactions/return/' . $trxId)->with('success', $pesan);
+        } catch (\Exception $e) {
+            return redirect()->to('/transactions/return/' . $trxId)->with('error', $e->getMessage());
+        }
+    }
+
+    private function transactionIdOfDetail($detailId): int
+    {
+        $row = $this->transactionModel->db->table('transaction_details')->select('transaction_id')->where('id', $detailId)->get()->getRowArray();
+
+        return (int) ($row['transaction_id'] ?? 0);
     }
 
 
@@ -310,19 +377,28 @@ class Transactions extends BaseController
     public function returnProcess($id)
     {
         try {
-            $lostBookItemIds = $this->request->getPost('lost_books') ?: [];
+            // Aksi per buku: kembali / hilang / (kosong = belum dibawa, tetap dipinjam)
+            $aksi = (array) ($this->request->getPost('aksi') ?: []);
+            $returnIds = array_keys(array_filter($aksi, static fn ($a) => $a === 'kembali'));
+            $lostIds   = array_keys(array_filter($aksi, static fn ($a) => $a === 'hilang'));
 
-            $denda = $this->service->return(
-                $id,
-                $lostBookItemIds,
-                session('user_id')
-            );
+            $hasil = $this->service->return((int) $id, $returnIds, $lostIds, (int) session('user_id'));
 
-            return redirect()->to('/transactions')
-                ->with('success', "Pengembalian selesai. Denda: Rp {$denda}");
+            $rp = static fn ($n) => 'Rp ' . number_format($n, 0, ',', '.');
+            $pesan = "{$hasil['dikembalikan']} buku dikembalikan" . ($hasil['hilang'] ? ", {$hasil['hilang']} dinyatakan hilang" : '') . '. ';
+            $pesan .= 'Denda ditagih transaksi ini: ' . $rp($hasil['ditagih']);
+            if ($hasil['ditahan'] > 0) {
+                $pesan .= ' (ditahan untuk buku hilang: ' . $rp($hasil['ditahan']) . ')';
+            }
+            $pesan .= $hasil['selesai']
+                ? '. Transaksi selesai.'
+                : ". Masih {$hasil['sisa']} buku dipinjam; dendanya terus berjalan sampai dikembalikan.";
+
+            return redirect()->to($hasil['selesai'] ? '/transactions' : '/transactions/return/' . $id)
+                ->with('success', $pesan);
 
         } catch (\Exception $e) {
-            return redirect()->to('/transactions')
+            return redirect()->to('/transactions/return/' . $id)
                 ->with('error', $e->getMessage());
         }
     }
@@ -345,6 +421,10 @@ class Transactions extends BaseController
             ->select('
                 td.id,
                 td.lost_settlement_status,
+                td.lost_reported_at,
+                f.jumlah AS denda_jumlah,
+                f.jumlah_awal AS denda_awal,
+                f.status AS denda_status,
                 td.lost_note,
                 td.lost_settlement_amount,
                 td.book_item_id,
@@ -363,6 +443,7 @@ class Transactions extends BaseController
             ->join('book_items bi', 'bi.id = td.book_item_id', 'left')
             ->join('users u', 'u.id = t.user_id')
             ->join('users v', 'v.id = td.settled_by', 'left')
+            ->join('fines f', 'f.transaction_detail_id = td.id', 'left')
             ->where('td.is_lost', 1);
 
         if (!empty($status)) {
@@ -438,6 +519,11 @@ class Transactions extends BaseController
                 ->with('error', 'Data tidak ditemukan');
         }
 
+        if (!$detail['is_lost'] || $detail['lost_settlement_status'] !== 'pending') {
+            return redirect()->to('/lost-books')
+                ->with('error', 'Buku hilang ini sudah diselesaikan sebelumnya');
+        }
+
         $transactionId = $detail['transaction_id'];
         $bookId = $detail['book_id'];
         $oldItemId = $detail['book_item_id'];
@@ -493,9 +579,12 @@ class Transactions extends BaseController
                     $nextNumber = intval($lastItem['nomor_urut']) + 1;
                 }
 
-                // Pengganti mengikuti sumber dana salinan yang hilang, tahun penggantian
+                // Buku pengganti dibeli dengan uang pribadi peminjam: sumber dana PRIBADI, tahun penggantian
                 $bookService = new \App\Services\BookService();
-                $sumberDana  = $oldItem['sumber_dana'] ?? (\App\Services\BookService::parseKode($book['kode_buku'])['sumber'] ?? 'BOS');
+                $sumberDana  = \App\Services\BookService::SUMBER_PENGGANTI;
+                if (!$db->table('source_fund')->where('kode', $sumberDana)->countAllResults()) {
+                    throw new \Exception("Sumber dana {$sumberDana} (Pembelian Pribadi) tidak ada di Data Master. Tambahkan dulu di menu Data Master > Sumber Dana.");
+                }
                 $newKodeInventaris = $bookService->itemKode($book, $sumberDana, intval(date('Y')), $nextNumber);
 
                 $db->table('book_items')->insert([
@@ -518,6 +607,22 @@ class Transactions extends BaseController
                     ]);
 
                 $settlementText = "Menggantikan salinan fisik [{$oldKode}] yang hilang dengan salinan baru: [{$newKodeInventaris}]. Catatan: {$userNotes}";
+
+            } elseif ($settlementType === 'found') {
+                // D. Buku ditemukan: salinan yang sama kembali ke rak, stok tersedia bertambah
+                if ($oldItemId) {
+                    $db->table('book_items')
+                        ->where('id', $oldItemId)
+                        ->update(['status' => 'available']);
+                }
+
+                $db->table('books')
+                    ->where('id', $bookId)
+                    ->update([
+                        'stok_tersedia' => $book['stok_tersedia'] + 1
+                    ]);
+
+                $settlementText = "Salinan fisik [{$oldKode}] yang dilaporkan hilang telah ditemukan dan dikembalikan. Catatan: {$userNotes}";
 
             } elseif ($settlementType === 'paid') {
                 // B. Ganti Uang
@@ -556,8 +661,21 @@ class Transactions extends BaseController
                     'settled_at'             => date('Y-m-d H:i:s')
                 ]);
 
+            // Denda keterlambatan buku ini (ditahan) mengikuti penyelesaian:
+            // ditemukan -> ditagih, diganti buku/uang -> dihapus, pemutihan -> sesuai surat
+            $fineResult = $this->service->applyLostSettlementToFine(
+                (int) $detailId,
+                $settlementType,
+                [
+                    'keputusan' => $this->request->getPost('denda_keputusan'),
+                    'nominal'   => $this->request->getPost('denda_nominal'),
+                    'catatan'   => $this->request->getPost('denda_surat'),
+                ],
+                (int) session('user_id')
+            );
+
             // LOG ACTIVITY
-            $logMsg = "Penyelesaian buku hilang (Tipe: {$settlementType}): " . ($newKodeInventaris ? "menggantikan [{$oldKode}] dengan [{$newKodeInventaris}]" : "penghapusan [{$oldKode}]") . " (Transaksi ID {$transactionId})";
+            $logMsg = "Penyelesaian buku hilang (Tipe: {$settlementType}): " . ($newKodeInventaris ? "menggantikan [{$oldKode}] dengan [{$newKodeInventaris}]" : ($settlementType === 'found' ? "ditemukan [{$oldKode}]" : "penghapusan [{$oldKode}]")) . " (Transaksi ID {$transactionId})";
             $this->logActivity($logMsg, $memberId);
 
             $db->transComplete();
@@ -566,10 +684,19 @@ class Transactions extends BaseController
                 throw new \Exception('Gagal memproses penyelesaian buku hilang');
             }
 
-            return redirect()->to('/lost-books')
-                ->with('success', 'Penyelesaian buku hilang berhasil diproses dengan metode: ' . ($settlementType === 'replaced' ? 'Ganti Buku Fisik' : ($settlementType === 'paid' ? 'Ganti Uang' : 'Pemutihan')));
+            $metode = ['replaced' => 'Ganti Buku Fisik', 'paid' => 'Ganti Uang', 'written_off' => 'Pemutihan', 'found' => 'Buku Ditemukan'][$settlementType];
+            $pesan  = "Penyelesaian buku hilang berhasil diproses dengan metode: {$metode}.";
+            if ($fineResult) {
+                $pesan .= $fineResult['status'] === 'dibebaskan'
+                    ? ' Denda keterlambatan buku ini dihapus.'
+                    : ' Denda keterlambatan Rp ' . number_format($fineResult['jumlah'], 0, ',', '.') . ' kini ditagih (menu Denda).';
+            }
+
+            return redirect()->to('/lost-books')->with('success', $pesan);
 
         } catch (\Exception $e) {
+            $db->transRollback();
+
             return redirect()->to('/lost-books')
                 ->with('error', $e->getMessage());
         }

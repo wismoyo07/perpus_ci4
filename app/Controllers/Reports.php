@@ -31,6 +31,7 @@ class Reports extends BaseController
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
+            ->where('td.returned_at', null)
             ->countAllResults();
 
         // 6. Jumlah buku dipinjam jangka pendek
@@ -38,6 +39,7 @@ class Reports extends BaseController
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
+            ->where('td.returned_at', null)
             ->where('t.jenis_peminjaman', 'pendek')
             ->countAllResults();
 
@@ -46,6 +48,7 @@ class Reports extends BaseController
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
+            ->where('td.returned_at', null)
             ->where('t.jenis_peminjaman', 'panjang')
             ->countAllResults();
 
@@ -120,12 +123,14 @@ class Reports extends BaseController
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
+            ->where('td.returned_at', null)
             ->countAllResults();
 
         $shortTermBorrowed = $db->table('transaction_details td')
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
+            ->where('td.returned_at', null)
             ->where('t.jenis_peminjaman', 'pendek')
             ->countAllResults();
 
@@ -133,6 +138,7 @@ class Reports extends BaseController
             ->join('transactions t', 't.id = td.transaction_id')
             ->whereIn('t.status', ['dipinjam', 'terlambat'])
             ->where('td.is_lost', 0)
+            ->where('td.returned_at', null)
             ->where('t.jenis_peminjaman', 'panjang')
             ->countAllResults();
 

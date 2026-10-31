@@ -100,11 +100,21 @@ foreach ($trx['details'] ?? [] as $d) {
                                         <span class="badge bg-secondary">
                                             Hilang (Pemutihan)
                                         </span>
+                                    <?php elseif($d['lost_settlement_status'] === 'found'): ?>
+                                        <span class="badge bg-primary">
+                                            Hilang (Ditemukan)
+                                        </span>
                                     <?php else: ?>
                                         <span class="badge bg-danger">
                                             Hilang (Belum Diganti)
                                         </span>
                                     <?php endif; ?>
+
+                                <?php elseif (!empty($d['returned_at'])): ?>
+
+                                    <span class="badge bg-secondary">
+                                        Dikembalikan <?= date('d/m/Y', strtotime($d['returned_at'])) ?>
+                                    </span>
 
                                 <?php else: ?>
 

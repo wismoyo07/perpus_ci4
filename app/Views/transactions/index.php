@@ -174,6 +174,11 @@
                         <?php elseif ($trx['status'] === 'terlambat'): ?>
                             <span class="badge bg-danger">Terlambat</span>
                         <?php endif; ?>
+                        <?php
+                            $kembaliN = count(array_filter($trx['details'], static fn ($x) => !empty($x['returned_at']) || $x['is_lost']));
+                            if ($kembaliN > 0): ?>
+                            <div class="small text-muted mt-1"><?= $kembaliN ?>/<?= count($trx['details']) ?> buku kembali/hilang</div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </td>
 
@@ -192,7 +197,7 @@
                     <?php if($trx['status'] !== 'selesai'): ?>
                         <a href="/transactions/return/<?= $trx['id'] ?>"
                         class="btn btn-sm btn-warning">
-                        Return
+                        Detail / Kembali
                         </a>
                     <?php endif; ?>
                 </td>
@@ -224,7 +229,7 @@
                                                     <?php if ($det['is_lost']): ?>
                                                         <span class="badge bg-danger">Hilang</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-success">Kembali</span>
+                                                        <span class="badge bg-success">Kembali<?= !empty($det['returned_at']) ? ' ' . date('d/m', strtotime($det['returned_at'])) : '' ?></span>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>

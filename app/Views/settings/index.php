@@ -53,7 +53,12 @@
                             <label class="form-label fw-medium">Kode Barang Buku *</label>
                             <input type="text" name="kode_barang_buku" class="form-control" placeholder="03.11.01.01.001" pattern="^[0-9][0-9.]*$" required value="<?= old('kode_barang_buku', $setting['kode_barang_buku'] ?? '03.11.01.01.001') ?>">
                         </div>
-                        <div class="col-md-8 mb-3 d-flex align-items-end">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-medium">Batas Maksimal Hari Denda *</label>
+                            <input type="number" name="maks_hari_denda" class="form-control" min="0" max="365" required value="<?= old('maks_hari_denda', $setting['maks_hari_denda'] ?? 10) ?>">
+                            <small class="text-muted">Denda keterlambatan per buku dihitung paling banyak sekian hari. Isi 0 untuk tanpa batas.</small>
+                        </div>
+                        <div class="col-md-4 mb-3 d-flex align-items-end">
                             <small class="text-muted">Kode barang aset untuk buku. Menjadi awal kode buku baru, misalnya <b><?= esc($setting['kode_barang_buku'] ?? '03.11.01.01.001') ?> / BOS / <?= date('Y') ?> / 001</b>. Kode buku yang sudah ada tidak berubah.</small>
                         </div>
                     </div>

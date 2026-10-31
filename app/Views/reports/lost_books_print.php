@@ -218,6 +218,8 @@
                                 Ganti Uang
                             <?php elseif($l['lost_settlement_status'] === 'written_off'): ?>
                                 Pemutihan
+                            <?php elseif($l['lost_settlement_status'] === 'found'): ?>
+                                Ditemukan
                             <?php else: ?>
                                 PENDING
                             <?php endif; ?>
