@@ -51,10 +51,6 @@ $routes->get('member/dashboard', 'Dashboard::member', [
     'filter' => ['auth','role:member']
 ]);
 
-$routes->group('books', ['filter' => 'role:admin,staff'], function($routes) {
-    $routes->get('/', 'Books::index');
-});
-
 /*
 |--------------------------------------------------------------------------
 | BOOKS ROUTES
@@ -62,7 +58,7 @@ $routes->group('books', ['filter' => 'role:admin,staff'], function($routes) {
 | Hanya admin & staff
 */
 
-$routes->group('books', ['filter' => 'auth', 'role:admin,staff'], function($routes) {
+$routes->group('books', ['filter' => ['auth', 'role:admin,staff']], function($routes) {
 
     $routes->get('/', 'Books::index');
     $routes->get('create', 'Books::create');
@@ -77,6 +73,7 @@ $routes->group('books', ['filter' => 'auth', 'role:admin,staff'], function($rout
     $routes->get('items/(:num)', 'Books::items/$1');
     $routes->post('items/store/(:num)', 'Books::storeItem/$1');
     $routes->post('items/delete/(:num)', 'Books::deleteItem/$1');
+    $routes->get('items/labels/(:num)', 'Books::labels/$1');
 
 });
 
@@ -145,6 +142,7 @@ $routes->group('users', [
 ], function($routes){
 
     $routes->get('/', 'Users::index');
+    $routes->get('cards', 'Users::cards');
     $routes->get('create', 'Users::create');
     $routes->post('store', 'Users::store');
     $routes->get('edit/(:num)', 'Users::edit/$1');

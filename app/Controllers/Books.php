@@ -205,6 +205,41 @@ class Books extends BaseController
         return view('books/items', $data);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CETAK LABEL SALINAN BUKU
+    |--------------------------------------------------------------------------
+    */
+    public function labels($bookId)
+    {
+        $book = $this->bookModel->find($bookId);
+        if (!$book) {
+            return redirect()->to('/books')->with('error', 'Buku tidak ditemukan');
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('book_items')
+            ->where('book_id', $bookId)
+            ->where('status !=', 'lost');
+
+        $ids = array_filter(array_map('intval', (array) $this->request->getGet('selected')));
+        if (!empty($ids)) {
+            $builder->whereIn('id', $ids);
+        }
+
+        $setting = (new \App\Models\AppSettingModel())->find(1) ?? [
+            'nama_lembaga' => 'Perpustakaan Sekolah',
+        ];
+
+        helper('barcode');
+
+        return view('books/labels', [
+            'book'    => $book,
+            'items'   => $builder->orderBy('nomor_urut', 'ASC')->get()->getResultArray(),
+            'setting' => $setting,
+        ]);
+    }
+
     public function storeItem($bookId)
     {
         try {

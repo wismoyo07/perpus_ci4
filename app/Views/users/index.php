@@ -76,6 +76,9 @@
                 <option value="activate">Aktifkan</option>
             </select>
             <button type="submit" class="btn btn-sm btn-warning fw-bold text-dark"><i class="fa-solid fa-bolt"></i> Apply</button>
+            <button type="submit" formaction="/users/cards" formmethod="get" formtarget="_blank" class="btn btn-sm btn-outline-primary fw-bold">
+                <i class="fa-solid fa-id-card"></i> Cetak Kartu
+            </button>
         </div>
 
         <!-- TABLE OF USERS -->
@@ -178,6 +181,10 @@
                                                 <?php if ($currentRole === 'admin' || $currentRole === 'staff'): ?>
                                                     <a href="/users/edit/<?= $u['id'] ?>" class="btn btn-sm btn-primary fw-bold">
                                                         <i class="fa-solid fa-pen-to-square"></i> Ubah
+                                                    </a>
+
+                                                    <a href="/users/cards?selected[]=<?= $u['id'] ?>" target="_blank" class="btn btn-sm btn-outline-primary fw-bold">
+                                                        <i class="fa-solid fa-id-card"></i> Kartu
                                                     </a>
 
                                                     <button type="button" class="btn btn-sm btn-warning fw-bold text-dark" 

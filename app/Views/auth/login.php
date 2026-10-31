@@ -49,7 +49,7 @@
         </div>
 
         <div class="text-end mb-4">
-            <a href="#" class="nk-auth-link" data-auth-switch="#l-forget-password">Lupa password?</a>
+            <small class="text-muted">Lupa password? Hubungi petugas perpustakaan untuk reset.</small>
         </div>
 
         <button type="submit" class="btn btn-primary w-100 nk-auth-btn">
