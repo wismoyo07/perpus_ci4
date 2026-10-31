@@ -14,14 +14,11 @@ class ClassSeeder extends Seeder
             'IX-A','IX-B','IX-C','IX-D','IX-E'
         ];
 
-        $data = [];
-
+        // Lewati yang sudah ada agar aman dijalankan ulang (tidak membuat data ganda)
         foreach ($classes as $class) {
-            $data[] = [
-                'class_name' => $class
-            ];
+            if (!$this->db->table('class')->where('class_name', $class)->countAllResults()) {
+                $this->db->table('class')->insert(['class_name' => $class]);
+            }
         }
-
-        $this->db->table('class')->insertBatch($data);
     }
 }
