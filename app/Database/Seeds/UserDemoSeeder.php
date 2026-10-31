@@ -22,7 +22,7 @@ class UserDemoSeeder extends Seeder
                 'member_code' => 'STF-002',
                 'is_validated' => 1,
                 'is_archived' => 0,
-                'must_change_password' => 0
+                'must_change_password' => 1
             ],
             // 2. Pegawai Sekolah (Member)
             [
@@ -34,7 +34,7 @@ class UserDemoSeeder extends Seeder
                 'member_code' => 'PEG-001',
                 'is_validated' => 1,
                 'is_archived' => 0,
-                'must_change_password' => 0
+                'must_change_password' => 1
             ],
             // 3. Guru (Member)
             [
@@ -46,7 +46,7 @@ class UserDemoSeeder extends Seeder
                 'member_code' => 'GRU-001',
                 'is_validated' => 1,
                 'is_archived' => 0,
-                'must_change_password' => 0
+                'must_change_password' => 1
             ],
             // 4. Siswa 1 (Member)
             [
@@ -58,7 +58,7 @@ class UserDemoSeeder extends Seeder
                 'member_code' => 'SSW-001',
                 'is_validated' => 1,
                 'is_archived' => 0,
-                'must_change_password' => 0
+                'must_change_password' => 1
             ],
             // 5. Siswa 2 (Member)
             [
@@ -70,7 +70,7 @@ class UserDemoSeeder extends Seeder
                 'member_code' => 'SSW-002',
                 'is_validated' => 1,
                 'is_archived' => 0,
-                'must_change_password' => 0
+                'must_change_password' => 1
             ]
         ];
 

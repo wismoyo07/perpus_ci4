@@ -189,6 +189,32 @@
     </div>
 </div>
 
+<!-- Ringkasan Denda -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0 text-secondary fw-semibold">Ringkasan Denda</h5>
+        <a href="/fines?status=semua" class="btn btn-sm btn-outline-secondary">Lihat Menu Denda</a>
+    </div>
+    <div class="card-body pt-0">
+        <div class="row g-3">
+            <?php foreach ([
+                ['Diterima (Lunas)', 'rp_lunas', 'jml_lunas', 'text-success'],
+                ['Belum Dibayar', 'rp_belum', 'jml_belum', 'text-danger'],
+                ['Ditahan (Buku Hilang)', 'rp_tahan', 'jml_tahan', 'text-warning'],
+                ['Dibebaskan', 'rp_bebas', 'jml_bebas', 'text-secondary'],
+            ] as [$label, $rp, $jml, $cls]): ?>
+            <div class="col-6 col-md-3">
+                <div class="border rounded p-3 h-100">
+                    <div class="small text-muted"><?= $label ?></div>
+                    <div class="fs-5 fw-bold <?= $cls ?>">Rp <?= number_format((float) $fine_totals[$rp], 0, ',', '.') ?></div>
+                    <div class="small text-muted"><?= (int) $fine_totals[$jml] ?> denda</div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
 <!-- Riwayat Transaksi Terbaru -->
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
@@ -229,7 +255,7 @@
                                         <span class="badge bg-success">Selesai</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="fw-medium text-danger">Rp <?= number_format($t['total_denda'], 0, ',', '.') ?></td>
+                                <td><span class="fw-medium text-danger">Rp <?= number_format($t['total_denda'], 0, ',', '.') ?></span><?= fine_badge($t['fine'], $t['status']) ?></td>
                                 <td class="pe-4"><?= esc($t['staff_name']) ?></td>
                             </tr>
                         <?php endforeach; ?>

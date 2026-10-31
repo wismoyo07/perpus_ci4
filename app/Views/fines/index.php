@@ -3,12 +3,6 @@
 
 <?php
 $rp = static fn ($n) => 'Rp ' . number_format((float) $n, 0, ',', '.');
-$badge = [
-    'belum_lunas' => ['bg-warning text-dark', 'Belum Lunas'],
-    'ditahan'     => ['bg-info text-dark', 'Ditahan'],
-    'lunas'       => ['bg-success', 'Lunas'],
-    'dibebaskan'  => ['bg-secondary', 'Dibebaskan'],
-];
 ?>
 
 <div class="container-fluid">
@@ -22,7 +16,14 @@ $badge = [
     </div>
 
     <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success"><?= esc(session()->getFlashdata('success')) ?></div>
+        <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span><?= esc(session()->getFlashdata('success')) ?></span>
+            <?php if (session()->getFlashdata('receipt_id')): ?>
+                <a href="/fines/receipt/<?= (int) session()->getFlashdata('receipt_id') ?>" target="_blank" class="btn btn-sm btn-success fw-bold">
+                    <i class="fa-solid fa-print"></i> Cetak Kwitansi
+                </a>
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
     <?php if (session()->getFlashdata('error')): ?>
         <div class="alert alert-danger"><?= esc(session()->getFlashdata('error')) ?></div>
@@ -31,8 +32,8 @@ $badge = [
     <!-- RINGKASAN -->
     <div class="row g-3 mb-4">
         <?php foreach ([
-            ['Belum Lunas', 'rp_belum', 'jml_belum', 'bg-warning text-dark'],
-            ['Ditahan (Buku Hilang)', 'rp_tahan', 'jml_tahan', 'bg-info text-dark'],
+            ['Belum Lunas', 'rp_belum', 'jml_belum', 'bg-danger text-white'],
+            ['Ditahan (Buku Hilang)', 'rp_tahan', 'jml_tahan', 'bg-warning text-dark'],
             ['Lunas (Uang Masuk)', 'rp_lunas', 'jml_lunas', 'bg-success text-white'],
             ['Dibebaskan', 'rp_bebas', 'jml_bebas', 'bg-secondary text-white'],
         ] as [$label, $rpKey, $jmlKey, $cls]): ?>
@@ -61,8 +62,8 @@ $badge = [
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small fw-bold text-secondary">Cari Member / Transaksi / Judul</label>
-                    <input type="text" name="search" class="form-control form-control-sm" value="<?= esc($search) ?>" placeholder="Nama, NIS/NIP, TRX-..., judul">
+                    <label class="form-label small fw-bold text-secondary">Cari Member / Transaksi / Judul / Kwitansi</label>
+                    <input type="text" name="search" class="form-control form-control-sm" value="<?= esc($search) ?>" placeholder="Nama, NIS/NIP, TRX-..., judul, KW/...">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small fw-bold text-secondary">Tercatat Dari</label>
@@ -87,7 +88,8 @@ $badge = [
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light text-uppercase small text-muted">
                         <tr>
-                            <th class="ps-4" width="50">No</th>
+                            <th class="ps-4" width="40"><i class="fa-regular fa-square-check" title="Pilih untuk dibayar sekaligus"></i></th>
+                            <th width="50">No</th>
                             <th width="150">Transaksi</th>
                             <th>Member</th>
                             <th>Buku</th>
@@ -100,12 +102,18 @@ $badge = [
                     </thead>
                     <tbody>
                         <?php if (empty($fines)): ?>
-                            <tr><td colspan="9" class="text-center text-muted py-4">Tidak ada data denda untuk filter ini.</td></tr>
+                            <tr><td colspan="10" class="text-center text-muted py-4">Tidak ada data denda untuk filter ini.</td></tr>
                         <?php endif; ?>
                         <?php foreach ($fines as $i => $f): ?>
-                            <?php [$cls, $label] = $badge[$f['status']]; ?>
                             <tr>
-                                <td class="ps-4"><?= ($page - 1) * $perPage + $i + 1 ?></td>
+                                <td class="ps-4">
+                                    <?php if ($f['status'] === 'belum_lunas'): ?>
+                                        <input type="checkbox" class="form-check-input fine-pick" value="<?= $f['id'] ?>"
+                                               data-user="<?= $f['user_id'] ?>" data-member="<?= esc($f['member_name']) ?>"
+                                               data-jumlah="<?= (float) $f['jumlah'] ?>">
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= ($page - 1) * $perPage + $i + 1 ?></td>
                                 <td><code class="fw-bold"><?= esc($f['kode_transaksi']) ?></code></td>
                                 <td>
                                     <div class="fw-bold text-dark"><?= esc($f['member_name']) ?></div>
@@ -141,11 +149,12 @@ $badge = [
                                         <div class="small text-muted text-decoration-line-through fw-normal"><?= $rp($f['jumlah_awal']) ?></div>
                                     <?php endif; ?>
                                 </td>
-                                <td><span class="badge <?= $cls ?>"><?= $label ?></span></td>
+                                <td><?= fine_status_badge($f['status']) ?></td>
                                 <td class="small text-muted">
                                     <?php if ($f['diproses_at']): ?>
                                         <?= esc($f['petugas_name'] ?? '-') ?>, <?= date('d/m/Y H:i', strtotime($f['diproses_at'])) ?>
                                     <?php endif; ?>
+                                    <?php if ($f['nomor_kwitansi']): ?><div>Kwitansi <code><?= esc($f['nomor_kwitansi']) ?></code></div><?php endif; ?>
                                     <?php if ($f['catatan']): ?><div class="fst-italic">"<?= esc($f['catatan']) ?>"</div><?php endif; ?>
                                     <?php if ($f['status'] === 'ditahan'): ?>
                                         <a href="/lost-books?status=pending">Selesaikan di Buku Hilang →</a>
@@ -162,6 +171,10 @@ $badge = [
                                                 data-denda="<?= esc($rp($f['jumlah'])) ?>">
                                             <i class="fa-solid fa-cash-register"></i> Proses
                                         </button>
+                                    <?php elseif ($f['payment_id']): ?>
+                                        <a href="/fines/receipt/<?= $f['payment_id'] ?>" target="_blank" class="btn btn-sm btn-outline-secondary" title="Cetak ulang kwitansi">
+                                            <i class="fa-solid fa-print"></i> Kwitansi
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -173,6 +186,51 @@ $badge = [
     </div>
 
     <?= $pager ?>
+</div>
+
+<!-- BAR PEMBAYARAN GABUNGAN -->
+<div id="payBar" class="position-fixed bottom-0 start-0 end-0 bg-white border-top shadow-lg py-2 d-none" style="z-index: 1030;">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <b id="payCount">0</b> denda dipilih untuk <b id="payMember"></b>, total <b class="text-danger" id="payTotal"></b>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="payClear">Batal Pilih</button>
+            <button type="button" class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#payModal">
+                <i class="fa-solid fa-receipt"></i> Bayar &amp; Buat Kwitansi
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PEMBAYARAN GABUNGAN -->
+<div class="modal fade" id="payModal" tabindex="-1" aria-labelledby="payModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold" id="payModalLabel"><i class="fa-solid fa-receipt me-2"></i> Bayar Denda</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="payForm" method="post" action="/fines/pay">
+                <?= csrf_field() ?>
+                <div class="modal-body">
+                    <p class="mb-2">Semua denda terpilih akan dicatat <b>LUNAS</b> dalam <b>satu kwitansi</b>.</p>
+                    <div class="p-3 bg-light rounded mb-3">
+                        <div class="fw-bold text-dark" id="payModalMember"></div>
+                        <div class="small"><span id="payModalCount"></span> denda</div>
+                        <div class="fs-5 fw-bold text-danger" id="payModalTotal"></div>
+                    </div>
+                    <label class="form-label fw-semibold">Catatan <span class="text-muted fw-normal">(opsional)</span></label>
+                    <textarea name="catatan" class="form-control" rows="2" maxlength="255" placeholder="Misalnya: dibayar tunai oleh orang tua"></textarea>
+                    <div id="payIds"></div>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-outline-secondary fw-semibold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success fw-bold">Simpan &amp; Buat Kwitansi</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- MODAL PROSES DENDA -->
@@ -195,7 +253,7 @@ $badge = [
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Penyelesaian</label>
                         <select name="jenis" id="fineJenis" class="form-select" required>
-                            <option value="lunas">Lunas (dibayar penuh)</option>
+                            <option value="lunas">Lunas (dibayar penuh, kwitansi dibuat)</option>
                             <option value="dibebaskan">Dibebaskan (diputihkan)</option>
                         </select>
                     </div>
@@ -241,6 +299,42 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     jenis.addEventListener('change', syncJenis);
+
+    // Pembayaran gabungan: hanya denda milik satu anggota dalam satu kwitansi
+    const picks  = Array.from(document.querySelectorAll('.fine-pick'));
+    const bar    = document.getElementById('payBar');
+    const rupiah = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+
+    function selected() { return picks.filter(p => p.checked); }
+
+    function syncBar() {
+        const sel   = selected();
+        const total = sel.reduce((t, p) => t + parseFloat(p.dataset.jumlah), 0);
+        bar.classList.toggle('d-none', sel.length === 0);
+        if (!sel.length) return;
+        document.getElementById('payCount').textContent  = sel.length;
+        document.getElementById('payMember').textContent = sel[0].dataset.member;
+        document.getElementById('payTotal').textContent  = rupiah(total);
+        document.getElementById('payModalMember').textContent = sel[0].dataset.member;
+        document.getElementById('payModalCount').textContent  = sel.length;
+        document.getElementById('payModalTotal').textContent  = rupiah(total);
+        document.getElementById('payIds').innerHTML = sel
+            .map(p => '<input type="hidden" name="fine_ids[]" value="' + p.value + '">').join('');
+    }
+
+    picks.forEach(p => p.addEventListener('change', function () {
+        const other = selected().find(x => x.dataset.user !== this.dataset.user);
+        if (this.checked && other) {
+            alert('Satu kwitansi hanya untuk denda milik satu anggota (' + other.dataset.member + ').');
+            this.checked = false;
+        }
+        syncBar();
+    }));
+
+    document.getElementById('payClear').addEventListener('click', function () {
+        picks.forEach(p => p.checked = false);
+        syncBar();
+    });
 });
 </script>
 

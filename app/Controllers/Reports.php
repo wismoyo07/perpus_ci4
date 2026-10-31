@@ -81,7 +81,8 @@ class Reports extends BaseController
             'short_term' => $shortTermBorrowed,
             'long_term' => $longTermBorrowed,
             'lost_books' => $lostBooks,
-            'transactions' => $recentTransactions
+            'transactions' => (new \App\Models\FineModel())->attachSummary($recentTransactions),
+            'fine_totals' => (new \App\Models\FineModel())->totals()
         ];
 
         return view('reports/index', $data);
@@ -170,7 +171,8 @@ class Reports extends BaseController
             'short_term' => $shortTermBorrowed,
             'long_term' => $longTermBorrowed,
             'lost_books' => $lostBooks,
-            'transactions' => $allTransactions,
+            'transactions' => (new \App\Models\FineModel())->attachSummary($allTransactions),
+            'fine_totals' => (new \App\Models\FineModel())->totals(),
             'tanggal_cetak' => date('d F Y')
         ];
 

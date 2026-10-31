@@ -10,7 +10,7 @@ class AuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        $uri = service('uri')->getPath();
+        $uri = trim(service('uri')->getPath(), '/');
 
         // PUBLIC PAGES
         $public = [
@@ -25,6 +25,11 @@ class AuthFilter implements FilterInterface
 
         if (!session()->get('logged_in')) {
             return redirect()->to('/auth/login');
+        }
+
+        // Akun yang wajib ganti password hanya boleh membuka halaman ganti password atau keluar
+        if (session()->get('force_password_change') && !in_array($uri, ['force-change-password', 'logout'], true)) {
+            return redirect()->to('/force-change-password');
         }
     }
 

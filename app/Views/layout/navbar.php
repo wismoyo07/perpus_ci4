@@ -108,6 +108,15 @@ $secondSegment = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : null;
                         </a>
                     </li>
 
+                    <!-- Denda Saya -->
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentSegment === 'member' && $secondSegment === 'fines' ? 'active' : '' ?>"
+                           href="/member/fines">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                            <span>Denda Saya</span>
+                        </a>
+                    </li>
+
                 <?php endif; ?>
 
             </ul>

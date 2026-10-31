@@ -22,6 +22,13 @@
 </div>
 <?php endif; ?>
 
+<?php if ((int) $fineTotals['jml_belum'] > 0): ?>
+<div class="alert alert-danger d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span>💰 Anda memiliki denda belum lunas sebesar <b>Rp <?= number_format((float) $fineTotals['rp_belum'], 0, ',', '.') ?></b>. Peminjaman baru diblokir sampai denda dilunasi.</span>
+    <a href="/member/fines" class="btn btn-sm btn-light">Lihat Denda Saya</a>
+</div>
+<?php endif; ?>
+
 <div class="accordion" id="trxAccordion">
 
 <?php foreach ($transactions as $index => $trx): ?>
@@ -34,12 +41,6 @@ foreach ($trx['details'] ?? [] as $d) {
     }
 }
 ?>
-
-<?php if($dueSoon > 0): ?>
-    <div class="alert alert-warning">
-        ⏳ Anda memiliki <?= $dueSoon ?> transaksi mendekati jatuh tempo (H-2).
-    </div>
-<?php endif; ?>
 
     <div class="accordion-item mb-2 
         <?= $hasLostPending ? 'border border-danger' : '' ?>">
@@ -145,6 +146,7 @@ foreach ($trx['details'] ?? [] as $d) {
                 <div>
                     <strong>Denda:</strong>
                     Rp <?= number_format($trx['total_denda'],0,',','.') ?>
+                    <?= fine_badge($trx['fine'], $trx['status']) ?>
                 </div>
 
             </div>

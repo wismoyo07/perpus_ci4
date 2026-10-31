@@ -71,7 +71,7 @@ class Dashboard extends BaseController
             'total_books'  => $bookModel->countAll(),
             'total_trx'    => $trxModel->countAll(),
             'total_late'   => $trxModel->where('status','terlambat')->countAllResults(),
-            'recent_trx'   => $recentTrx,
+            'recent_trx'   => (new \App\Models\FineModel())->attachSummary($recentTrx),
             'recent_logs'  => $recentLogs
         ];
 

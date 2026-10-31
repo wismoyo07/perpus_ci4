@@ -768,6 +768,115 @@ class TransactionService
 
     /*
     |--------------------------------------------------------------------------
+    | KWITANSI PEMBAYARAN DENDA
+    |--------------------------------------------------------------------------
+    */
+    /**
+     * Lunasi satu atau beberapa denda belum lunas milik anggota yang sama dalam satu kwitansi.
+     *
+     * @param int[] $fineIds
+     *
+     * @return array baris fine_payments yang baru dibuat
+     */
+    public function payFines(array $fineIds, int $staffId, ?string $catatan = null): array
+    {
+        $fineIds = array_values(array_unique(array_filter(array_map('intval', $fineIds))));
+        $catatan = trim((string) $catatan);
+
+        return $this->runInTransaction(function () use ($fineIds, $staffId, $catatan) {
+            $fines = $fineIds === [] ? [] : $this->db->query(
+                'SELECT * FROM fines WHERE id IN (' . implode(',', $fineIds) . ') FOR UPDATE'
+            )->getResultArray();
+
+            if ($error = self::finePaymentError($fines, $fineIds, $catatan)) {
+                throw new \Exception($error);
+            }
+
+            $now    = date('Y-m-d H:i:s');
+            $tahun  = (int) date('Y');
+            $last   = $this->db->query('SELECT MAX(urutan) AS urutan FROM fine_payments WHERE tahun = ? FOR UPDATE', [$tahun])->getRowArray();
+            $urutan = (int) ($last['urutan'] ?? 0) + 1;
+            $total  = array_sum(array_map(static fn ($f) => (float) $f['jumlah'], $fines));
+
+            $paymentModel = new \App\Models\FinePaymentModel();
+            $paymentId    = $paymentModel->insert([
+                'nomor_kwitansi' => self::receiptNumber($tahun, $urutan),
+                'tahun'          => $tahun,
+                'urutan'         => $urutan,
+                'user_id'        => $fines[0]['user_id'],
+                'total'          => $total,
+                'dibayar_at'     => $now,
+                'diterima_by'    => $staffId,
+                'catatan'        => $catatan === '' ? null : $catatan,
+            ]);
+
+            $transactionIds = [];
+            foreach ($fines as $fine) {
+                $this->fineModel->update($fine['id'], [
+                    'status'      => 'lunas',
+                    'payment_id'  => $paymentId,
+                    'diproses_by' => $staffId,
+                    'diproses_at' => $now,
+                ]);
+                $transactionIds[$fine['transaction_id']] = true;
+            }
+            foreach (array_keys($transactionIds) as $transactionId) {
+                $this->recalcTotalDenda((int) $transactionId);
+            }
+
+            $payment = $paymentModel->find($paymentId);
+            (new LoggingService())->log(
+                "Pembayaran denda kwitansi {$payment['nomor_kwitansi']} (" . count($fines) . ' denda) sebesar Rp'
+                    . number_format($total, 0, ',', '.'),
+                $payment['user_id'],
+                $staffId
+            );
+
+            return $payment;
+        }, 'Gagal mencatat pembayaran denda');
+    }
+
+    /** Nomor kwitansi berurutan per tahun, misalnya KW/2026/0001. */
+    public static function receiptNumber(int $tahun, int $urutan): string
+    {
+        return sprintf('KW/%04d/%04d', $tahun, $urutan);
+    }
+
+    /**
+     * Validasi pembayaran denda: semua denda ditemukan, berstatus belum lunas,
+     * dan milik anggota yang sama.
+     *
+     * @param array $fines   baris fines yang ditemukan
+     * @param int[] $fineIds id yang diminta
+     */
+    public static function finePaymentError(array $fines, array $fineIds, string $catatan = ''): ?string
+    {
+        if ($fineIds === []) {
+            return 'Pilih minimal satu denda yang akan dibayar';
+        }
+        if (count($fines) !== count($fineIds)) {
+            return 'Sebagian denda tidak ditemukan';
+        }
+        foreach ($fines as $fine) {
+            if ($fine['status'] === 'ditahan') {
+                return 'Ada denda yang masih ditahan: selesaikan dulu status buku hilangnya di menu Buku Hilang';
+            }
+            if ($fine['status'] !== 'belum_lunas') {
+                return 'Ada denda yang tidak dalam status belum lunas';
+            }
+        }
+        if (count(array_unique(array_column($fines, 'user_id'))) > 1) {
+            return 'Satu kwitansi hanya untuk denda milik satu anggota';
+        }
+        if (mb_strlen($catatan) > 255) {
+            return 'Catatan maksimal 255 karakter';
+        }
+
+        return null;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | AUTO LATE
     |--------------------------------------------------------------------------
     */

@@ -351,7 +351,8 @@ class Users extends BaseController
     =============================== */
     public function edit($id)
     {
-        $data['user'] = $this->userModel->find($id);
+        $data['user']       = $this->userModel->find($id);
+        $data['list_kelas'] = (new \App\Models\ClassModel())->getClass();
         return view('users/edit', $data);
 
         if (!$user['is_validated']) {
@@ -372,7 +373,10 @@ class Users extends BaseController
         // Validation rules
         $rules = [
             'name' => 'required',
-            'jenis_pengguna' => 'required|in_list[siswa,guru,pegawai]'
+            'jenis_pengguna' => 'required|in_list[siswa,guru,pegawai]',
+            'phone' => 'permit_empty|regex_match[/^[0-9+\-\s]{9,20}$/]',
+            'whatsapp' => 'permit_empty|regex_match[/^[0-9+\-\s]{9,20}$/]',
+            'class' => 'permit_empty|max_length[50]',
         ];
 
         // Unique validation of NIS/NIP and NISN/NUPTK only if Admin is updating
@@ -382,13 +386,18 @@ class Users extends BaseController
         }
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Validasi gagal: Nomor Induk sudah digunakan atau data tidak lengkap.');
+            return redirect()->back()->withInput()->with('error', 'Validasi gagal: Nomor Induk sudah digunakan, nomor telepon/WhatsApp tidak valid, atau data tidak lengkap.');
         }
 
         $data = [
             'name' => $this->request->getPost('name'),
-            'jenis_pengguna' => $this->request->getPost('jenis_pengguna')
+            'jenis_pengguna' => $this->request->getPost('jenis_pengguna'),
+            'phone' => trim((string) $this->request->getPost('phone')) ?: null,
+            'whatsapp' => trim((string) $this->request->getPost('whatsapp')) ?: null,
         ];
+        if ($data['jenis_pengguna'] === 'siswa') {
+            $data['class'] = trim((string) $this->request->getPost('class')) ?: null;
+        }
 
         // Only Admin can update member_code and member_code_nation
         if ($currentRole === 'admin') {
