@@ -74,7 +74,7 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
     *   Satu transaksi minimal berisi **1 buku**, dan anggota tidak dapat meminjam judul yang sama yang masih dipinjamnya.
     *   Anggota maksimal memiliki **3 transaksi aktif** (status `dipinjam`/`terlambat`) sekaligus.
     *   **Pengembalian per buku:** buku dalam satu transaksi bisa dikembalikan satu per satu (sebelum maupun sesudah jatuh tempo). Di halaman **Detail / Kembali**, pilih aksi tiap buku: *Dikembalikan sekarang*, *Belum dibawa*, atau *Hilang* (mulai H+1). Buku yang belum dibawa tetap dipinjam dan **dendanya terus berjalan** sampai dikembalikan. Transaksi selesai setelah semua buku dikembalikan atau dinyatakan hilang.
-    *   Peminjaman berstatus **terlambat otomatis sejak H+1** setelah jatuh tempo (diperbarui setiap halaman sirkulasi/dashboard dibuka). Anggota dengan pinjaman terlambat tidak diperbolehkan meminjam lagi sampai transaksinya diselesaikan. Perintah `php spark transactions:updateLate` tetap bisa dijadwalkan harian (lihat bagian 6) sebagai cadangan.
+    *   Peminjaman berstatus **terlambat otomatis sejak H+1** setelah jatuh tempo (diperbarui setiap halaman sirkulasi/dashboard dibuka). Anggota dengan pinjaman terlambat tidak diperbolehkan meminjam lagi sampai transaksinya diselesaikan. Perintah `php spark transactions:updateLate` tetap bisa dijadwalkan harian sebagai cadangan: di Windows lewat Task Scheduler (bagian 5 langkah 8), di server lewat cron (bagian 6).
 *   **Denda Keterlambatan:**
     *   Dihitung **per buku** sejak H+1 jatuh tempo, paling banyak sejumlah **batas maksimal hari** yang diatur di **Pengaturan** (default **10 hari**; isi 0 untuk tanpa batas).
     *   Denda tercatat saat buku dikembalikan dengan status **Belum Lunas**. Petugas menandainya **Lunas** atau **Dibebaskan** (wajib dengan alasan) melalui menu **Manajemen Buku → Denda Keterlambatan**.
@@ -150,6 +150,20 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
     ```bash
     php vendor/bin/phpunit --no-coverage
     ```
+8.  **Jadwal Pembaruan Status Terlambat di Windows** (opsional):
+    Status `terlambat` sudah diperbarui otomatis setiap halaman sirkulasi/dashboard dibuka, jadi langkah ini **tidak wajib**. Berguna bila aplikasi dipasang di PC Windows yang selalu menyala (misalnya komputer perpustakaan) dan Anda ingin status selalu terbarui walau tidak ada yang membuka aplikasi. Jalankan di PowerShell atau Command Prompt, sesuaikan folder proyek dan lokasi `php.exe`:
+    ```bat
+    schtasks /Create /SC DAILY /ST 00:05 /TN "perpus_ci4 updateLate" /TR "cmd /c cd /d C:\laragon\www\perpus_ci4 && C:\laragon\bin\php\php-8.x\php.exe spark transactions:updateLate"
+    ```
+    *   Tugas tampil di **Task Scheduler** (`taskschd.msc`) → **Task Scheduler Library** → *perpus_ci4 updateLate*.
+    *   Tugas hanya berjalan saat pengguna Windows sedang login, komputer menyala, dan MySQL aktif pada jam tersebut. Agar jadwal yang terlewat tetap dijalankan, buka properti tugas → tab **Settings** → centang *Run task as soon as possible after a scheduled start is missed*.
+    *   Uji dan periksa hasil (*Last Result* `0` = berhasil):
+        ```bat
+        schtasks /Run /TN "perpus_ci4 updateLate"
+        schtasks /Query /TN "perpus_ci4 updateLate" /V /FO LIST
+        ```
+    *   Hapus jadwal: `schtasks /Delete /TN "perpus_ci4 updateLate" /F`
+    *   Untuk server Linux/cPanel gunakan **cron** (lihat bagian 6).
 
 ---
 
