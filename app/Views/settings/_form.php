@@ -81,7 +81,7 @@ $val = static fn (string $key, $default = '') => esc((string) (old($key, null, f
     <!-- Action Buttons -->
     <div class="d-flex justify-content-end gap-2 border-top pt-3">
         <a href="/admin/dashboard" class="btn btn-light px-4">Batal</a>
-        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save me-1"></i> Simpan Perubahan</button>
+        <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan</button>
     </div>
 
 </form>

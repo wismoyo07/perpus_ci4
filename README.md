@@ -1,6 +1,6 @@
 # Sistem Informasi Perpustakaan Digital (Perpustakaan CI4)
 
-Sistem Informasi Manajemen Perpustakaan berbasis web yang dikembangkan menggunakan framework **CodeIgniter 4** (PHP 8.2+), database **MySQL**, dan antarmuka **Bootstrap 5**.
+Sistem Informasi Manajemen Perpustakaan berbasis web yang dikembangkan menggunakan framework **CodeIgniter 4** (PHP 8.2+), database **MySQL**, dan antarmuka **Bootstrap 5** berbasis template admin [**Notika**](https://github.com/puikinsh/notika) karya [Colorlib](https://colorlib.com) (lihat [Kredit](#8-kredit--lisensi)).
 
 Aplikasi ini dirancang untuk memudahkan inventarisasi buku sekolah, sirkulasi peminjaman/pengembalian, serta pencetakan laporan resmi, kartu anggota, dan label buku dengan identitas sekolah dinamis.
 
@@ -323,3 +323,17 @@ Setiap kali ada rilis baru, baca dulu catatan rilisnya di halaman [Releases](htt
      ALTER TABLE transaction_details ADD COLUMN book_item_id INT NULL AFTER book_id;
      ALTER TABLE transaction_details ADD CONSTRAINT fk_transaction_details_book_item FOREIGN KEY (book_item_id) REFERENCES book_items(id) ON DELETE RESTRICT ON UPDATE CASCADE;
      ```
+
+---
+
+## 8. Kredit & Lisensi
+
+Tampilan aplikasi ini diadaptasi dari template admin **Notika**:
+
+* **Notika – Free Bootstrap 5 Admin Dashboard Template**, dibuat dan dikelola oleh [Colorlib](https://colorlib.com).
+  * Repositori: <https://github.com/puikinsh/notika>
+  * Demo: <https://colorlib.com/polygon/notika/index.html>
+  * Lisensi: [MIT](https://github.com/puikinsh/notika/blob/master/LICENSE). Lisensi ini mewajibkan atribusi kepada Colorlib sebagai pembuat aslinya.
+* Aset yang dipakai dari Notika berada di folder `public/assets/` (CSS, logo, dan sumber tema). Font **Roboto** dan ikon **Font Awesome** dipakai mengikuti tema tersebut.
+
+Terima kasih kepada Colorlib yang telah membagikan template ini secara gratis.

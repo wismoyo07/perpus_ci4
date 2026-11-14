@@ -3,21 +3,21 @@
 <?= $this->section('content') ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2"><i class="bi bi-gear-fill text-primary"></i> Pengaturan Identitas Sekolah</h1>
+    <h1 class="h2"><i class="fa-solid fa-gear text-primary"></i> Pengaturan Identitas Sekolah</h1>
 </div>
 
 <div class="row">
     <div class="col-lg-8">
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i> <?= esc(session()->getFlashdata('success')) ?>
+                <i class="fa-solid fa-circle-check me-2"></i> <?= esc(session()->getFlashdata('success')) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
 
         <?php if (session()->getFlashdata('errors')): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i> Perhatian!</h5>
+                <h5 class="alert-heading"><i class="fa-solid fa-triangle-exclamation me-2"></i> Perhatian!</h5>
                 <ul class="mb-0">
                     <?php foreach (session()->getFlashdata('errors') as $error): ?>
                         <li><?= esc($error) ?></li>

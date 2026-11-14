@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($setting['nama_lembaga']) ?> - Perpustakaan Digital</title>
     
-    <!-- Google Fonts & Bootstrap 5 -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5, Font Awesome & Roboto (tema Notika) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             background-color: #f6f8fb;
             color: #2b3a4a;
         }
@@ -92,13 +94,13 @@
             <?php if ($setting['logo']): ?>
                 <img src="<?= base_url('uploads/settings/' . $setting['logo']) ?>" alt="Logo" class="school-logo-img me-2">
             <?php else: ?>
-                <i class="bi bi-book-half me-2"></i>
+                <i class="fa-solid fa-book-open me-2"></i>
             <?php endif; ?>
             <?= esc($setting['nama_lembaga']) ?>
         </a>
         <div class="ms-auto">
             <a href="/auth/login" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Masuk Perpustakaan
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Masuk Perpustakaan
             </a>
         </div>
     </div>
@@ -120,7 +122,7 @@
                 <form action="/" method="GET">
                     <div class="input-group">
                         <input type="text" name="q" class="form-control search-input" placeholder="Cari judul buku, pengarang, atau penerbit..." value="<?= esc($search ?? '') ?>" aria-label="Search">
-                        <button class="btn btn-primary search-btn" type="submit"><i class="bi bi-search me-1"></i> Cari</button>
+                        <button class="btn btn-primary search-btn" type="submit"><i class="fa-solid fa-magnifying-glass me-1"></i> Cari</button>
                     </div>
                 </form>
             </div>
@@ -138,7 +140,7 @@
             <p class="text-muted mb-0 small"><?= count($books) ?> buku ditampilkan</p>
         </div>
         <?php if ($search): ?>
-            <a href="/" class="btn btn-link text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Katalog Utama</a>
+            <a href="/" class="btn btn-link text-decoration-none"><i class="fa-solid fa-arrow-left"></i> Kembali ke Katalog Utama</a>
         <?php endif; ?>
     </div>
 
@@ -146,7 +148,7 @@
     <div class="row g-4">
         <?php if (empty($books)): ?>
             <div class="col-12 text-center py-5">
-                <div class="fs-1 text-muted mb-3"><i class="bi bi-emoji-frown"></i></div>
+                <div class="fs-1 text-muted mb-3"><i class="fa-solid fa-face-frown"></i></div>
                 <h5 class="text-secondary fw-semibold">Buku tidak ditemukan</h5>
                 <p class="text-muted">Gunakan kata kunci pencarian lain.</p>
             </div>

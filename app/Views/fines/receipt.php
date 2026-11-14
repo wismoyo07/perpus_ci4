@@ -11,7 +11,10 @@ $tgl = static fn ($d) => (int) date('j', strtotime($d)) . ' ' . $bulan[(int) dat
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kwitansi <?= esc($payment['nomor_kwitansi']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         @page {
             size: A5;
@@ -19,7 +22,7 @@ $tgl = static fn ($d) => (int) date('j', strtotime($d)) . ' ' . $bulan[(int) dat
         }
         body {
             background-color: #f1f1f1;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             color: #000;
             font-size: 9pt;
         }
@@ -135,8 +138,8 @@ $tgl = static fn ($d) => (int) date('j', strtotime($d)) . ' ' . $bulan[(int) dat
 <body>
 
 <div class="no-print-btn d-flex gap-2">
-    <a href="<?= esc($backUrl) ?>" class="btn btn-outline-secondary shadow-lg"><i class="bi bi-arrow-left"></i> Kembali</a>
-    <button onclick="window.print()" class="btn btn-primary shadow-lg"><i class="bi bi-printer"></i> Cetak Kwitansi</button>
+    <a href="<?= esc($backUrl) ?>" class="btn btn-outline-secondary shadow-lg"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+    <button onclick="window.print()" class="btn btn-primary shadow-lg"><i class="fa-solid fa-print"></i> Cetak Kwitansi</button>
 </div>
 
 <div class="kwitansi">
