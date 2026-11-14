@@ -1,0 +1,33 @@
+name: Usulan Fitur
+description: Usulkan fitur baru atau perbaikan yang membantu perpustakaan sekolah.
+title: "[Fitur] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: masalah
+    attributes:
+      label: Masalah yang ingin diselesaikan
+      description: Ceritakan kebutuhan di perpustakaan Anda, misalnya "petugas harus mengetik data siswa satu per satu".
+    validations:
+      required: true
+  - type: textarea
+    id: usulan
+    attributes:
+      label: Usulan solusi
+      description: Bagaimana fitur ini sebaiknya bekerja?
+    validations:
+      required: true
+  - type: dropdown
+    id: peran
+    attributes:
+      label: Untuk siapa fitur ini?
+      multiple: true
+      options:
+        - Admin
+        - Staff / petugas perpustakaan
+        - Anggota (siswa / guru / pegawai)
+  - type: textarea
+    id: lainnya
+    attributes:
+      label: Informasi tambahan
+      description: Contoh aplikasi lain, aturan sekolah, atau gambaran tampilan.

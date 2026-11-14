@@ -6,6 +6,22 @@ Aplikasi ini dirancang untuk memudahkan inventarisasi buku sekolah, sirkulasi pe
 
 > **Versi terbaru & catatan perubahan:** lihat halaman [Releases](https://github.com/wismoyo07/perpus_ci4/releases).
 
+### Tampilan
+
+| Dashboard Admin | Sirkulasi Peminjaman |
+| :---: | :---: |
+| ![Dashboard admin](docs/screenshots/02-dashboard-admin.png) | ![Daftar transaksi dengan status denda](docs/screenshots/03-sirkulasi.png) |
+| **Denda per Buku** | **Kwitansi Pembayaran (A5)** |
+| ![Menu denda keterlambatan](docs/screenshots/04-denda.png) | ![Kwitansi pembayaran denda](docs/screenshots/05-kwitansi.png) |
+| **Laporan & Klasifikasi DDC** | **Katalog Publik** |
+| ![Laporan transaksi dan inventaris](docs/screenshots/06-laporan.png) | ![Halaman depan katalog](docs/screenshots/01-landing.png) |
+| **Kartu Anggota (Barcode)** | **Label Buku (QR Code)** |
+| ![Kartu anggota](docs/screenshots/07-kartu-anggota.png) | ![Label buku](docs/screenshots/08-label-buku.png) |
+| **Denda Saya (Anggota)** | **Profil Pengguna** |
+| ![Halaman denda anggota](docs/screenshots/09-denda-saya.png) | ![Profil pengguna](docs/screenshots/10-profil.png) |
+
+<sub>Screenshot diambil dari instalasi `php spark perpus:install --demo` dengan data contoh.</sub>
+
 ---
 
 ## 1. Akses Halaman & Fitur Utama

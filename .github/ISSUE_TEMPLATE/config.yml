@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Panduan instalasi & penggunaan
+    url: https://github.com/wismoyo07/perpus_ci4#readme
+    about: Baca README terlebih dahulu untuk pertanyaan instalasi dan cara pakai.
+  - name: Laporkan celah keamanan
+    url: https://github.com/wismoyo07/perpus_ci4/security/advisories/new
+    about: Celah keamanan dilaporkan secara privat, bukan lewat issue publik.
