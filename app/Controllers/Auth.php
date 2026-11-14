@@ -307,6 +307,12 @@ class Auth extends Controller
                 ->with('error', 'Password salah.');
         }
 
+        // Hash lama tanpa pepper (misalnya akun demo dari db/perpustakaan.sql) diperbarui
+        // memakai pepper instalasi ini setelah login berhasil.
+        if (!verifyPassword($password, $user['password'])) {
+            $userModel->update($user['id'], ['password' => hashPassword($password)]);
+        }
+
         // Validasi status akun
         if (!$user['is_validated']) {
             $logger = new LoggingService();

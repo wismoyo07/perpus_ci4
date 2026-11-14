@@ -21,7 +21,7 @@ Aplikasi dapat dijalankan secara lokal melalui:
 
 ## 2. Akun Pengujian (Demo Accounts)
 
-Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang dibuat oleh seeder dan tersedia di `db/perpustakaan.sql`:
+Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang tersedia di `db/perpustakaan.sql` atau dibuat oleh `php spark perpus:install --demo` (pada wizard, akun **admin** tidak dibuat dari tabel ini karena Anda membuat admin sendiri):
 
 | Peran (Role) | Jenis Pengguna | Username | Password | Kode Anggota |
 | :--- | :--- | :--- | :--- | :--- |
@@ -146,19 +146,25 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
     ```bash
     composer install
     ```
-4.  **Siapkan file `.env`:** salin `env.example` menjadi `.env`, lalu sesuaikan `app.baseURL` (misalnya `'http://localhost:8080/'`) dan koneksi database (`database.default.*`).
-5.  **Buat database** kosong (misalnya `perpus_ci4`), lalu **jalankan migrasi & seeder**:
+4.  **Siapkan file `.env`:** salin `env.example` menjadi `.env`, lalu sesuaikan `app.baseURL` (misalnya `'http://localhost:8080/'`) dan koneksi database (`database.default.*`). `APP_PASSWORD_PEPPER` biarkan kosong, karena akan diisi oleh wizard.
+5.  **Buat database** kosong (misalnya `perpus_ci4`), lalu **jalankan wizard instalasi**:
     ```bash
-    php spark migrate
-    php spark db:seed DdcSeeder
-    php spark db:seed ClassSeeder
-    php spark db:seed SourceFundSeeder
-    php spark db:seed AdminSeeder
-    php spark db:seed StaffSeeder
-    php spark db:seed UserDemoSeeder
-    php spark db:seed BookSeeder
+    php spark perpus:install --demo
     ```
-    > **⚠️ Perhatian:** `BookSeeder` mengosongkan (*truncate*) tabel `books` dan `book_items` sebelum mengisi data contoh, jadi **jangan jalankan pada database yang sudah berisi data buku**. Seeder data master (`DdcSeeder`, `ClassSeeder`, `SourceFundSeeder`) dan seeder akun aman dijalankan ulang: data yang sudah ada dilewati. Sebagai alternatif, import `db/perpustakaan.sql` yang berisi hasil yang sama.
+    Wizard ini:
+    * menampilkan database tujuan dan meminta konfirmasi;
+    * membuat **pepper password unik** di `.env` (hanya bila belum ada akun);
+    * menjalankan migrasi;
+    * mengisi data master (klasifikasi DDC, kelas, sumber dana);
+    * meminta nama, username, dan password **admin pertama**.
+
+    Opsi `--demo` menambahkan akun demo staf/anggota (bagian 2) dan katalog buku contoh. Buku contoh hanya ditambahkan bila katalog masih kosong. Hilangkan `--demo` untuk instalasi bersih. Wizard aman dijalankan ulang: langkah yang sudah selesai dilewati.
+
+    Tanpa pertanyaan, misalnya untuk skrip:
+    ```bash
+    php spark perpus:install --yes --admin-name "Nama Admin" --admin-user admin_sekolah --admin-pass "Rahasia#2026"
+    ```
+    > **⚠️ Perhatian:** seeder `BookSeeder` jika dijalankan manual (`php spark db:seed BookSeeder`) mengosongkan (*truncate*) tabel `books` dan `book_items`. Jangan jalankan pada database yang sudah berisi data buku.
 6.  **Jalankan Server Lokal:**
     ```bash
     php spark serve
@@ -216,17 +222,12 @@ Untuk memasang aplikasi ini di server hosting dan menghubungkannya dengan domain
      * `database.default.database = nama_db_server`
      * `database.default.username = user_db_server`
      * `database.default.password = password_db_server`
-   * Biarkan `APP_PASSWORD_PEPPER` sama dengan nilai di `env.example` **sebelum** akun pertama dibuat. Mengubah nilai ini membuat semua password yang sudah ada (termasuk akun dari seeder / `db/perpustakaan.sql`) tidak bisa dipakai login.
-5. **Migrasi dan Inisialisasi Database**:
-   * Jalankan perintah Spark berikut untuk membuat tabel dan data master awal (pada database kosong):
-     ```bash
-     php spark migrate
-     php spark db:seed ClassSeeder
-     php spark db:seed AdminSeeder
-     php spark db:seed StaffSeeder
-     php spark db:seed SourceFundSeeder
-     php spark db:seed DdcSeeder
-     ```
+   * Biarkan `APP_PASSWORD_PEPPER` kosong. Wizard di langkah 5 akan mengisinya dengan nilai acak yang unik. **Setelah ada akun, jangan ubah nilai ini**, karena password yang sudah ada tidak akan bisa dipakai login.
+5. **Wizard Instalasi Database** (pada database kosong):
+   ```bash
+   php spark perpus:install
+   ```
+   Wizard ini membuat pepper password, struktur tabel, dan data master, lalu meminta data **admin pertama**. Tambahkan `--demo` bila ingin akun dan buku contoh.
 6. **Set Permission Folder Writable**:
    * Berikan hak akses menulis agar sistem log dan sesi bisa disimpan oleh web server:
      ```bash
@@ -265,10 +266,11 @@ Untuk memasang aplikasi ini di server hosting dan menghubungkannya dengan domain
    * Buat database dan user baru di menu **MySQL Database Wizard** cPanel. Hubungkan user tersebut ke database dengan semua hak akses (*all privileges*).
    * Buka **phpMyAdmin** di cPanel Anda, pilih database yang telah dibuat, lalu pilih menu **Import**.
    * Unggah dan import file **`db/perpustakaan.sql`**. File ini berisi struktur tabel terbaru, data master (kelas, DDC, sumber dana), akun demo, dan katalog buku contoh.
-   * Setelah login pertama, ganti password akun admin dan hapus data/akun demo yang tidak diperlukan (lihat bagian 2).
+   * Login pertama memakai akun demo `admin` (bagian 2). Anda akan diminta membuat password baru. Setelah itu, hapus atau arsipkan akun dan data demo yang tidak diperlukan.
 5. **Konfigurasi Environment (`.env`)**:
    * Salin file `env.example` di dalam direktori root proyek menjadi `.env`.
-   * Edit file `.env` di File Manager cPanel dan sesuaikan nilai domain (`app.baseURL`), koneksi database (`database.default`), dan matikan mode development (`CI_ENVIRONMENT = production`). Jangan ubah `APP_PASSWORD_PEPPER` (lihat Metode A langkah 4).
+   * Edit file `.env` di File Manager cPanel dan sesuaikan nilai domain (`app.baseURL`), koneksi database (`database.default`), dan matikan mode development (`CI_ENVIRONMENT = production`).
+   * Isi `APP_PASSWORD_PEPPER` dengan teks acak yang panjang (minimal 32 karakter, misalnya dari pembuat password acak) **sebelum login pertama**, lalu jangan diubah lagi. Akun demo di `db/perpustakaan.sql` tetap bisa dipakai login dengan pepper apa pun, dan password-nya otomatis disimpan ulang memakai pepper Anda.
 6. **Set Folder Permission**:
    * Pastikan folder **`writable`** yang ada di luar `public_html` memiliki permission **755** atau **775** agar web server dapat menulis log, sesi, dan unggahan logo.
 7. **Jadwalkan Pembaruan Status Terlambat (Cron)**:
