@@ -4,7 +4,7 @@
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4><i class="bi bi-clipboard-data text-primary"></i> Monitoring Transaksi (Admin View)</h4>
+        <h4><i class="fa-solid fa-clipboard-list text-primary"></i> Monitoring Transaksi (Admin View)</h4>
     </div>
 
     <!-- Filter & Search Card Start -->

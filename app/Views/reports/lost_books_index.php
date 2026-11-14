@@ -6,23 +6,23 @@
     <!-- HEADER & EXPORT ACTIONS -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
-            <h1 class="h2"><i class="bi bi-exclamation-triangle text-danger"></i> Laporan Buku Hilang & Ganti Rugi</h1>
+            <h1 class="h2"><i class="fa-solid fa-triangle-exclamation text-danger"></i> Laporan Buku Hilang & Ganti Rugi</h1>
             <p class="text-muted mb-0">Pertanggungjawaban sirkulasi aset buku yang hilang dan status penyelesaiannya.</p>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0 d-flex gap-2">
             <!-- EXCEL EXPORT -->
             <a href="/reports/lost-books/export?format=excel&status=<?= esc($status) ?>&start_date=<?= esc($start_date) ?>&end_date=<?= esc($end_date) ?>" 
                class="btn btn-success shadow-sm d-flex align-items-center gap-2">
-                <i class="bi bi-file-earmark-excel-fill"></i> Export Excel
+                <i class="fa-solid fa-file-excel"></i> Export Excel
             </a>
             <!-- PRINT / PDF -->
             <a href="/reports/lost-books/export?format=print&status=<?= esc($status) ?>&start_date=<?= esc($start_date) ?>&end_date=<?= esc($end_date) ?>" 
                target="_blank" 
                class="btn btn-primary shadow-sm d-flex align-items-center gap-2">
-                <i class="bi bi-printer-fill"></i> Cetak Laporan Resmi
+                <i class="fa-solid fa-print"></i> Cetak Laporan Resmi
             </a>
             <a href="/reports" class="btn btn-outline-secondary shadow-sm">
-                <i class="bi bi-arrow-left"></i> Kembali
+                <i class="fa-solid fa-arrow-left"></i> Kembali
             </a>
         </div>
     </div>
@@ -118,8 +118,8 @@
                 </div>
                 <!-- Tombol Aksi -->
                 <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-filter"></i> Saring</button>
-                    <a href="/reports/lost-books" class="btn btn-outline-secondary w-100 fw-semibold"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fa-solid fa-filter"></i> Saring</button>
+                    <a href="/reports/lost-books" class="btn btn-outline-secondary w-100 fw-semibold"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</a>
                 </div>
             </form>
         </div>
@@ -147,7 +147,7 @@
                         <?php if (empty($lostBooks)): ?>
                             <tr>
                                 <td colspan="9" class="text-center py-5 text-muted">
-                                    <i class="bi bi-journal-x display-6 d-block mb-3 text-muted"></i>
+                                    <i class="fa-solid fa-folder-open display-6 d-block mb-3 text-muted"></i>
                                     Tidak ada data buku hilang yang cocok dengan filter.
                                 </td>
                             </tr>
@@ -190,7 +190,7 @@
                                     </td>
                                     <td class="pe-4 text-secondary small">
                                         <?php if (!empty($l['verifier_name'])): ?>
-                                            <i class="bi bi-person-fill-check text-success"></i> <?= esc($l['verifier_name']) ?><br>
+                                            <i class="fa-solid fa-user-check text-success"></i> <?= esc($l['verifier_name']) ?><br>
                                             <small class="text-muted"><?= date('d/m/y H:i', strtotime($l['settled_at'])) ?></small>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>

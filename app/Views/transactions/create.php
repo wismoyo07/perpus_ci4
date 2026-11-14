@@ -4,7 +4,7 @@
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4><i class="bi bi-plus-circle-fill text-primary"></i> Transaksi Peminjaman Baru</h4>
+        <h4><i class="fa-solid fa-circle-plus text-primary"></i> Transaksi Peminjaman Baru</h4>
         <a href="/transactions" class="btn btn-outline-secondary btn-sm">
             ← Kembali
         </a>
@@ -120,7 +120,7 @@
 
                 <div class="mt-4 pt-2 border-top">
                     <button type="submit" class="btn btn-primary btn-lg shadow-sm" id="submit-btn" disabled>
-                        <i class="bi bi-check2-circle"></i> Proses Peminjaman
+                        <i class="fa-solid fa-circle-check"></i> Proses Peminjaman
                     </button>
                     <a href="/transactions" class="btn btn-light btn-lg">
                         Batal

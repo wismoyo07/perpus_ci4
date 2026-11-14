@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Buku Hilang - <?= esc($setting['nama_lembaga']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #fff;
-            font-family: "Times New Roman", Times, serif;
+            font-family: 'Roboto', Arial, sans-serif;
             font-size: 12pt;
             color: #000;
         }
@@ -96,7 +100,7 @@
 
 <!-- Tombol Cetak Manual -->
 <div class="no-print-btn">
-    <button onclick="window.print()" class="btn btn-primary shadow-lg"><i class="bi bi-printer"></i> Cetak Dokumen</button>
+    <button onclick="window.print()" class="btn btn-primary shadow-lg"><i class="fa-solid fa-print"></i> Cetak Dokumen</button>
     <button onclick="window.close()" class="btn btn-secondary shadow-lg">Tutup</button>
 </div>
 

@@ -15,7 +15,7 @@
             </nav>
         </div>
         <a href="/books" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Kembali ke Daftar Buku
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Buku
         </a>
     </div>
 
@@ -105,7 +105,7 @@
                         </div>
                         <p class="small text-muted">Jika sumber dana atau tahun berbeda dari kode buku, kode salinan memakai sumber dana &amp; tahun tersebut.</p>
                         <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-plus-circle"></i> Generate Salinan Baru
+                            <i class="fa-solid fa-circle-plus"></i> Generate Salinan Baru
                         </button>
                     </form>
                 </div>
@@ -143,7 +143,7 @@
                                 <?php if (empty($items)): ?>
                                     <tr>
                                         <td colspan="6" class="text-center py-5 text-muted">
-                                            <i class="bi bi-box-seam display-6 d-block mb-3 text-muted"></i>
+                                            <i class="fa-solid fa-box-open display-6 d-block mb-3 text-muted"></i>
                                             Belum ada salinan fisik untuk buku ini.
                                         </td>
                                     </tr>
@@ -173,12 +173,12 @@
                                                           onsubmit="return confirm('Apakah Anda yakin ingin menghapus salinan ini? Stok buku katalog akan otomatis disesuaikan.')">
                                                         <?= csrf_field() ?>
                                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                            <i class="bi bi-trash"></i> Hapus
+                                                            <i class="fa-solid fa-trash"></i> Hapus
                                                         </button>
                                                     </form>
                                                 <?php else: ?>
                                                     <button class="btn btn-sm btn-outline-secondary" disabled title="Hanya salinan fisik yang tersedia yang dapat dihapus">
-                                                        <i class="bi bi-trash"></i> Hapus
+                                                        <i class="fa-solid fa-trash"></i> Hapus
                                                     </button>
                                                 <?php endif; ?>
                                             </td>
