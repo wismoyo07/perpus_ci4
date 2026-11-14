@@ -4,9 +4,14 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h2 class="text-dark fw-bold"><i class="fa-solid fa-users text-primary me-2"></i> Manajemen User</h2>
-        <a href="/users/create" class="btn btn-primary shadow-sm">
-            <i class="fa-solid fa-user-plus me-1"></i> Tambah User
-        </a>
+        <div class="d-flex gap-2">
+            <a href="/users/import" class="btn btn-outline-success shadow-sm">
+                <i class="fa-solid fa-file-excel me-1"></i> Impor Excel
+            </a>
+            <a href="/users/create" class="btn btn-primary shadow-sm">
+                <i class="fa-solid fa-user-plus me-1"></i> Tambah User
+            </a>
+        </div>
     </div>
 
     <!-- FLASH MESSAGES -->

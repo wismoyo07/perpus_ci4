@@ -167,6 +167,10 @@ $routes->group('users', [
 
     $routes->get('/', 'Users::index');
     $routes->get('cards', 'Users::cards');
+    $routes->get('import', 'UserImport::index');
+    $routes->get('import/template', 'UserImport::template');
+    $routes->post('import/preview', 'UserImport::preview');
+    $routes->post('import/process', 'UserImport::process');
     $routes->get('create', 'Users::create');
     $routes->post('store', 'Users::store');
     $routes->get('edit/(:num)', 'Users::edit/$1');

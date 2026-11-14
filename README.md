@@ -67,6 +67,7 @@ Untuk kebutuhan pengujian fitur, berikut adalah daftar akun demo yang tersedia d
 | Hapus Buku (*Delete*) | ✔ | ✔ | ✘ |
 | Cetak Label Buku (QR Code) | ✔ | ✔ | ✘ |
 | Manajemen User (Tambah, Edit, Validasi, Reset Sandi) | ✔ | ✔ (Hanya Member) | ✘ |
+| Impor Anggota dari Excel | ✔ | ✔ | ✘ |
 | Cetak Kartu Anggota (Barcode) | ✔ | ✔ (Hanya Member) | ✔ (Kartu Sendiri, lewat Profil) |
 | Profil Saya (Kontak & Ganti Password) | ✔ | ✔ | ✔ |
 | Hapus User (*Delete*) | ✔ | ✘ | ✘ |
@@ -121,12 +122,25 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
 *   Ganti password di Profil memerlukan password lama.
 *   Akun yang wajib ganti password tidak bisa membuka halaman lain sebelum password diganti.
 
-### D. Cetak Kartu Anggota & Label Buku
+### D. Impor Anggota dari Excel
+*   Menu **Manajemen User → Impor Excel**. Unduh template, isi data siswa/guru/pegawai, lalu unggah file `.xlsx` (maksimal 1.000 anggota dan 2 MB per file).
+*   Isi template:
+    *   **Kolom wajib:** Nama Lengkap, Jenis Pengguna (`siswa`/`guru`/`pegawai`), dan NIS/NIP.
+    *   **Kolom opsional:** NISN/NUPTK, Kelas (khusus siswa, harus sesuai data kelas), Telepon, WhatsApp, dan Username.
+    *   Username yang dikosongkan dibuat otomatis dari NIS/NIP.
+    *   Kolom di template berformat teks, sehingga angka 0 di depan NIS atau nomor telepon tidak hilang.
+*   Sebelum disimpan, muncul **pratinjau** yang menandai setiap baris sebagai *Baru*, *Diperbarui*, *Dilewati*, atau *Error* (beserta alasannya). Hanya baris yang valid yang disimpan.
+*   **NIS/NIP yang sudah terdaftar** bisa **dilewati** atau **diperbarui**.
+    *   Yang diperbarui: nama, NISN/NUPTK, kelas, dan kontak. Isian kosong tidak menghapus data lama. Cocok untuk **kenaikan kelas** di awal tahun ajaran.
+    *   Akun staf/admin dan perubahan jenis pengguna tidak bisa diubah lewat impor.
+*   Akun baru dibuat sebagai **Member** yang sudah tervalidasi, dengan password awal `123456` yang wajib diganti saat login pertama.
+
+### E. Cetak Kartu Anggota & Label Buku
 *   **Kartu anggota:** menu **Users**, centang anggota lalu klik **Cetak Kartu** (atau tombol **Kartu** per baris). Ukuran kartu 85,6 × 54 mm (10 kartu per A4) dengan barcode NIS/NIP.
 *   **Label buku:** menu **Buku → Salinan**, klik **Cetak Label**. Ukuran label 62 × 32 mm (24 label per A4) dengan QR code berisi kode inventaris dan nomor panggil (jika buku sudah diklasifikasi DDC). Salinan berstatus hilang tidak ikut dicetak.
 *   Barcode dan QR code dibuat di server (SVG), sehingga pencetakan tidak memerlukan koneksi internet ke layanan pihak ketiga.
 
-### E. Penomoran Buku & Klasifikasi DDC
+### F. Penomoran Buku & Klasifikasi DDC
 *   **Kode buku** dibuat otomatis dengan format `kode barang / sumber dana / tahun / nomor urut`, misalnya `03.11.01.01.001 / APBD / 2025 / 001`.
     *   **Kode barang** diatur di menu **Pengaturan** (default `03.11.01.01.001`).
     *   **Sumber dana** dan **tahun pengadaan** dipilih saat menambah buku. Nomor urut berjalan per kombinasi kode barang, sumber dana, dan tahun.
@@ -144,7 +158,7 @@ Sistem sirkulasi membedakan batas maksimal peminjaman dan denda keterlambatan se
 
 ## 4. Kebutuhan Sistem
 
-*   **PHP 8.2** atau lebih baru dengan ekstensi `intl`, `mbstring`, dan `mysqli`.
+*   **PHP 8.2** atau lebih baru dengan ekstensi `intl`, `mbstring`, `mysqli`, `zip`, `gd`, `xml`, dan `fileinfo`. Ekstensi `zip` dan `gd` dibutuhkan untuk impor anggota dari Excel. Di Laragon, aktifkan lewat menu **PHP → Extensions** (centang `zip` dan `gd`), lalu restart.
 *   **MySQL 8** (dikembangkan dan diuji dengan MySQL 8.0.30).
 *   **Composer 2** (untuk memasang dependensi; folder `vendor/` tidak disertakan di repositori).
 
