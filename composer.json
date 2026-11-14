@@ -1,13 +1,13 @@
 {
-    "name": "codeigniter4/appstarter",
-    "description": "CodeIgniter4 starter app",
+    "name": "wismoyo07/perpus_ci4",
+    "description": "Sistem informasi perpustakaan sekolah berbasis CodeIgniter 4: katalog & DDC, sirkulasi, denda per buku, kwitansi, kartu anggota, dan label buku.",
     "license": "MIT",
     "type": "project",
-    "homepage": "https://codeigniter.com",
+    "keywords": ["perpustakaan", "library", "sekolah", "codeigniter4"],
+    "homepage": "https://github.com/wismoyo07/perpus_ci4",
     "support": {
-        "forum": "https://forum.codeigniter.com/",
-        "source": "https://github.com/codeigniter4/CodeIgniter4",
-        "slack": "https://codeigniterchat.slack.com"
+        "issues": "https://github.com/wismoyo07/perpus_ci4/issues",
+        "source": "https://github.com/wismoyo07/perpus_ci4"
     },
     "require": {
         "php": "^8.2",
