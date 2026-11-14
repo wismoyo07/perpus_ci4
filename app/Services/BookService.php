@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\BookModel;
-use App\Models\ActivityLogModel;
+use App\Services\LoggingService;
 use Config\Database;
 
 class BookService
@@ -21,13 +21,11 @@ class BookService
     public const SUMBER_PENGGANTI = 'PRIBADI';
 
     protected $bookModel;
-    protected $logModel;
     protected $db;
 
     public function __construct()
     {
         $this->bookModel = new BookModel();
-        $this->logModel  = new ActivityLogModel();
         $this->db        = Database::connect();
     }
 
@@ -77,10 +75,7 @@ class BookService
             ]);
         }
 
-        $this->logModel->insert([
-            'user_id'  => $actorId,
-            'aktivitas'=> "Menambahkan buku: {$data['judul']}"
-        ]);
+        (new LoggingService())->log("Menambahkan buku: {$data['judul']}", null, $actorId);
 
         return $id;
     }
@@ -112,10 +107,7 @@ class BookService
 
         $this->bookModel->update($id, $data);
 
-        $this->logModel->insert([
-            'user_id'  => $actorId,
-            'aktivitas'=> "Mengupdate buku: {$book['judul']}"
-        ]);
+        (new LoggingService())->log("Mengupdate buku: {$book['judul']}", null, $actorId);
 
         return true;
     }
@@ -142,10 +134,7 @@ class BookService
 
         $this->bookModel->delete($id);
 
-        $this->logModel->insert([
-            'user_id'  => $actorId,
-            'aktivitas'=> "Menghapus buku: {$book['judul']}"
-        ]);
+        (new LoggingService())->log("Menghapus buku: {$book['judul']}", null, $actorId);
 
         return true;
     }
@@ -164,10 +153,7 @@ class BookService
 
         $this->bookModel->update($id, ['is_active' => 0]);
 
-        $this->logModel->insert([
-            'user_id'  => $actorId,
-            'aktivitas'=> "Mengarsipkan buku: {$book['judul']}"
-        ]);
+        (new LoggingService())->log("Mengarsipkan buku: {$book['judul']}", null, $actorId);
 
         return true;
     }
@@ -188,10 +174,7 @@ class BookService
             'is_active' => 1
         ]);
 
-        $this->logModel->insert([
-            'user_id'  => $actorId,
-            'aktivitas'=> "Mengaktifkan kembali buku: {$book['judul']}"
-        ]);
+        (new LoggingService())->log("Mengaktifkan kembali buku: {$book['judul']}", null, $actorId);
 
         return true;
     }

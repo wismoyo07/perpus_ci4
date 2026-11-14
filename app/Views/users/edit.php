@@ -13,6 +13,17 @@
     </div>
 
     <!-- ERROR MESSAGES -->
+    <?php if (session()->getFlashdata('errors')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>Periksa kembali isian berikut:
+        <ul class="mb-0 mt-1">
+            <?php foreach ((array) session()->getFlashdata('errors') as $e): ?>
+                <li><?= esc($e) ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
     <?php if(session()->getFlashdata('error')): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="fa-solid fa-circle-exclamation me-2"></i><?= session()->getFlashdata('error') ?>
@@ -38,7 +49,7 @@
                 <!-- NAMA LENGKAP -->
                 <div class="mb-3">
                     <label for="name" class="form-label small fw-bold text-secondary">Nama Lengkap <span class="text-danger">*</span></label>
-                    <input type="text" name="name" id="name" value="<?= esc($user['name']) ?>" class="form-control" required>
+                    <input type="text" name="name" id="name" value="<?= esc(old('name', null, false) ?? $user['name']) ?>" class="form-control" required>
                 </div>
 
                 <!-- DYNAMIC INDENTITAS (NIS/NISN ATAU NIP/NUPTK) -->
@@ -105,12 +116,12 @@
                     <div class="col-md-6">
                         <label for="phone" class="form-label small fw-bold text-secondary">Nomor Telepon</label>
                         <input type="text" name="phone" id="phone" maxlength="20" class="form-control"
-                               value="<?= esc(old('phone', $user['phone'] ?? '')) ?>">
+                               value="<?= esc(old('phone', null, false) ?? ($user['phone'] ?? '')) ?>">
                     </div>
                     <div class="col-md-6">
                         <label for="whatsapp" class="form-label small fw-bold text-secondary">Nomor WhatsApp</label>
                         <input type="text" name="whatsapp" id="whatsapp" maxlength="20" class="form-control"
-                               value="<?= esc(old('whatsapp', $user['whatsapp'] ?? '')) ?>">
+                               value="<?= esc(old('whatsapp', null, false) ?? ($user['whatsapp'] ?? '')) ?>">
                     </div>
                 </div>
 
