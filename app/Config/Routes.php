@@ -201,11 +201,6 @@ $routes->group('staff', [
 
 });
 
-// RESET PASSWORD STAFF SIDE
-$routes->post('users/reset-password/(:num)', 'Users::resetPassword', [
-    'filter' => ['auth','role:staff']
-]);
-
 // ROUTE LOG ACTIVITY
 $routes->get('activity-logs', 'ActivityLogs::index', [
     'filter' => ['auth','role:admin']

@@ -81,34 +81,110 @@ class Users extends BaseController
     =============================== */
     public function create()
     {
-        return view('users/create');
+        return view('users/create', [
+            'list_kelas' => (new \App\Models\ClassModel())->getClass(),
+        ]);
     }
 
     public function store()
     {
         $rules = [
-            'name' => 'required',
-            'username' => 'required|is_unique[users.username]',
-            'member_code' => 'required|is_unique[users.member_code]',
-            'jenis_pengguna' => 'required|in_list[siswa,guru,pegawai]'
-        ];
+            'name' => [
+                'rules'  => 'required|min_length[3]|max_length[100]',
+                'errors' => [
+                    'required'   => 'Nama wajib diisi.',
+                    'min_length' => 'Nama minimal 3 karakter.',
+                    'max_length' => 'Nama maksimal 100 karakter.',
+                ],
+            ],
+            'username' => [
+                'rules'  => 'required|min_length[4]|max_length[50]|regex_match[/^[A-Za-z0-9_.\-]+$/]|is_unique[users.username]',
+                'errors' => [
+                    'required'    => 'Username wajib diisi.',
+                    'min_length'  => 'Username minimal 4 karakter.',
+                    'max_length'  => 'Username maksimal 50 karakter.',
+                    'regex_match' => 'Username hanya boleh berisi huruf, angka, titik, garis bawah, atau tanda minus (tanpa spasi).',
+                    'is_unique'   => 'Username sudah dipakai pengguna lain.',
+                ],
+            ],
+            'jenis_pengguna' => [
+                'rules'  => 'required|in_list[siswa,guru,pegawai]',
+                'errors' => [
+                    'required' => 'Jenis pengguna wajib dipilih.',
+                    'in_list'  => 'Jenis pengguna tidak valid.',
+                ],
+            ],
+        ] + self::identityRules() + self::contactRules();
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $this->userModel->insert([
-            'name' => $this->request->getPost('name'),
-            'username' => $this->request->getPost('username'),
+        $jenis = $this->request->getPost('jenis_pengguna');
+
+        $newId = $this->userModel->insert([
+            'name' => trim((string) $this->request->getPost('name')),
+            'username' => trim((string) $this->request->getPost('username')),
             'password' => hashPassword('123456'),
             'role' => 'member',
-            'jenis_pengguna' => $this->request->getPost('jenis_pengguna'),
-            'member_code' => $this->request->getPost('member_code'),
+            'jenis_pengguna' => $jenis,
+            'member_code' => trim((string) $this->request->getPost('member_code')),
+            'member_code_nation' => trim((string) $this->request->getPost('member_code_nation')) ?: null,
+            'class' => $jenis === 'siswa' ? (trim((string) $this->request->getPost('class')) ?: null) : null,
+            'phone' => trim((string) $this->request->getPost('phone')) ?: null,
+            'whatsapp' => trim((string) $this->request->getPost('whatsapp')) ?: null,
             'is_validated' => 1,
             'must_change_password' => 1
         ]);
 
-        return redirect()->to('/users')->with('success','User dibuat.');
+        $this->logActivity('Membuat user baru', (int) $newId);
+
+        return redirect()->to('/users')->with('success', 'User dibuat. Password awal 123456 dan wajib diganti saat login pertama.');
+    }
+
+    /**
+     * Aturan NIS/NIP & NISN/NUPTK (unik). $exceptId diisi saat update agar data sendiri tidak dianggap ganda.
+     */
+    private static function identityRules(?int $exceptId = null): array
+    {
+        $except = $exceptId ? ',id,' . $exceptId : '';
+
+        return [
+            'member_code' => [
+                'rules'  => 'required|max_length[50]|is_unique[users.member_code' . $except . ']',
+                'errors' => [
+                    'required'   => 'NIS / NIP wajib diisi.',
+                    'max_length' => 'NIS / NIP maksimal 50 karakter.',
+                    'is_unique'  => 'NIS / NIP sudah dipakai pengguna lain.',
+                ],
+            ],
+            'member_code_nation' => [
+                'rules'  => 'permit_empty|max_length[50]|is_unique[users.member_code_nation' . $except . ']',
+                'errors' => [
+                    'max_length' => 'NISN / NUPTK maksimal 50 karakter.',
+                    'is_unique'  => 'NISN / NUPTK sudah dipakai pengguna lain.',
+                ],
+            ],
+        ];
+    }
+
+    /** Aturan kelas, telepon, dan WhatsApp (opsional). */
+    private static function contactRules(): array
+    {
+        return [
+            'class' => [
+                'rules'  => 'permit_empty|max_length[50]',
+                'errors' => ['max_length' => 'Kelas maksimal 50 karakter.'],
+            ],
+            'phone' => [
+                'rules'  => 'permit_empty|regex_match[/^[0-9+\-\s]{9,20}$/]',
+                'errors' => ['regex_match' => 'Nomor telepon 9–20 karakter, hanya angka, spasi, + atau -.'],
+            ],
+            'whatsapp' => [
+                'rules'  => 'permit_empty|regex_match[/^[0-9+\-\s]{9,20}$/]',
+                'errors' => ['regex_match' => 'Nomor WhatsApp 9–20 karakter, hanya angka, spasi, + atau -.'],
+            ],
+        ];
     }
 
     /* ===============================
@@ -351,14 +427,13 @@ class Users extends BaseController
     =============================== */
     public function edit($id)
     {
-        $data['user']       = $this->userModel->find($id);
+        $data['user'] = $this->userModel->find($id);
+        if (!$data['user']) {
+            return redirect()->to('/users')->with('error', 'User tidak ditemukan.');
+        }
+
         $data['list_kelas'] = (new \App\Models\ClassModel())->getClass();
         return view('users/edit', $data);
-
-        if (!$user['is_validated']) {
-            return redirect()->back()
-                ->with('error','User belum divalidasi.');
-        }
     }
 
     public function update($id)
@@ -372,21 +447,30 @@ class Users extends BaseController
 
         // Validation rules
         $rules = [
-            'name' => 'required',
-            'jenis_pengguna' => 'required|in_list[siswa,guru,pegawai]',
-            'phone' => 'permit_empty|regex_match[/^[0-9+\-\s]{9,20}$/]',
-            'whatsapp' => 'permit_empty|regex_match[/^[0-9+\-\s]{9,20}$/]',
-            'class' => 'permit_empty|max_length[50]',
-        ];
+            'name' => [
+                'rules'  => 'required|min_length[3]|max_length[100]',
+                'errors' => [
+                    'required'   => 'Nama wajib diisi.',
+                    'min_length' => 'Nama minimal 3 karakter.',
+                    'max_length' => 'Nama maksimal 100 karakter.',
+                ],
+            ],
+            'jenis_pengguna' => [
+                'rules'  => 'required|in_list[siswa,guru,pegawai]',
+                'errors' => [
+                    'required' => 'Jenis pengguna wajib dipilih.',
+                    'in_list'  => 'Jenis pengguna tidak valid.',
+                ],
+            ],
+        ] + self::contactRules();
 
         // Unique validation of NIS/NIP and NISN/NUPTK only if Admin is updating
         if ($currentRole === 'admin') {
-            $rules['member_code'] = 'required|is_unique[users.member_code,id,' . $id . ']';
-            $rules['member_code_nation'] = 'permit_empty|is_unique[users.member_code_nation,id,' . $id . ']';
+            $rules += self::identityRules((int) $id);
         }
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Validasi gagal: Nomor Induk sudah digunakan, nomor telepon/WhatsApp tidak valid, atau data tidak lengkap.');
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $data = [
